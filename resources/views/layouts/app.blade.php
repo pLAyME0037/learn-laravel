@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-    class="h-full">
+    class="h-full light">
 
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
         content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token"
         content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Dashboard' }} School Manage</title>
+    <title>{{ $title ?? 'Dashboard' }} - School Manage</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         // Initialize theme from session or localStorage

@@ -22,7 +22,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['web'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+        ->middleware(['auth', 'verified'])->name('dashboard');
     Route::post('/toggle-sidebar', [SidebarController::class, 'toggle'])
         ->name('sidebar.toggle');
     Route::post('/theme/set', [ThemeController::class, 'set'])

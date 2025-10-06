@@ -45,12 +45,14 @@
             <div class="relative"
                 x-data="{ open: false }">
                 <button @click="open = !open"
-                    class="flex items-center space-x-2 focus:outline-none">
+                    class="flex p-2 rounded-lg bg-slate-100 dark:bg-slate-700 items-center space-x-2 focus:outline-none">
                     <img class="w-8 h-8 rounded-full"
-                        src="https://via.placeholder.com/32"
+                        src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.DqCEDqO18zRENq1kW0FVxAHaHa%3Fcb%3D12%26pid%3DApi&f=1&ipt=7b543ffbf7325518cfb398a61c9e7245dcb2a37bbb5087893a075036ee26e434&ipo=images"
                         alt="User">
                     <span
-                        class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ auth()->user()->name ?? 'John Doe' }}</span>
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ auth()->user()->name ?? 'Guest' }}
+                    </span>
                     <svg :class="{ 'rotate-180': open }"
                         class="w-4 h-4 transition-transform"
                         fill="none"
