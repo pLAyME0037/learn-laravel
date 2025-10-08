@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -18,8 +17,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'username',
         'name',
         'email',
+        'profile_pic',
+        'bio',
         'password',
     ];
 
@@ -42,7 +44,27 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
+    }
+
+    // Accessor for profile picture
+    public function getProfilePictureUrlAttribute(): string
+    {
+        if ($this->profile_pic) {
+            // Check if it's a full URL or stored locally
+            if (filter_var($this->profile_pic, FILTER_VALIDATE_URL)) {
+                return $this->profile_pic;
+            }
+            return asset('storage/' . $this->profile_pic) . '?v=' . $this->updated_at->timestamp;
+        }
+
+        // Generate default avatar based on name
+        return $this->generateDefaultAvatar();
+    }
+    
+    public function generateDefaultAvatar() {     
+        $name = urlencode($this->name);
+        return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF";
     }
 }

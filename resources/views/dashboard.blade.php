@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <x-stats-card 
             title="Total Users" 
-            value="1,248" 
+            value="{{ auth()->user()->count() }}" 
             icon="users" 
             color="blue" 
         />

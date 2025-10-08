@@ -1,7 +1,7 @@
 <?php
-
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -23,12 +23,19 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->name();
+        $user = new User();
+        $icon = $user->getProfilePictureUrlAttribute();
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            // 'profile_pic'       => "https://ui-avatars.com/api/?name=".urlencode($name)."&color=7F9CF5&background=EBF4FF",
+            'profile_pic'       => $icon,
+            'username'          => Str::slug(fake()->unique()->userName()),
+            'name'              => $name,
+            'email'             => fake()->unique()->safeEmail(),
+            'bio'               => fake()->optional(0.7)->sentence(10), // 70% chance of having a bio
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'password'          => static::$password ??= Hash::make('password'),
+            'remember_token'    => Str::random(10),
         ];
     }
 
@@ -37,8 +44,15 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+    
+    public function withoutProfilePic(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'profile_pic' => null,
         ]);
     }
 }

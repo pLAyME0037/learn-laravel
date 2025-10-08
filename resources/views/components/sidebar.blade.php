@@ -23,6 +23,25 @@
         </button>
     </div>
 
+    {{-- Profile Icon --}}
+    <div class="flex items-center space-x-3 px-6 py-3 text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 border-r-4 border-blue-500"
+        x-show="!collapsed">
+        <x-profile-image src="{{ Auth::user()->profile_picture_url }}"
+            alt="{{ Auth::user()->username }}"
+            size="lg" />
+        <div class="text-left">
+            <div class="font-semibold text-gray-900 dark:text-white">
+                {{ Auth::user()->name }}
+            </div>
+            <div class="text-xs text-gray-500">
+                @<span>{{ Auth::user()->username }}</span>
+            </div>
+            <div class="font-mono text-xs text-gray-900 dark:text-white">
+                {{ Auth::user()->email }}
+            </div>
+        </div>
+    </div>
+
     <nav class="mt-6">
         <div x-show="!collapsed"
             class="px-6 py-2">
