@@ -27,12 +27,13 @@ class UserFactory extends Factory
         $user = new User();
         $icon = $user->getProfilePictureUrlAttribute();
         return [
-            // 'profile_pic'       => "https://ui-avatars.com/api/?name=".urlencode($name)."&color=7F9CF5&background=EBF4FF",
             'profile_pic'       => $icon,
             'username'          => Str::slug(fake()->unique()->userName()),
             'name'              => $name,
             'email'             => fake()->unique()->safeEmail(),
+            'role'              => 'user',
             'bio'               => fake()->optional(0.7)->sentence(10), // 70% chance of having a bio
+            'is_active'         => true,
             'email_verified_at' => now(),
             'password'          => static::$password ??= Hash::make('password'),
             'remember_token'    => Str::random(10),

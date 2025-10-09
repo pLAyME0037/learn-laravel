@@ -3,13 +3,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +24,9 @@ class User extends Authenticatable
         'profile_pic',
         'bio',
         'password',
+        'role',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -45,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'last_login_at'    => 'datetime',
         ];
     }
 
@@ -62,9 +67,41 @@ class User extends Authenticatable
         // Generate default avatar based on name
         return $this->generateDefaultAvatar();
     }
-    
-    public function generateDefaultAvatar() {     
+
+    public function generateDefaultAvatar()
+    {
         $name = urlencode($this->name);
         return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF";
     }
+
+    public function scopeNormalUser($query)
+    {
+        return $query->where('role', 'user');
+    }
+    public function scopeStaff($query)
+    {
+        return $query->where('role', 'staff');
+    }
+    public function scopeAdmin($query)
+    {
+        return $query->where('role', 'admin');
+    }
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+    public function isActive()
+    {
+        return $this->is_active;
+    }
+
 }

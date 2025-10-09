@@ -1,0 +1,137 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Edit User') }}
+            </h2>
+            <a href="{{ route('admin.users.index') }}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                {{ __('Back to Users') }}
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form method="POST" action="{{ route('admin.users.update', $user) }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="space-y-6">
+                            <!-- Current User Info -->
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <img class="h-16 w-16 rounded-full" src="{{ $user->profile_picture_url }}" alt="{{ $user->name }}">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $user->name }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><span>@</span>{{ $user->username }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Name -->
+                            <div>
+                                <x-input-label for="name" :value="__('Full Name')" />
+                                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" 
+                                              :value="old('name', $user->name)" required autofocus />
+                                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                            </div>
+
+                            <!-- Username -->
+                            <div>
+                                <x-input-label for="username" :value="__('Username')" />
+                                <x-text-input id="username" name="username" type="text" class="mt-1 block w-full" 
+                                              :value="old('username', $user->username)" required />
+                                <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <x-input-label for="email" :value="__('Email')" />
+                                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" 
+                                              :value="old('email', $user->email)" required />
+                                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                            </div>
+
+                            <!-- Role -->
+                            <div>
+                                <x-input-label for="role" :value="__('Role')" />
+                                <select id="role" name="role" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                    <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>
+                                       User
+                                    </option>
+                                    <option value="staff" {{ old('role', $user->role) === 'staff' ? 'selected' : '' }}>
+                                       Staff
+                                    </option>
+                                    <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>
+                                       Administrator
+                                    </option>
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('role')" />
+                            </div>
+
+                            <!-- Active Status -->
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="is_active" value="1" 
+                                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800"
+                                           {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
+                                    <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('User is active and can login to the system') }}
+                                    </span>
+                                </label>
+                                <x-input-error class="mt-2" :messages="$errors->get('is_active')" />
+                            </div>
+
+                            <!-- Bio -->
+                            <div>
+                                <x-input-label for="bio" :value="__('Bio')" />
+                                <textarea id="bio" name="bio" rows="4" 
+                                          class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                          placeholder="{{ __('Brief description about the user...') }}">{{ old('bio', $user->bio) }}</textarea>
+                                <x-input-error class="mt-2" :messages="$errors->get('bio')" />
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end space-x-4">
+                                <a href="{{ route('admin.users.index') }}" 
+                                   class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                    {{ __('Cancel') }}
+                                </a>
+                                <x-primary-button>
+                                    {{ __('Update User') }}
+                                </x-primary-button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Danger Zone -->
+                    @if($user->id !== auth()->id())
+                        <div class="mt-8 border-t border-red-200 dark:border-red-800 pt-6">
+                            <h3 class="text-lg font-medium text-red-600 dark:text-red-400">Danger Zone</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('Permanently delete this user account. This action cannot be undone.') }}
+                            </p>
+                            
+                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="mt-4">
+                                @csrf
+                                @method('DELETE')
+                                <x-danger-button 
+                                    onclick="return confirm('Are you sure you want to delete this user? This will remove all their data permanently.')">
+                                    {{ __('Delete User') }}
+                                </x-danger-button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="mt-8 border-t border-yellow-200 dark:border-yellow-800 pt-6">
+                            <p class="text-sm text-yellow-600 dark:text-yellow-400">
+                                {{ __('You cannot delete your own account while logged in.') }}
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

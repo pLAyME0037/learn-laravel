@@ -68,6 +68,7 @@
                 </a>
             </li>
 
+            @if(auth()->user()->isAdmin())
             <li x-data="{ open: false }">
                 <button @click="open = !open"
                     class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -101,7 +102,7 @@
                 <div x-show="!collapsed && open"
                     x-collapse
                     class="bg-gray-50 dark:bg-gray-700">
-                    <a href="#"
+                    <a href="{{ route('admin.users.index') }}"
                         class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                         All Users
                     </a>
@@ -110,7 +111,8 @@
                         Add User
                     </a>
                 </div>
-            </li>
+            </li>               
+            @endif
         </ul>
     </nav>
 </div>
