@@ -8,39 +8,6 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
-    {
-        $search = $request->get('search');
-        $role   = $request->get('role');
-        $status = $request->get('status');
-
-        $users = User::withTrashed()
-            ->when($search, function ($query, $search) {
-                return $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orwhere('email', 'like', "%{$search}%")
-                        ->orwhere('username', 'like', "%{$search}%");
-                });
-            })
-            ->when($role, function ($query, $role) {
-                return $query->where('role', $role);
-            })
-            ->when($status === 'inactive', function ($query) {
-                return $query->where('is_active', false);
-            })
-            ->when($status === 'trashed', function ($query) {
-                return $query->onlyTrashed();
-            })
-            ->latest()
-            ->paginate(15)
-            ->withQueryString()
-        ;
-        return view('users.index', compact('users', 'search', 'role', 'status'));
-    }
-
-    /**
      * Show the form for creating a new resource.
      */
     public function create()

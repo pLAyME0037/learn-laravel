@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SidebarController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\UserController;
+use App\Livewire\UserIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,8 +31,9 @@ Route::middleware(['auth', 'admin'])
     ->name('admin.')
     ->group(function () {
         // user management routes
+        Route::get('users', UserIndex::class)->name('users.index');
         Route::resource('users', UserController::class)
-            ->except(['show']);
+            ->except(['show', 'index']);
         Route::get('users/{user}/show', [UserController::class, 'show'])
             ->name('users.show');
         // User actions - all as POST since they're form submissions
@@ -54,12 +56,12 @@ Route::middleware(['web'])->group(function () {
 });
 
 Route::middleware(['admin', 'staff'])->group(function () {
-    Route::get('/admin/users', [UserController::class, 'index'])
+    Route::get('/admin/users', UserIndex::class)
     ->name('admin.users.index');
 });
 
 Route::middleware(['staff'])->group(function () {
-    Route::get('/staff/users', [UserController::class, 'index'])
+    Route::get('/staff/users', UserIndex::class)
     ->name('staff.users.index');
 });
 
