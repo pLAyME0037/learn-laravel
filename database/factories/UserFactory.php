@@ -1,6 +1,7 @@
 <?php
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -27,11 +28,12 @@ class UserFactory extends Factory
         $user = new User();
         $icon = $user->getProfilePictureUrlAttribute();
         return [
+            'role_id'           => Role::where('slug', 'student')->first()->id,
+            'department_id'     => null,
             'profile_pic'       => $icon,
             'username'          => Str::slug(fake()->unique()->userName()),
             'name'              => $name,
             'email'             => fake()->unique()->safeEmail(),
-            'role'              => 'user',
             'bio'               => fake()->optional(0.7)->sentence(10), // 70% chance of having a bio
             'is_active'         => true,
             'email_verified_at' => now(),
@@ -49,7 +51,7 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-    
+
     public function withoutProfilePic(): static
     {
         return $this->state(fn(array $attributes) => [

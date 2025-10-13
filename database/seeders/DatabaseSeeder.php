@@ -19,8 +19,9 @@ class DatabaseSeeder extends Seeder
         // User::factory()->count(3)->withLongBio()->unverified()->create();
 
         $this->call([
+            RoleSeeder::class,
+            DepartmentSeeder::class,
             AdminSeeder::class,
-            StaffSeeder::class,
         ]);
     }
 }

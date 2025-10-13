@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -6,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class StaffMiddleware
+class SuperAdminMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,12 +16,14 @@ class StaffMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || ! Auth::user()->isStaff()) {
-            if (request()->acceptsJson()) {
-                return response()->json(['error' => 'Unauthorized access.'], 403);
+        if (!Auth::check() || !Auth::user()->isSuperUser()){
+            if ($request->acceptsJson()) {
+                return response()->json([
+                    'error' => 'Unauthorized access.'
+                ], 403);
             }
             return redirect()->route('dashboard')
-                ->with('error', 'You do not have permission to access this page.');
+            ->with('error', 'You do not have permission to acccess this Page.');
         }
         return $next($request);
     }

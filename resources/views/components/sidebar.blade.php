@@ -51,7 +51,6 @@
         <ul>
             <li>
                 <a href="{{ route('dashboard') }}"
-                    wire:navigate
                     class="flex items-center px-6 py-3 text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 border-r-4 border-blue-500"
                     :class="collapsed ? 'justify-center' : ''">
                     <svg class="w-5 h-5"
@@ -69,12 +68,12 @@
                 </a>
             </li>
 
-            @if (auth()->user()->isAdmin())
+            @admin
                 <li x-data="{ open: false }">
                     <button @click="open = !open"
                         class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                         :class="collapsed ? 'justify-center' : ''">
-                        <svg class="w-5 h-5"
+                        <svg class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -104,18 +103,59 @@
                         x-collapse
                         class="bg-gray-50 dark:bg-gray-700">
                         <a href="{{ route('admin.users.index') }}"
-                            wire:navigate
                             class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             All Users
                         </a>
                         <a href="{{ route('admin.users.create') }}"
-                            wire:navigate
                             class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                             Add User
                         </a>
                     </div>
                 </li>
-            @endif
+                <li x-data="{ open: false }">
+                    <button @click="open = !open"
+                        class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                        :class="collapsed ? 'justify-center' : ''">
+                        <svg class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <template x-if="!collapsed">
+                            <span class="mx-3 text-left flex-1">Department</span>
+                        </template>
+                        <template x-if="!collapsed">
+                            <svg :class="{ 'rotate-180': open }"
+                                class="w-4 h-4 transition-transform"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </template>
+                    </button>
+
+                    <div x-show="!collapsed && open"
+                        x-collapse
+                        class="bg-gray-50 dark:bg-gray-700">
+                        <a href="{{ route('admin.departments.index') }}"
+                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            All Department
+                        </a>
+                        <a href="{{ route('admin.departments.index') }}"
+                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Manage Department
+                        </a>
+                    </div>
+                </li>
+            @endadmin
         </ul>
     </nav>
 </div>

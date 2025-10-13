@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SidebarController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\UserController;
-use App\Livewire\UserIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,9 +31,8 @@ Route::middleware(['auth', 'admin'])
     ->name('admin.')
     ->group(function () {
         // user management routes
-        Route::get('users', UserIndex::class)->name('users.index');
         Route::resource('users', UserController::class)
-            ->except(['show', 'index']);
+            ->except(['show']);
         Route::get('users/{user}/show', [UserController::class, 'show'])
             ->name('users.show');
         // User actions - all as POST since they're form submissions
@@ -43,8 +42,20 @@ Route::middleware(['auth', 'admin'])
         ->name('users.restore');
         Route::post('users/{user}/force-delete', [UserController::class, 'forceDelete'])
             ->name('users.force-delete');
-        });
+    });
         
+// Department management routes
+Route::middleware(['auth', 'staff'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function() {
+        Route::resource('departments', DepartmentController::class);
+        Route::post('/departments/{department}/status', [DepartmentController::class, 'updateStatus'])
+            ->name('departments.status');
+        Route::post('/departments/{department}/restore', [DepartmentController::class, 'restore'])
+            ->name('departments.restore');
+    });
+
 Route::middleware(['web'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -56,12 +67,12 @@ Route::middleware(['web'])->group(function () {
 });
 
 Route::middleware(['admin', 'staff'])->group(function () {
-    Route::get('/admin/users', UserIndex::class)
+    Route::get('/admin/users', [UserController::class, 'index'])
     ->name('admin.users.index');
 });
 
 Route::middleware(['staff'])->group(function () {
-    Route::get('/staff/users', UserIndex::class)
+    Route::get('/staff/users', [UserController::class, 'index'])
     ->name('staff.users.index');
 });
 

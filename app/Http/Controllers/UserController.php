@@ -1,12 +1,49 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $search = $request->get('search');
+        $role   = $request->get('role');
+        $status = $request->get('status');
+
+        $users = User::withTrashed()
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('username', 'like', "%{$search}%");
+                });
+            })
+            ->when($role, function ($query, $role) {
+                return $query->byRole($role);
+            })
+            ->when($status === 'active', function ($query) {
+                return $query->where('is_active', true);
+            })
+            ->when($status === 'inactive', function ($query) {
+                return $query->where('is_active', false);
+            })
+            ->when($status === 'trashed', function ($query) {
+                return $query->onlyTrashed();
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString()
+        ;
+        return view('users.index', compact('users', 'search', 'role', 'status'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -29,12 +66,14 @@ class UserController extends Controller
             'bio'      => 'nullable|string|max:500',
         ]);
 
+        $role = Role::where('slug', $validated['role'])->firstOrFail();
+
         User::create([
             'name'              => $validated['name'],
             'email'             => $validated['email'],
             'username'          => $validated['username'],
-            'password'          => Hash::make($validated['email']),
-            'role'              => $validated['role'],
+            'password'          => Hash::make($validated['password']),
+            'role_id'           => $role->id,
             'bio'               => $validated['bio'],
             'email_verified_at' => now(),
         ]);
@@ -82,12 +121,16 @@ class UserController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $role = Role::where('slug', $validated['role'])->firstOrFail();
+        $validated['role_id'] = $role->id;
+        unset($validated['role']);
+
         $user->update($validated);
         return redirect()->route('admin.users.index')
             ->with('success', 'User Update Successfully');
     }
 
-    private function delCheckAdmin(User $user, string $key, string $value)
+    private function checkSelfModification(User $user, string $key, string $value)
     {
         // Prevent admin form deleting themselves
         if ($user->id === auth()->id()) {
@@ -104,7 +147,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $this->delCheckAdmin(
+        $this->checkSelfModification(
             $user,
             'success',
             'User deleted successfully.'
@@ -127,30 +170,31 @@ class UserController extends Controller
     public function forceDelete($userId)
     {
         $user = User::withTrashed()->findOrFail($userId);
-        $this->delCheckAdmin(
+        $this->checkSelfModification(
             $user,
             'error',
             'You cannot permanently delete your own account.'
         );
         $user->forceDelete();
         return redirect()->route('admin.users.index')
-        ->with('success', 'User permanently deleted.');
+            ->with('success', 'User permanently deleted.');
     }
 
-    public function updateStatus(User $user) {
-        $this->delCheckAdmin(
+    public function updateStatus(User $user)
+    {
+        $this->checkSelfModification(
             $user,
             'error',
             'You cannot deactivate your own account.'
         );
 
         $user->update([
-            'is_active' => !$user->is_active
+            'is_active' => ! $user->is_active,
         ]);
 
         $status = $user->is_active ? 'activated' : 'deactivated';
 
         return redirect()->route('admin.users.index')
-        ->with('success', "User {$status} successfully");
+            ->with('success', "User {$status} successfully");
     }
 }
