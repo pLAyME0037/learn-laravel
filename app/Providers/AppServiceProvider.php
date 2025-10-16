@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     });
 
     // Super admin-only directive
-    Blade::if('superadmin', function () {
+    Blade::if('superuser', function () {
         $user = auth()->user();
         return $user && $user->isSuperUser();
     });

@@ -1,24 +1,17 @@
 <?php
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'role_id',
         'department_id',
         'name',
         'username',
@@ -30,21 +23,11 @@ class User extends Authenticatable
         'last_login_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -55,151 +38,79 @@ class User extends Authenticatable
         ];
     }
 
-    // relationship
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
+    // Relationships
     public function department()
     {
         return $this->belongsTo(Department::class);
     }
 
-    // Accessor for profile picture
+    // Accessors
     public function getProfilePictureUrlAttribute(): string
     {
         if ($this->profile_pic) {
-            // Check if it's a full URL or stored locally
             if (filter_var($this->profile_pic, FILTER_VALIDATE_URL)) {
                 return $this->profile_pic;
             }
-            return asset('storage/' . $this->profile_pic) . '?v=' . $this->updated_at->timestamp;
+            return asset('storage/' . $this->profile_pic);
         }
-
-        // Generate default avatar based on name
         return $this->generateDefaultAvatar();
     }
 
-    public function generateDefaultAvatar()
+    // Helper Methods
+    private function generateDefaultAvatar(): string
     {
         $name = urlencode($this->name);
-        return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF";
+        return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF&bold=true";
     }
 
-    /**
-     * Summary of has"Role | Permission"
-     * @param mixed $role
-     * @return bool
-     */
-    public function hasRole($role)
+    // Custom permission checks
+    public function isSuperAdmin(): bool
     {
-        $userRole = $this->role;
-        if (is_string($userRole)) {
-            $userRole = Role::where('slug', $userRole)->first();
-        }
-
-        if (! $userRole) {
-            return false;
-        }
-
-        if (is_string($role)) {
-            return $userRole->slug === $role;
-        }
-
-        if ($role instanceof Role) {
-            return $userRole->id === $role->id;
-        }
-
-        return false;
-    }
-    public function hasPermission($permission)
-    {
-        return $this->role && $this->role->hasPermission($permission);
+        return $this->hasRole('super_user');
     }
 
-    /**
-     * Summary of scope"User | Active"
-     * @param mixed $query
-     */
-    public function scopeStudent($query)
+    public function isAdmin(): bool
     {
-        return $query->whereHas('role', function ($q) {
-            $q->where('slug', 'student');
-        });
+        return $this->hasAnyRole(['super_user', 'admin']);
     }
-    public function scopeNormalUser($query)
+
+    public function isStaff(): bool
     {
-        return $query->whereHas('role', function ($q) {
-            $q->where('slug', 'user');
-        });
+        return $this->hasAnyRole(['super_user', 'admin', 'registrar', 'hod', 'professor', 'staff']);
     }
-    public function scopeStaff($query)
+
+    public function isStudent(): bool
     {
-        return $query->whereHas('role', function ($q) {
-            $q->whereIn('slug', [
-                'admin'
-                , "super_user"
-                , "register"
-                , "HOD"
-                , "professor"
-                ,
-            ]);
-        });
+        return $this->hasRole('student');
     }
-    public function scopeAdmin($query)
+
+    public function isHod(): bool
     {
-        return $query->whereHas('role', function ($q) {
-            $q->where('slug', 'admin');
-        });
+        return $this->hasRole('hod');
     }
+
+    // Scopes
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-    public function scopeByRole($query, $role)
+
+    public function scopeStaff($query)
     {
-        if (is_string($role)) {
-            return $query->whereHas('role', function ($q) use ($role) {
-                $q->where('slug', $role);
-            });
-        }
-        return $query->where('role_id', $role);
+        return $query->whereHas('roles', function ($q) {
+            $q->whereIn('name', ['super_user', 'admin', 'registrar', 'hod', 'professor', 'staff']);
+        });
     }
 
-    /**
-     * Summary of is"Role | Active"
-     * @return bool
-     */
-    public function isStudent()
+    public function scopeStudents($query)
     {
-        return $this->hasRole('student');
+        return $query->whereHas('roles', function ($q) {
+            $q->where('name', 'student');
+        });
     }
-    public function isStaff()
-    {
-        $role = $this->role;
-        if (is_string($role)) {
-            $role = Role::where('slug', $role)->first();
-        }
 
-        return $role && in_array($role->slug, [
-            'admin',
-            'super_user',
-            'register',
-            'HOD',
-            'professor',
-        ]);
-    }
-    public function isAdmin()
+    public function scopeByDepartment($query, $departmentId)
     {
-        return $this->hasRole('admin');
-    }
-    public function isSuperUser()
-    {
-        return $this->hasRole('super_user');
-    }
-    public function isActive()
-    {
-        return $this->is_active;
+        return $query->where('department_id', $departmentId);
     }
 }

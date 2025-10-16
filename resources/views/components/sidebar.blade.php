@@ -35,6 +35,7 @@
             </div>
             <div class="text-xs text-gray-500">
                 @<span>{{ Auth::user()->username }}</span>
+                (<span>{{ Auth::user()->role }}</span>)
             </div>
             <div class="font-mono text-xs text-gray-900 dark:text-white">
                 {{ Auth::user()->email }}
@@ -68,7 +69,7 @@
                 </a>
             </li>
 
-            @admin
+            {{-- @admin --}}
                 <li x-data="{ open: false }">
                     <button @click="open = !open"
                         class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -155,7 +156,7 @@
                         </a>
                     </div>
                 </li>
-            @endadmin
+            {{-- @endadmin --}}
         </ul>
     </nav>
 </div>

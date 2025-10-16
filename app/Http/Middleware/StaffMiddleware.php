@@ -15,7 +15,7 @@ class StaffMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || ! Auth::user()->isStaff()) {
+        if (! Auth::check() || ! Auth::user()->hasAnyRole(['super_admin', 'admin', 'register', 'hod', 'professor'])) {
             if (request()->acceptsJson()) {
                 return response()->json(['error' => 'Unauthorized access.'], 403);
             }

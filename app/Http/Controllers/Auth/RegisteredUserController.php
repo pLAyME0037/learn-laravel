@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -37,6 +38,9 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $defaultRole = DB::table('roles')->where('slug', 'student')->first();
+        $roleId = $defaultRole ? $defaultRole->id : null;
+        
         $user = User::create([
             'username' => $this->generateUsername($request->name),
             'name' => $request->name,
@@ -44,6 +48,7 @@ class RegisteredUserController extends Controller
             'profile_pic' => null,
             'bio' => null,
             'password' => Hash::make($request->password),
+            'role_id' => $roleId, // Add role_id here
         ]);
 
         event(new Registered($user));

@@ -1,10 +1,7 @@
 <?php
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,9 +16,10 @@ class DatabaseSeeder extends Seeder
         // User::factory()->count(3)->withLongBio()->unverified()->create();
 
         $this->call([
-            RoleSeeder::class,
+            PermissionSeeder::class,
             DepartmentSeeder::class,
             AdminSeeder::class,
+            ProgramSeeder::class,
         ]);
     }
 }

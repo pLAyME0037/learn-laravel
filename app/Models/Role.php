@@ -2,99 +2,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+class Role extends SpatieRole
 {
     use HasFactory;
 
+    // Spatie's Role model has 'name' and 'guard_name' as fillable.
+    // We add our custom columns from the migration.
     protected $fillable = [
-        'name'
-        , 'slug'
-        , 'description'
-        , 'permission'
-        , 'is_system_role'
-        , 'is_active'
-        ,
-    ];
-    protected $cast = [
-        'permission' => 'array'
-        , 'is_system_role' => 'boolean'
-        , 'is_active' => 'boolean'
-        ,
+        'name',
+        'guard_name',
+        'description',
+        'is_system_role',
     ];
 
-    public function users()
-    {
-        return $this->belongsToMany(User::class);
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
+    // The 'is_active' column and related scope are removed as they are not in the migration.
+    // The custom permission logic is removed in favor of Spatie's built-in functionality.
+    // The 'users' relationship is inherited from the parent SpatieRole model.
 
     public function scopeSystemRoles($query)
     {
         return $query->where('is_system_role', true);
-    }
-    // check if role has permission
-    public function hasPermission($permission)
-    {
-        if ($this->permissions && in_array($permission, $this->permissions)) {
-            return true;
-        }
-        return false;
-    }
-
-    public static function getAvailablePermission()
-    {
-        return [
-            'user_management'      => [
-                'user.view'
-                , 'user.create'
-                , 'user.edit'
-                , 'user.delete'
-                , 'user.impersonate'
-                ,
-            ],
-            'rile_management'      => [
-                'user.view'
-                , 'user.create'
-                , 'user.edit'
-                , 'user.delete'
-                , 'user.assign'
-                ,
-            ],
-            'acadamic_management'  => [
-                'department.manage'
-                , 'programs.manage'
-                , 'courses.manage'
-                , 'syllabus.manage'
-                ,
-            ],
-            'student_management'   => [
-                'student.view'
-                , 'student.create'
-                , 'student.edit'
-                , 'student.delete'
-                , 'student.manage'
-                ,
-            ],
-            'financial_management' => [
-                'fees.manage'
-                , 'payments.view'
-                , 'payments.manage'
-                , 'scholarships.manage'
-                ,
-            ],
-            'system_management'    => [
-                'system.config'
-                , 'backup.manage'
-                , 'reports.view'
-                , 'audit.view'
-                ,
-            ],
-        ];
     }
 }

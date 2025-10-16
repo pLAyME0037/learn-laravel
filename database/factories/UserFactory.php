@@ -28,8 +28,6 @@ class UserFactory extends Factory
         $user = new User();
         $icon = $user->getProfilePictureUrlAttribute();
         return [
-            'role_id'           => Role::where('slug', 'student')->first()->id,
-            'department_id'     => null,
             'profile_pic'       => $icon,
             'username'          => Str::slug(fake()->unique()->userName()),
             'name'              => $name,
