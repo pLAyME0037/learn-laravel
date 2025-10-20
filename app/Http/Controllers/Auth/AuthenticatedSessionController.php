@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\LoginHistory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        Auth::logoutOtherDevices($request->input('password'));
+
         // Update last login timestamp
         $request->user()->update(['last_login_at' => now()]);
+
+        // Record login history
+        LoginHistory::create([
+            'user_id' => $request->user()->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'login_at' => now(),
+        ]);
 
         return redirect()->intended(route(
             'dashboard', absolute: false)

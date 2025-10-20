@@ -70,7 +70,7 @@ class Department extends Model
         return $this->users()->students()->count();
     }
     public function getProgramCountAttribute() {
-        return $this->users()->programs()->count();
+        return $this->programs()->count();
     }
 
     // Helper Methods

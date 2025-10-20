@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 class DepartmentController extends Controller
 {
@@ -17,6 +17,7 @@ class DepartmentController extends Controller
         $this->middleware('permission:departments.create')->only('create', 'store');
         $this->middleware('permission:departments.edit')->only('edit', 'update');
         $this->middleware('permission:departments.delete')->only('destroy');
+        $this->middleware('has_permission:departments.delete')->only('restore', 'forceDelete');
     }
 
     public function index(Request $request): View
@@ -47,7 +48,9 @@ class DepartmentController extends Controller
 
     public function create(): View
     {
-        $hods = User::role(['hod', 'professor'])->active()->get();
+        $hods = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['hod', 'professor']);
+        })->active()->get();
         return view('departments.create', compact('hods'));
     }
 
@@ -83,7 +86,9 @@ class DepartmentController extends Controller
 
     public function edit(Department $department): View
     {
-        $hods = User::role(['hod', 'professor'])->active()->get();
+        $hods = User::whereHas('roles', function ($query) {
+            $query->whereIn('name', ['hod', 'professor']);
+        })->active()->get();
         return view('departments.edit', compact('department', 'hods'));
     }
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\SidebarController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LoginHistoryController;
 use App\Models\Department;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +83,11 @@ Route::middleware(['auth', 'verified'])
         // Role & Permission Management
         // Route::resource('roles', RoleController::class);
         // Route::resource('permissions', PermissionController::class);
+
+        // Login History
+        Route::get('login-history', [
+            LoginHistoryController::class, 'index'
+        ])->name('login-history.index');
     });
 
 Route::middleware(['web'])->group(function () {
@@ -92,11 +98,6 @@ Route::middleware(['web'])->group(function () {
         ->name('sidebar.toggle');
     Route::post('/theme/set', [ThemeController::class, 'set'])
         ->name('theme.set');
-});
-
-Route::middleware(['admin', 'staff'])->group(function () {
-    Route::get('/admin/users', [UserController::class, 'index'])
-        ->name('admin.users.index');
 });
 
 Route::middleware(['staff'])->group(function () {

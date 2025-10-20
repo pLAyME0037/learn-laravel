@@ -1,31 +1,34 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Student;
-use App\Models\User;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class StudentController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('permission:students.view')->only('index', 'show');
         $this->middleware('permission:students.create')->only('create', 'store');
         $this->middleware('permission:students.edit')->only('edit', 'update');
         $this->middleware('permission:students.delete')->only('destroy');
+        $this->middleware('has_permission:students.delete')->only('restore', 'forceDelete');
+        $this->middleware('has_permission:students.edit')->only('updateStatus');
     }
-public function index(Request $request): View
+    public function index(Request $request): View
     {
-        $search = $request->get('search');
+        $search     = $request->get('search');
         $department = $request->get('department');
-        $program = $request->get('program');
-        $status = $request->get('status', 'active');
+        $program    = $request->get('program');
+        $status     = $request->get('status', 'active');
 
         $students = Student::with(['user', 'department', 'program'])
             ->when($search, function ($query, $search) {
@@ -51,7 +54,7 @@ public function index(Request $request): View
             ->withQueryString();
 
         $departments = Department::active()->get();
-        $programs = Program::active()->get();
+        $programs    = Program::active()->get();
 
         return view('students.index', compact('students', 'search', 'department', 'program', 'status', 'departments', 'programs'));
     }
@@ -59,8 +62,8 @@ public function index(Request $request): View
     public function create(): View
     {
         $departments = Department::active()->get();
-        $programs = Program::active()->get();
-        
+        $programs    = Program::active()->get();
+
         return view('students.create', compact('departments', 'programs'));
     }
 
@@ -71,47 +74,47 @@ public function index(Request $request): View
         try {
             // Validate user data
             $userData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'username' => 'required|string|max:255|alpha_dash|unique:users',
-                'password' => 'required|string|min:8|confirmed',
+                'name'        => 'required|string|max:255',
+                'email'       => 'required|string|email|max:255|unique:users',
+                'username'    => 'required|string|max:255|alpha_dash|unique:users',
+                'password'    => 'required|string|min:8|confirmed',
                 'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
             // Validate student data
             $studentData = $request->validate([
-                'department_id' => 'required|exists:departments,id',
-                'program_id' => 'required|exists:programs,id',
-                'date_of_birth' => 'required|date',
-                'gender' => 'required|in:male,female,other',
-                'nationality' => 'required|string|max:100',
-                'phone' => 'required|string|max:20',
-                'emergency_contact_name' => 'required|string|max:255',
-                'emergency_contact_phone' => 'required|string|max:20',
+                'department_id'              => 'required|exists:departments,id',
+                'program_id'                 => 'required|exists:programs,id',
+                'date_of_birth'              => 'required|date',
+                'gender'                     => 'required|in:male,female,other',
+                'nationality'                => 'required|string|max:100',
+                'phone'                      => 'required|string|max:20',
+                'emergency_contact_name'     => 'required|string|max:255',
+                'emergency_contact_phone'    => 'required|string|max:20',
                 'emergency_contact_relation' => 'required|string|max:100',
-                'current_address' => 'required|string',
-                'permanent_address' => 'required|string',
-                'city' => 'required|string|max:100',
-                'state' => 'required|string|max:100',
-                'country' => 'required|string|max:100',
-                'postal_code' => 'required|string|max:20',
-                'admission_date' => 'required|date',
-                'enrollment_status' => 'required|in:full_time,part_time,exchange,study_abroad',
-                'fee_category' => 'required|in:regular,scholarship,financial_aid,self_financed',
-                'previous_education' => 'nullable|string',
-                'blood_group' => 'nullable|string|max:10',
-                'has_disability' => 'boolean',
-                'disability_details' => 'nullable|string',
+                'current_address'            => 'required|string',
+                'permanent_address'          => 'required|string',
+                'city'                       => 'required|string|max:100',
+                'state'                      => 'required|string|max:100',
+                'country'                    => 'required|string|max:100',
+                'postal_code'                => 'required|string|max:20',
+                'admission_date'             => 'required|date',
+                'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
+                'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
+                'previous_education'         => 'nullable|string',
+                'blood_group'                => 'nullable|string|max:10',
+                'has_disability'             => 'boolean',
+                'disability_details'         => 'nullable|string',
             ]);
 
             // Create user
             $user = User::create([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'username' => $userData['username'],
-                'password' => Hash::make($userData['password']),
+                'name'          => $userData['name'],
+                'email'         => $userData['email'],
+                'username'      => $userData['username'],
+                'password'      => Hash::make($userData['password']),
                 'department_id' => $studentData['department_id'],
-                'is_active' => true,
+                'is_active'     => true,
             ]);
 
             // Assign student role
@@ -124,8 +127,8 @@ public function index(Request $request): View
             }
 
             // Create student record
-            $student = Student::create(array_merge($studentData, [
-                'user_id' => $user->id,
+            Student::create(array_merge($studentData, [
+                'user_id'    => $user->id,
                 'student_id' => (new Student())->generateStudentId(),
             ]));
 
@@ -136,8 +139,17 @@ public function index(Request $request): View
 
         } catch (\Exception $e) {
             DB::rollBack();
+            // Log the exception for debugging purposes
+            \Log::error('Student creation failed: ' . $e->getMessage(), [
+                'exception'    => $e,
+                'request_data' => $request->all(),
+            ]);
+
             return redirect()->back()
-                ->with('error', 'Failed to create student: ' . $e->getMessage())
+                ->with(
+                    'error',
+                    'Failed to create student. Please check the form data and try again. If the problem persists, contact support.'
+                )
                 ->withInput();
         }
     }
@@ -145,7 +157,7 @@ public function index(Request $request): View
     public function show(Student $student): View
     {
         $student->load(['user', 'department', 'program', 'enrollments', 'academicRecords']);
-        
+
         return view('students.show', compact('student'));
     }
 
@@ -153,9 +165,14 @@ public function index(Request $request): View
     {
         $student->load('user');
         $departments = Department::active()->get();
-        $programs = Program::active()->get();
-        
-        return view('students.edit', compact('student', 'departments', 'programs'));
+        $programs    = Program::active()->get();
+
+        return view('students.edit',
+            compact(
+                'student',
+                'departments', 'programs'
+            )
+        );
     }
 
     public function update(Request $request, Student $student): RedirectResponse
@@ -165,39 +182,47 @@ public function index(Request $request): View
         try {
             // Validate user data
             $userData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users,email,' . $student->user_id,
-                'username' => 'required|string|max:255|alpha_dash|unique:users,username,' . $student->user_id,
+                'name'     => 'required|string|max:255',
+                'email'    => 'required
+                    |string
+                    |email
+                    |max:255
+                    |unique:users,email,' . $student->user_id,
+                'username' => 'required
+                    |string
+                    |max:255
+                    |alpha_dash
+                    |unique:users,username,' . $student->user_id,
             ]);
 
             // Validate student data
             $studentData = $request->validate([
-                'department_id' => 'required|exists:departments,id',
-                'program_id' => 'required|exists:programs,id',
-                'date_of_birth' => 'required|date',
-                'gender' => 'required|in:male,female,other',
-                'nationality' => 'required|string|max:100',
-                'phone' => 'required|string|max:20',
-                'emergency_contact_name' => 'required|string|max:255',
-                'emergency_contact_phone' => 'required|string|max:20',
+                'department_id'              => 'required|exists:departments,id',
+                'program_id'                 => 'required|exists:programs,id',
+                'date_of_birth'              => 'required|date',
+                'gender'                     => 'required|in:male,female,other',
+                'nationality'                => 'required|string|max:100',
+                'phone'                      => 'required|string|max:20',
+                'emergency_contact_name'     => 'required|string|max:255',
+                'emergency_contact_phone'    => 'required|string|max:20',
                 'emergency_contact_relation' => 'required|string|max:100',
-                'current_address' => 'required|string',
-                'permanent_address' => 'required|string',
-                'city' => 'required|string|max:100',
-                'state' => 'required|string|max:100',
-                'country' => 'required|string|max:100',
-                'postal_code' => 'required|string|max:20',
-                'admission_date' => 'required|date',
-                'expected_graduation' => 'nullable|date',
-                'current_semester' => 'required|integer|min:1|max:12',
-                'academic_status' => 'required|in:active,probation,suspended,graduated,withdrawn,transfered',
-                'enrollment_status' => 'required|in:full_time,part_time,exchange,study_abroad',
-                'fee_category' => 'required|in:regular,scholarship,financial_aid,self_financed',
-                'has_outstanding_balance' => 'boolean',
-                'previous_education' => 'nullable|string',
-                'blood_group' => 'nullable|string|max:10',
-                'has_disability' => 'boolean',
-                'disability_details' => 'nullable|string',
+                'current_address'            => 'required|string',
+                'permanent_address'          => 'required|string',
+                'city'                       => 'required|string|max:100',
+                'state'                      => 'required|string|max:100',
+                'country'                    => 'required|string|max:100',
+                'postal_code'                => 'required|string|max:20',
+                'admission_date'             => 'required|date',
+                'expected_graduation'        => 'nullable|date',
+                'current_semester'           => 'required|integer|min:1|max:12',
+                'academic_status'            => 'required|in:active,probation,suspended,graduated,withdrawn,transfered',
+                'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
+                'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
+                'has_outstanding_balance'    => 'boolean',
+                'previous_education'         => 'nullable|string',
+                'blood_group'                => 'nullable|string|max:10',
+                'has_disability'             => 'boolean',
+                'disability_details'         => 'nullable|string',
             ]);
 
             // Update user
@@ -249,7 +274,7 @@ public function index(Request $request): View
     public function restore($id): RedirectResponse
     {
         $student = Student::withTrashed()->findOrFail($id);
-        
+
         DB::beginTransaction();
 
         try {
@@ -271,7 +296,7 @@ public function index(Request $request): View
     public function forceDelete($id): RedirectResponse
     {
         $student = Student::withTrashed()->findOrFail($id);
-        
+
         DB::beginTransaction();
 
         try {
@@ -294,7 +319,7 @@ public function index(Request $request): View
     public function updateStatus(Student $student): RedirectResponse
     {
         $request = request();
-        
+
         $validated = $request->validate([
             'academic_status' => 'required|in:active,probation,suspended,graduated,withdrawn,transfered',
         ]);
@@ -303,4 +328,5 @@ public function index(Request $request): View
 
         return redirect()->route('admin.students.show', $student)
             ->with('success', 'Student status updated successfully.');
-    }}
+    }
+}

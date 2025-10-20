@@ -43,26 +43,36 @@ class Program extends Model
     }
 
     // Accessors
-    public function getStudentCountAttribute() {
+    public function getStudentCountAttribute()
+    {
         return $this->students->count();
     }
-    public function getActiveStudentCountAttribute() {
+    public function getActiveStudentCountAttribute()
+    {
         return $this->students->active()->count();
+    }
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} - {$this->code}";
     }
 
     // Scopes
-    public function scopeActive($query) {
+    public function scopeActive($query)
+    {
         return $query->where('is_active', true);
     }
-    public function scopeByDepartment($query, $departmentId) {
+    public function scopeByDepartment($query, $departmentId)
+    {
         return $query->where('department_id', $departmentId);
     }
-    public function scopeByLevel($query, $level) {
+    public function scopeByLevel($query, $level)
+    {
         return $query->where('level', $level);
     }
 
     // Helper Methods
-    public function canDelete() {
+    public function canDelete()
+    {
         return $this->students_count === 0;
     }
 }

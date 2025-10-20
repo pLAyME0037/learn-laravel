@@ -38,7 +38,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $defaultRole = DB::table('roles')->where('slug', 'student')->first();
+        $defaultRole = DB::table('roles')->where('name', 'student')->first();
         $roleId = $defaultRole ? $defaultRole->id : null;
         
         $user = User::create([

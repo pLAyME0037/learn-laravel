@@ -16,10 +16,11 @@ class DatabaseSeeder extends Seeder
         // User::factory()->count(3)->withLongBio()->unverified()->create();
 
         $this->call([
-            PermissionSeeder::class,
+            RolePermissionSeeder::class,
             DepartmentSeeder::class,
             AdminSeeder::class,
             ProgramSeeder::class,
+            StudentManagementSeeder::class,
         ]);
     }
 }

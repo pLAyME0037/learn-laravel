@@ -3,15 +3,16 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use \Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Role as SpatieRole;
 use App\Models\Role;
 
-class PermissionSeeder extends Seeder
+class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]
+        app()[PermissionRegistrar::class]
             ->forgetCachedPermissions();
 
         // Create permissions
@@ -72,12 +73,12 @@ class PermissionSeeder extends Seeder
         }
 
         // Create roles and assign permissions
-        $superAdmin = SpatieRole::create([
-            'name'           => 'super_admin',
+        $superUser = SpatieRole::create([
+            'name'           => 'Super Administrator',
             'description'    => 'Full system access',
             'is_system_role' => true,
         ]);
-        $superAdmin->givePermissionTo(Permission::all());
+        $superUser->givePermissionTo($permissions);
 
         $admin = SpatieRole::create([
             'name'           => 'admin',
@@ -89,25 +90,39 @@ class PermissionSeeder extends Seeder
             'users.create',
             'users.edit',
             'users.delete',
+            'users.impersonate',
+            'roles.view',
+            'roles.create',
+            'roles.edit',
+            'roles.delete',
+            'roles.assign',
             'departments.view',
             'departments.create',
             'departments.edit',
             'departments.delete',
+            'departments.manage',
             'students.view',
             'students.create',
             'students.edit',
             'students.delete',
+            'students.manage_records',
             'programs.manage',
             'courses.manage',
+            'syllabus.manage',
+            'classes.manage',
             'fees.manage',
             'payments.view',
             'payments.manage',
+            'scholarships.manage',
+            'system.config',
+            'backup.manage',
             'reports.view',
+            'audit.view',
         ]);
 
         $registrar = SpatieRole::create([
-            'name'           => 'registrar',
-            'description'    => 'Registrar office staff',
+            'name'           => 'register',
+            'description'    => 'Register office staff',
             'is_system_role' => true,
 
         ]);
@@ -118,6 +133,8 @@ class PermissionSeeder extends Seeder
             'students.manage_records',
             'programs.manage',
             'courses.manage',
+            'syllabus.manage',
+            'classes.manage',
             'reports.view',
         ]);
 
@@ -133,6 +150,7 @@ class PermissionSeeder extends Seeder
             'programs.manage',
             'courses.manage',
             'syllabus.manage',
+            'classes.manage',
         ]);
 
         $professor = SpatieRole::create([
@@ -143,6 +161,7 @@ class PermissionSeeder extends Seeder
         $professor->givePermissionTo([
             'students.view',
             'courses.manage',
+            'syllabus.manage',
             'classes.manage',
         ]);
 
@@ -154,6 +173,8 @@ class PermissionSeeder extends Seeder
         $staff->givePermissionTo([
             'students.view',
             'payments.view',
+            'payments.manage',
+            'fees.manage',
         ]);
 
         $student = SpatieRole::create([
@@ -166,13 +187,21 @@ class PermissionSeeder extends Seeder
         ]);
 
         // Create super admin user
-        $user = \App\Models\User::factory()->create([
-            'name'     => 'Super Administrator',
-            'username' => 'superadmin',
-            'email'    => 'superadmin@university.edu',
-            'password' => bcrypt('password'),
-        ]);
-        $user->assignRole('super_admin');
+        $user = new \App\Models\User();
+        $user->name = 'Super Administrator';
+        $user->username = 'superuser';
+        $user->email = 'superuser@example.com';
+        $user->password = bcrypt('password');
+        $user->role_id = 1;
+        $user->save();
+
+        // Assign the Spatie role 'Super Administrator' directly using the Spatie Role model
+        // Ensure the Spatie role 'Super Administrator' exists before assigning
+        $superUserSpatieRole = SpatieRole::findByName('Super Administrator');
+        if ($superUserSpatieRole) {
+            // Directly attach the role to the user's roles relationship to bypass custom assignRole method
+            $user->roles()->attach($superUserSpatieRole->id);
+        }
     }
 
     private function getPermissionGroup($permission): string
@@ -238,7 +267,30 @@ class PermissionSeeder extends Seeder
             'students.create' => 'Create new student records',
             'students.edit' => 'Edit student records',
             'students.delete' => 'Delete student records',
-            // Add more descriptions as needed
+            'students.manage_records' => 'Manage student academic records',
+
+            'roles.view' => 'View roles',
+            'roles.create' => 'Create new roles',
+            'roles.edit' => 'Edit existing roles',
+            'roles.delete' => 'Delete roles',
+            'roles.assign' => 'Assign roles to users',
+
+            'departments.manage' => 'Manage department settings and data',
+
+            'programs.manage' => 'Manage academic programs',
+            'courses.manage' => 'Manage courses',
+            'syllabus.manage' => 'Manage syllabus for courses',
+            'classes.manage' => 'Manage classes and schedules',
+
+            'fees.manage' => 'Manage student fees',
+            'payments.view' => 'View payment records',
+            'payments.manage' => 'Manage student payments',
+            'scholarships.manage' => 'Manage scholarships',
+
+            'system.config' => 'Access and modify system configurations',
+            'backup.manage' => 'Manage system backups',
+            'reports.view' => 'View system reports',
+            'audit.view' => 'View audit logs',
         ];
 
         return $descriptions[$permission] ?? 'No description available';

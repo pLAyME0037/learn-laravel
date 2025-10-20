@@ -4,17 +4,28 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:users.view')->only('index', 'show');
+        $this->middleware('permission:users.create')->only('create', 'store');
+        $this->middleware('permission:users.edit')->only('edit', 'update');
+        $this->middleware('permission:users.delete')->only('destroy');
+        $this->middleware('has_permission:users.delete')->only('restore', 'forceDelete');
+        $this->middleware('has_permission:users.edit')->only('updateStatus');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $role   = $request->get('role');
+        $selectedRole = $request->get('role');
         $status = $request->get('status');
 
         $users = User::withTrashed()
@@ -25,8 +36,10 @@ class UserController extends Controller
                         ->orWhere('username', 'like', "%{$search}%");
                 });
             })
-            ->when($role, function ($query, $role) {
-                return $query->byRole($role);
+            ->when($selectedRole, function ($query, $selectedRole) {
+                return $query->whereHas('role', function ($q) use ($selectedRole) {
+                    $q->where('name', $selectedRole);
+                });
             })
             ->when($status === 'active', function ($query) {
                 return $query->where('is_active', true);
@@ -41,7 +54,8 @@ class UserController extends Controller
             ->paginate(15)
             ->withQueryString()
         ;
-        return view('users.index', compact('users', 'search', 'role', 'status'));
+        $roles = Role::all();
+        return view('users.index', compact('users', 'roles', 'search', 'selectedRole', 'status'));
     }
 
     /**
@@ -49,7 +63,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $roles = Role::all();
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -62,18 +77,18 @@ class UserController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'username' => 'required|string|max:255|alpha_dash|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:admin,staff,user',
+            'role'     => 'required|in:super_user,admin,hod,register,staff,user,student',
             'bio'      => 'nullable|string|max:500',
         ]);
 
-        $role = Role::where('slug', $validated['role'])->firstOrFail();
+        $role = Role::where('name', $validated['role'])->firstOrFail();
 
         User::create([
             'name'              => $validated['name'],
             'email'             => $validated['email'],
             'username'          => $validated['username'],
             'password'          => Hash::make($validated['password']),
-            'role_id'           => $role->id,
+            'role_id'           => $role->getKey(), // Use getKey() for primary key
             'bio'               => $validated['bio'],
             'email_verified_at' => now(),
         ]);
@@ -87,7 +102,9 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('users.show', compact('user'));
+        $roles = Role::all();
+        $user->load('role');
+        return view('users.show', compact('user', 'roles'));
     }
 
     /**
@@ -95,8 +112,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
-
+        $roles = Role::all();
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -106,23 +123,15 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
-            'email'     => 'required
-                |string
-                |email
-                |max:255
-                |unique:users,email,' . $user->id,
-            'username'  => 'required
-                |string
-                |max:255
-                |alpha_dash
-                |unique:users,username,' . $user->id,
-            'role'      => 'required|in:admin,staff,user',
+            'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->getKey(),
+            'email'     => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
+            'role'      => 'required|in:super_user,admin,hod,register,staff,user,student',
             'bio'       => 'nullable|string|max:500',
             'is_active' => 'boolean',
         ]);
 
-        $role = Role::where('slug', $validated['role'])->firstOrFail();
-        $validated['role_id'] = $role->id;
+        $role                 = Role::where('name', $validated['role'])->firstOrFail();
+        $validated['role_id'] = $role->getKey(); // Use getKey() for primary key
         unset($validated['role']);
 
         $user->update($validated);
@@ -132,8 +141,8 @@ class UserController extends Controller
 
     private function checkSelfModification(User $user, string $key, string $value)
     {
-        // Prevent admin form deleting themselves
-        if ($user->id === auth()->id()) {
+        // Prevent admin from deleting themselves
+        if (auth()->check() && $user->getKey() === auth()->user()->id) {
             return redirect()->route('admin.users.index')
                 ->with(
                     $key,

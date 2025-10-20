@@ -11,7 +11,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-9">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Filters -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -40,13 +40,15 @@
                                     name="role"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     <option value="">All Roles</option>
-                                    <option value="admin"
-                                        {{ $role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="staff"
-                                        {{ $role === 'staff' ? 'selected' : '' }}>Staff</option>
-                                    <option value="user"
-                                        {{ $role === 'user' ? 'selected' : '' }}>User</option>
+                                    @foreach ($roles as $roleItem)
+                                        <option value="{{ $roleItem->name }}"
+                                            {{ (string) old('role', $selectedRole) === (string) $roleItem->name ? 'selected' : '' }}>
+                                            {{ ucfirst($roleItem->name) }}
+                                        </option>
+                                    @endforeach
                                 </select>
+                                <x-input-error class="mt-2"
+                                    :messages="$errors->get('role')" />
                             </div>
 
                             <!-- Status Filter -->
@@ -138,8 +140,8 @@
                                             <td class="px-4 py-4 whitespace-nowrap">
                                                 <span
                                                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' }}">
-                                                    {{ ucfirst($user->role) }}
+                                                    {{ $user->role->name === 'admin' && $user->role->name === 'Super Administrator' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' }}">
+                                                    {{ ucfirst($user->role->name) }}
                                                 </span>
                                             </td>
 
@@ -272,7 +274,7 @@
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $search || $role || $status ? 'Try adjusting your search filters.' : 'Get started by creating a new user.' }}
+                                {{ $search || $selectedRole || $status ? 'Try adjusting your search filters.' : 'Get started by creating a new user.' }}
                             </p>
                             <div class="mt-6">
                                 <a href="{{ route('admin.users.create') }}"

@@ -34,8 +34,11 @@
                 {{ Auth::user()->name }}
             </div>
             <div class="text-xs text-gray-500">
-                @<span>{{ Auth::user()->username }}</span>
-                (<span>{{ Auth::user()->role }}</span>)
+                {{ \Illuminate\Support\Str::limit(
+                    '@' . Auth::user()->username . ' #' . Auth::user()->roles->pluck('name')->join(', '),
+                    20,
+                    '...',
+                ) }}
             </div>
             <div class="font-mono text-xs text-gray-900 dark:text-white">
                 {{ Auth::user()->email }}
@@ -64,99 +67,172 @@
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                     <span x-show="!collapsed"
-                        class="mx-3">Dashboard
+                        class="mx-3">
+                        Dashboard
                     </span>
                 </a>
             </li>
 
-            {{-- @admin --}}
-                <li x-data="{ open: false }">
-                    <button @click="open = !open"
-                        class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        :class="collapsed ? 'justify-center' : ''">
-                        <svg class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <template x-if="!collapsed">
-                            <span class="mx-3 text-left flex-1">Users</span>
-                        </template>
-                        <template x-if="!collapsed">
-                            <svg :class="{ 'rotate-180': open }"
-                                class="w-4 h-4 transition-transform"
+            @canany(['users.view', 'users.create', 'departments.view', 'departments.create', 'audit.view'])
+                {{-- Admin Section --}}
+                <div x-show="!collapsed"
+                    class="px-6 py-2 mt-4">
+                    <h2 class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                        Admin
+                    </h2>
+                </div>
+
+                @canany(['users.view', 'users.create'])
+                    {{-- Users --}}
+                    <li x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            :class="collapsed ? 'justify-center' : ''">
+                            <svg class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                        </template>
-                    </button>
+                            <template x-if="!collapsed">
+                                <span class="mx-3 text-left flex-1">
+                                    Users
+                                </span>
+                            </template>
+                            <template x-if="!collapsed">
+                                <svg :class="{ 'rotate-180': open }"
+                                    class="w-4 h-4 transition-transform"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </template>
+                        </button>
 
-                    <div x-show="!collapsed && open"
-                        x-collapse
-                        class="bg-gray-50 dark:bg-gray-700">
-                        <a href="{{ route('admin.users.index') }}"
-                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            All Users
-                        </a>
-                        <a href="{{ route('admin.users.create') }}"
-                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Add User
-                        </a>
-                    </div>
-                </li>
-                <li x-data="{ open: false }">
-                    <button @click="open = !open"
-                        class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        :class="collapsed ? 'justify-center' : ''">
-                        <svg class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <template x-if="!collapsed">
-                            <span class="mx-3 text-left flex-1">Department</span>
-                        </template>
-                        <template x-if="!collapsed">
-                            <svg :class="{ 'rotate-180': open }"
-                                class="w-4 h-4 transition-transform"
+                        <div x-show="!collapsed && open"
+                            x-collapse
+                            class="bg-gray-50 dark:bg-gray-700">
+                            @can('users.view')
+                                <a href="{{ route('admin.users.index') }}"
+                                    class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    All Users
+                                </a>
+                            @endcan
+                            @can('users.create')
+                                <a href="{{ route('admin.users.create') }}"
+                                    class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    Add User
+                                </a>
+                            @endcan
+                        </div>
+                    </li>
+                @endcanany
+
+                @canany(['departments.view', 'departments.create'])
+                    {{-- Department --}}
+                    <li x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            :class="collapsed ? 'justify-center' : ''">
+                            <svg class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                        </template>
-                    </button>
+                            <template x-if="!collapsed">
+                                <span class="mx-3 text-left flex-1">
+                                    Department
+                                </span>
+                            </template>
+                            <template x-if="!collapsed">
+                                <svg :class="{ 'rotate-180': open }"
+                                    class="w-4 h-4 transition-transform"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </template>
+                        </button>
 
-                    <div x-show="!collapsed && open"
-                        x-collapse
-                        class="bg-gray-50 dark:bg-gray-700">
-                        <a href="{{ route('admin.departments.index') }}"
-                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            All Department
-                        </a>
-                        <a href="{{ route('admin.departments.index') }}"
-                            class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Manage Department
-                        </a>
-                    </div>
-                </li>
-            {{-- @endadmin --}}
+                        <div x-show="!collapsed && open"
+                            x-collapse
+                            class="bg-gray-50 dark:bg-gray-700">
+                            @can('departments.view')
+                                <a href="{{ route('admin.departments.index') }}"
+                                    class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    All Department
+                                </a>
+                            @endcan
+                            @can('departments.create')
+                                <a href="{{ route('admin.departments.create') }}"
+                                    class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    New Department
+                                </a>
+                            @endcan
+                        </div>
+                    </li>
+                @endcanany
+
+                @can('audit.view')
+                    {{-- Login History --}}
+                    <li x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="w-full flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            :class="collapsed ? 'justify-center' : ''">
+                            <svg class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <template x-if="!collapsed">
+                                <span class="mx-3 text-left flex-1">
+                                    Login History
+                                </span>
+                            </template>
+                            <template x-if="!collapsed">
+                                <svg :class="{ 'rotate-180': open }"
+                                    class="w-4 h-4 transition-transform"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </template>
+                        </button>
+
+                        <div x-show="!collapsed && open"
+                            x-collapse
+                            class="bg-gray-50 dark:bg-gray-700">
+                            <a href="{{ route('admin.login-history.index') }}"
+                                class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                All Login History
+                            </a>
+                        </div>
+                    </li>
+                @endcan
+            @endcanany
         </ul>
     </nav>
 </div>

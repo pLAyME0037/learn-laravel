@@ -11,7 +11,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-9">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
@@ -56,19 +56,21 @@
 
                             <!-- Role -->
                             <div>
-                                <x-input-label for="role" :value="__('Role')" />
-                                <select id="role" name="role" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                                    <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>
-                                       User
-                                    </option>
-                                    <option value="staff" {{ old('role', $user->role) === 'staff' ? 'selected' : '' }}>
-                                       Staff
-                                    </option>
-                                    <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>
-                                       Administrator
-                                    </option>
+                                <x-input-label for="role"
+                                    :value="__('Role')" />
+                                <select id="role"
+                                    name="role"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                    required>
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role->name }}"
+                                            {{ (old('role', $user->role->name ?? '')) === $role->name ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
                                 </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('role')" />
+                                <x-input-error class="mt-2"
+                                    :messages="$errors->get('role')" />
                             </div>
 
                             <!-- Active Status -->

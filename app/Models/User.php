@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'department_id',
+        'role_id',
         'name',
         'username',
         'email',
@@ -39,9 +40,18 @@ class User extends Authenticatable
     }
 
     // Relationships
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function loginHistories()
+    {
+        return $this->hasMany(LoginHistory::class);
     }
 
     // Accessors
@@ -56,6 +66,11 @@ class User extends Authenticatable
         return $this->generateDefaultAvatar();
     }
 
+    public function getRoleNamesAttribute(): array
+    {
+        return $this->roles->pluck('name')->toArray();
+    }
+
     // Helper Methods
     private function generateDefaultAvatar(): string
     {
@@ -64,14 +79,14 @@ class User extends Authenticatable
     }
 
     // Custom permission checks
-    public function isSuperAdmin(): bool
+    public function isSuperUser(): bool
     {
-        return $this->hasRole('super_user');
+        return $this->hasRole('Super Administrator'); // Updated to match Spatie role name
     }
 
     public function isAdmin(): bool
     {
-        return $this->hasAnyRole(['super_user', 'admin']);
+        return $this->hasRole('admin');
     }
 
     public function isStaff(): bool
@@ -94,23 +109,32 @@ class User extends Authenticatable
     {
         return $query->where('is_active', true);
     }
-
     public function scopeStaff($query)
     {
         return $query->whereHas('roles', function ($q) {
             $q->whereIn('name', ['super_user', 'admin', 'registrar', 'hod', 'professor', 'staff']);
         });
     }
-
     public function scopeStudents($query)
     {
         return $query->whereHas('roles', function ($q) {
             $q->where('name', 'student');
         });
     }
-
     public function scopeByDepartment($query, $departmentId)
     {
         return $query->where('department_id', $departmentId);
+    }
+
+    public function updateLoginInfo()
+    {
+        $this->update([
+            'last_login_at' => now(),
+        ]);
+    }
+
+    public function assignRole($roles, $guard = null)
+    {
+        return parent::assignRole($roles, $guard); // Use Spatie's assignRole method
     }
 }

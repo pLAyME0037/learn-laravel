@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use function Termwind\parse;
+
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
@@ -53,15 +55,21 @@ class Student extends Model
         'metadata',
     ];
 
-    protected $casts = [
-        'date_of_birth'           => 'date',
-        'admission_date'          => 'date',
-        'expected_graduation'     => 'date',
-        'cgpa'                    => 'decimal:2',
-        'has_outstanding_balance' => 'boolean',
-        'has_disability'          => 'boolean',
-        'metadata'                => 'array',
-    ];
+protected $casts = [
+    'date_of_birth'           => 'date',
+    'admission_date'          => 'date',
+    'expected_graduation'     => 'date',
+    'cgpa'                    => 'decimal:2',
+    'has_outstanding_balance' => 'boolean',
+    'has_disability'          => 'boolean',
+    'metadata'                => 'array',
+    'id_card_number' => 'encrypted',
+    'passport_number' => 'encrypted',
+    'emergency_contact_name' => 'encrypted',
+    'emergency_contact_phone' => 'encrypted',
+    'permanent_address' => 'encrypted',
+    'disability_details' => 'encrypted',
+];
 
     // Relationship
     public function user()
@@ -111,6 +119,22 @@ class Student extends Model
             return ($this->total_credits_earned / $this->program->total_credits_required) * 100;
         }
     }
+    public function getAcademicStanding()
+    {
+        if ($this->cgpa >= 3.5) {
+            return 'Excellent';
+        }
+
+        if ($this->cgpa >= 3.0) {
+            return 'Good';
+        }
+
+        if ($this->cgpa >= 2.0) {
+            return 'Satisfatory';
+        }
+
+        return 'Probation';
+    }
 
     // Scopes
     public function scopeActive($query)
@@ -152,29 +176,37 @@ class Student extends Model
         && $this->cgpa >= 2.0;
     }
 
-    public function getAcademicStanding()
+    public function generateStudentId($departmentId = null)
     {
-        if ($this->cgpa >= 3.5) {
-            return 'Excellent';
+        // Get department code. If departmentId is provided, use it to fetch the department.
+        // Otherwise, assume $this->department_id is available (though it might not be set on a new instance).
+        $departmentCode = 'GEN';
+        if ($departmentId) {
+            $department = Department::find($departmentId);
+            $departmentCode = $department->code ?? 'GEN';
+        } elseif ($this->department_id) {
+            $department = Department::find($this->department_id);
+            $departmentCode = $department->code ?? 'GEN';
         }
 
-        if ($this->cgpa >= 3.0) {
-            return 'Good';
-        }
+        $year = now()->format('y');
 
-        if ($this->cgpa >= 2.0) {
-            return 'Satisfatory';
-        }
-
-        return 'Probation';
-    }
-    public function generateStudentId()
-    {
-        $departmentCode = $this->department?->code ?? 'GEN';
-        $year           = now()->format('y');
-        $sequence       = Student::where('department_id', $this->department_id)
-            ->whereYear('create_at', now()->year)
+        // Count students created in the current year for the given department.
+        // Use 'created_at' instead of 'create_at'.
+        $sequence = Student::where('department_id', $departmentId ?? $this->department_id)
+            ->whereYear('created_at', now()->year)
             ->count() + 1;
+
         return $departmentCode . $year . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    // Boot method to auto-generate student_id on creating
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($student) {
+            if (empty($student->student_id)) {
+                $student->student_id = (new static())->generateStudentId();
+            }
+        });
     }
 }

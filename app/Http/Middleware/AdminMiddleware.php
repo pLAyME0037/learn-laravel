@@ -15,7 +15,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || ! Auth::user()->hasRole(['super_admin', 'admin'])) {
+        if (! Auth::check() || ! Auth::user()->hasRole(['super_user', 'admin'])) {
             if (request()->acceptsJson()) {
                 return response()->json(['error' => 'Unauthorized access.'], 403);
             }

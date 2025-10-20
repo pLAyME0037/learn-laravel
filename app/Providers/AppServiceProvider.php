@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
     // Permission-specific directive
     Blade::if('permission', function ($permission) {
         $user = auth()->user();
-        return $user && $user->hasPermission($permission);
+        return $user && $user?->hasPermission($permission);
     });
     }
 }

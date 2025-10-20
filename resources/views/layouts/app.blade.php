@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-    class="h-full {{ session('theme', 'light') === 'dark' ? 'dark' : '' }}">
+    class="h-full {{ session('theme', 'dark') === 'light' ? 'light' : 'device' }}">
 
 <head>
     <meta charset="UTF-8">
@@ -43,7 +43,7 @@
             <x-header :title="$pageTitle ?? 'Dashboard'" />
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-3">
                 {{ $slot }}
             </main>
         </div>
