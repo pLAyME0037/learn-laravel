@@ -136,13 +136,39 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Role -->
+                                            <!-- Roles -->
                                             <td class="px-4 py-4 whitespace-nowrap">
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    {{ $user->role->name === 'admin' && $user->role->name === 'Super Administrator' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' }}">
-                                                    {{ ucfirst($user->role->name) }}
-                                                </span>
+                                                @forelse ($user->roles as $role)
+                                                    @php
+                                                        $roleColorClass = match ($role->name) {
+                                                            'Super Administrator'
+                                                                => 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100',
+                                                            'admin'
+                                                                => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100',
+                                                            'hod'
+                                                                => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
+                                                            'register'
+                                                                => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+                                                            'staff'
+                                                                => 'bg-teal-100 text-teal-800 dark:bg-teal-800 dark:text-teal-100',
+                                                            'professor'
+                                                                => 'bg-orange-100 text-blue-800 dark:bg-orange-800 dark:text-blue-100',
+                                                            'student'
+                                                                => 'bg-blue-100 text-gray-800 dark:bg-blue-700 dark:text-gray-300',
+                                                            default
+                                                                => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', // Default color
+                                                        };
+                                                    @endphp
+                                                    <span
+                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $roleColorClass }}">
+                                                        {{ ucfirst(str_replace('_', ' ', $role->name)) }}
+                                                    </span>
+                                                @empty
+                                                    <span
+                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                                        No Roles
+                                                    </span>
+                                                @endforelse
                                             </td>
 
                                             <!-- Status -->
@@ -215,10 +241,15 @@
                                                             class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                                                             Show
                                                         </a>
-                                                        <!-- Edit -->
+                                                        <!-- Edit User Details -->
                                                         <a href="{{ route('admin.users.edit', $user) }}"
                                                             class="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400">
                                                             Edit
+                                                        </a>
+                                                        <!-- Edit Roles/Permissions -->
+                                                        <a href="{{ route('admin.users.edit-access', $user) }}"
+                                                            class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400">
+                                                            Edit Access
                                                         </a>
                                                         <!-- Status Toggle -->
                                                         @if ($user->id !== auth()->id())

@@ -5,8 +5,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use function Termwind\parse;
-
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
@@ -55,21 +53,21 @@ class Student extends Model
         'metadata',
     ];
 
-protected $casts = [
-    'date_of_birth'           => 'date',
-    'admission_date'          => 'date',
-    'expected_graduation'     => 'date',
-    'cgpa'                    => 'decimal:2',
-    'has_outstanding_balance' => 'boolean',
-    'has_disability'          => 'boolean',
-    'metadata'                => 'array',
-    'id_card_number' => 'encrypted',
-    'passport_number' => 'encrypted',
-    'emergency_contact_name' => 'encrypted',
-    'emergency_contact_phone' => 'encrypted',
-    'permanent_address' => 'encrypted',
-    'disability_details' => 'encrypted',
-];
+    protected $casts = [
+        'date_of_birth'           => 'date',
+        'admission_date'          => 'date',
+        'expected_graduation'     => 'date',
+        'cgpa'                    => 'decimal:2',
+        'has_outstanding_balance' => 'boolean',
+        'has_disability'          => 'boolean',
+        'metadata'                => 'array',
+        'id_card_number'          => 'encrypted',
+        'passport_number'         => 'encrypted',
+        'emergency_contact_name'  => 'encrypted',
+        'emergency_contact_phone' => 'encrypted',
+        'permanent_address'       => 'encrypted',
+        'disability_details'      => 'encrypted',
+    ];
 
     // Relationship
     public function user()
@@ -182,10 +180,10 @@ protected $casts = [
         // Otherwise, assume $this->department_id is available (though it might not be set on a new instance).
         $departmentCode = 'GEN';
         if ($departmentId) {
-            $department = Department::find($departmentId);
+            $department     = Department::find($departmentId);
             $departmentCode = $department->code ?? 'GEN';
         } elseif ($this->department_id) {
-            $department = Department::find($this->department_id);
+            $department     = Department::find($this->department_id);
             $departmentCode = $department->code ?? 'GEN';
         }
 
@@ -201,7 +199,8 @@ protected $casts = [
     }
 
     // Boot method to auto-generate student_id on creating
-    protected static function boot() {
+    protected static function boot()
+    {
         parent::boot();
         static::creating(function ($student) {
             if (empty($student->student_id)) {

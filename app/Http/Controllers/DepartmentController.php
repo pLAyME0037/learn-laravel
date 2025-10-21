@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Department;
@@ -7,17 +6,21 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Role as SpatieRole;
 
 class DepartmentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:departments.view')->only('index', 'show');
-        $this->middleware('permission:departments.create')->only('create', 'store');
-        $this->middleware('permission:departments.edit')->only('edit', 'update');
-        $this->middleware('permission:departments.delete')->only('destroy');
-        $this->middleware('has_permission:departments.delete')->only('restore', 'forceDelete');
+        $this->middleware('permission:departments.view')
+            ->only('index', 'show');
+        $this->middleware('permission:departments.create')
+            ->only('create', 'store');
+        $this->middleware('permission:departments.edit')
+            ->only('edit', 'update');
+        $this->middleware('permission:departments.delete')
+            ->only('destroy');
+        $this->middleware('has_permission:departments.delete')
+            ->only('restore', 'forceDelete');
     }
 
     public function index(Request $request): View
@@ -57,16 +60,16 @@ class DepartmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:departments',
-            'description' => 'nullable|string',
-            'hod_id' => 'nullable|exists:users,id',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'office_location' => 'nullable|string|max:255',
+            'name'             => 'required|string|max:255',
+            'code'             => 'required|string|max:10|unique:departments',
+            'description'      => 'nullable|string',
+            'hod_id'           => 'nullable|exists:users,id',
+            'email'            => 'nullable|email',
+            'phone'            => 'nullable|string|max:20',
+            'office_location'  => 'nullable|string|max:255',
             'established_year' => 'nullable|integer|min:1900|max:' . date('Y'),
-            'budget' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
+            'budget'           => 'nullable|numeric|min:0',
+            'is_active'        => 'boolean',
         ]);
 
         Department::create($validated);
@@ -95,17 +98,20 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:departments,code,' . $department->id,
-            'description' => 'nullable|string',
-            'hod_id' => 'nullable|exists:users,id',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string|max:20',
-            'office_location' => 'nullable|string|max:255',
+            'name'             => 'required|string|max:255',
+            'code'             => 'required|string|max:10|unique:departments,code,' . $department->id,
+            'description'      => 'nullable|string',
+            'hod_id'           => 'nullable|exists:users,id',
+            'email'            => 'nullable|email',
+            'phone'            => 'nullable|string|max:20',
+            'office_location'  => 'nullable|string|max:255',
             'established_year' => 'nullable|integer|min:1900|max:' . date('Y'),
-            'budget' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
+            'budget'           => 'nullable|numeric|min:0',
+            'is_active'        => 'boolean',
         ]);
+
+        // Explicitly cast is_active to boolean to ensure correct storage
+        $validated['is_active'] = (bool) $validated['is_active'];
 
         $department->update($validated);
 
@@ -115,7 +121,7 @@ class DepartmentController extends Controller
 
     public function destroy(Department $department): RedirectResponse
     {
-        if (!$department->canDelete()) {
+        if (! $department->canDelete()) {
             return redirect()->route('admin.departments.index')
                 ->with('error', 'Cannot delete department with associated users or programs.');
         }
@@ -138,8 +144,8 @@ class DepartmentController extends Controller
     public function forceDelete($id): RedirectResponse
     {
         $department = Department::withTrashed()->findOrFail($id);
-        
-        if (!$department->canDelete()) {
+
+        if (! $department->canDelete()) {
             return redirect()->route('admin.departments.index')
                 ->with('error', 'Cannot permanently delete department with associated users or programs.');
         }

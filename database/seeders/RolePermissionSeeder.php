@@ -46,6 +46,11 @@ class RolePermissionSeeder extends Seeder
             'students.manage_records',
 
             // Academic Management
+            'academic_years.view',
+            'academic_years.create',
+            'academic_years.edit',
+            'academic_years.delete',
+            'academic_years.manage',
             'programs.manage',
             'courses.manage',
             'syllabus.manage',
@@ -106,6 +111,11 @@ class RolePermissionSeeder extends Seeder
             'students.edit',
             'students.delete',
             'students.manage_records',
+            'academic_years.view',
+            'academic_years.create',
+            'academic_years.edit',
+            'academic_years.delete',
+            'academic_years.manage',
             'programs.manage',
             'courses.manage',
             'syllabus.manage',
@@ -173,8 +183,6 @@ class RolePermissionSeeder extends Seeder
         $staff->givePermissionTo([
             'students.view',
             'payments.view',
-            'payments.manage',
-            'fees.manage',
         ]);
 
         $student = SpatieRole::create([

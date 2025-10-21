@@ -11,12 +11,18 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:users.view')->only('index', 'show');
-        $this->middleware('permission:users.create')->only('create', 'store');
-        $this->middleware('permission:users.edit')->only('edit', 'update');
-        $this->middleware('permission:users.delete')->only('destroy');
-        $this->middleware('has_permission:users.delete')->only('restore', 'forceDelete');
-        $this->middleware('has_permission:users.edit')->only('updateStatus');
+        $this->middleware('permission:users.view')
+            ->only('index', 'show');
+        $this->middleware('permission:users.create')
+            ->only('create', 'store');
+        $this->middleware('permission:users.edit')
+            ->only('edit', 'update');
+        $this->middleware('permission:users.delete')
+            ->only('destroy');
+        $this->middleware('has_permission:users.delete')
+            ->only('restore', 'forceDelete');
+        $this->middleware('has_permission:users.edit')
+            ->only('updateStatus');
     }
 
     /**
@@ -24,9 +30,9 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $search = $request->get('search');
+        $search       = $request->get('search');
         $selectedRole = $request->get('role');
-        $status = $request->get('status');
+        $status       = $request->get('status');
 
         $users = User::withTrashed()
             ->when($search, function ($query, $search) {
@@ -37,7 +43,7 @@ class UserController extends Controller
                 });
             })
             ->when($selectedRole, function ($query, $selectedRole) {
-                return $query->whereHas('role', function ($q) use ($selectedRole) {
+                return $query->whereHas('roles', function ($q) use ($selectedRole) {
                     $q->where('name', $selectedRole);
                 });
             })
@@ -50,12 +56,40 @@ class UserController extends Controller
             ->when($status === 'trashed', function ($query) {
                 return $query->onlyTrashed();
             })
-            ->latest()
+            ->with('roles') // Eager load Spatie roles
+            ->orderBy('name', 'asc') // Sort users alphabetically
             ->paginate(15)
             ->withQueryString()
         ;
-        $roles = Role::all();
+        $roles = Role::orderBy('name', 'asc')->get(); // Sort roles alphabetically
         return view('users.index', compact('users', 'roles', 'search', 'selectedRole', 'status'));
+    }
+
+    public function editAccess(User $user)
+    {
+        $allRoles = Role::orderBy('name', 'asc')->get(); // Sort roles alphabetically
+        $userRoles = $user->roles->pluck('id')->toArray();
+
+        $allPermissions = \Spatie\Permission\Models\Permission::orderBy('name', 'asc')->get()->groupBy('group_name'); // Sort permissions alphabetically
+        $userPermissions = $user->permissions->pluck('name')->toArray();
+
+        return view('users.edit-access', compact('user', 'allRoles', 'userRoles', 'allPermissions', 'userPermissions'));
+    }
+
+    public function updateAccess(Request $request, User $user)
+    {
+        $request->validate([
+            'roles'         => 'array',
+            'roles.*'       => 'exists:roles,id',
+            'permissions'   => 'array',
+            'permissions.*' => 'exists:permissions,name',
+        ]);
+
+        $roles = Role::whereIn('id', $request->roles)->get();
+        $user->syncRoles($roles);
+        $user->syncPermissions($request->permissions);
+
+        return redirect()->route('admin.users.index')->with('success', 'User roles and permissions updated successfully.');
     }
 
     /**
@@ -77,21 +111,20 @@ class UserController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'username' => 'required|string|max:255|alpha_dash|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|in:super_user,admin,hod,register,staff,user,student',
+            'role'     => 'required|string|exists:roles,name', // Validate role name against Spatie roles
             'bio'      => 'nullable|string|max:500',
         ]);
 
-        $role = Role::where('name', $validated['role'])->firstOrFail();
-
-        User::create([
+        $user = User::create([
             'name'              => $validated['name'],
             'email'             => $validated['email'],
             'username'          => $validated['username'],
             'password'          => Hash::make($validated['password']),
-            'role_id'           => $role->getKey(), // Use getKey() for primary key
             'bio'               => $validated['bio'],
             'email_verified_at' => now(),
         ]);
+
+        $user->assignRole($validated['role']); // Assign role using Spatie
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User create successfully');
@@ -102,9 +135,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $roles = Role::all();
         $user->load('role');
-        return view('users.show', compact('user', 'roles'));
+        return view('users.show', compact('user'));
     }
 
     /**
@@ -112,8 +144,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
-        return view('users.edit', compact('user', 'roles'));
+        $roles         = Role::all();
+        $userRoleNames = $user->getRoleNames()->toArray(); // Get Spatie role names
+        return view('users.edit', compact('user', 'roles', 'userRoleNames'));
     }
 
     /**
@@ -130,9 +163,15 @@ class UserController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $role                 = Role::where('name', $validated['role'])->firstOrFail();
-        $validated['role_id'] = $role->getKey(); // Use getKey() for primary key
+        $role = Role::where('name', $validated['role'])->firstOrFail();
+        // Remove the old role assignment
+        $user->roles()->detach();
+
+        // Assign new role(s) using Spatie's syncRoles
+        $user->syncRoles([$validated['role']]);
+
         unset($validated['role']);
+        unset($validated['role_id']); // Remove role_id as it's handled by Spatie
 
         $user->update($validated);
         return redirect()->route('admin.users.index')
@@ -141,14 +180,15 @@ class UserController extends Controller
 
     private function checkSelfModification(User $user, string $key, string $value)
     {
-        // Prevent admin from deleting themselves
-        if (auth()->check() && $user->getKey() === auth()->user()->id) {
+        // Prevent admin from modifying themselves
+        if (Auth::check() && $user->getKey() === Auth::id()) {
             return redirect()->route('admin.users.index')
                 ->with(
                     $key,
                     $value
                 );
         }
+        return null; // Return null if no redirection is needed
     }
 
     /**

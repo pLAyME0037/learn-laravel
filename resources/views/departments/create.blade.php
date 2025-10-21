@@ -76,7 +76,8 @@
 
                             <!-- Head of Department -->
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Head of Department
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                    Head of Department
                                 </h3>
 
                                 <div>

@@ -133,8 +133,4 @@ class User extends Authenticatable
         ]);
     }
 
-    public function assignRole($roles, $guard = null)
-    {
-        return parent::assignRole($roles, $guard); // Use Spatie's assignRole method
-    }
 }
