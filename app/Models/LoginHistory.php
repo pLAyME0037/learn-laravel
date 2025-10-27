@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +11,8 @@ class LoginHistory extends Model
     protected $fillable = [
         'user_id',
         'ip_address',
+        'Sec_Ch_Ua',
+        'Sec_Ch_Ua_Platform',
         'user_agent',
         'login_at',
     ];

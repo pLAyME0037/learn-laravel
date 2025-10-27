@@ -17,6 +17,7 @@ Schema::create('audit_logs', function (Blueprint $table) {
     $table->string('action');
     $table->text('description');
     $table->timestamps();
+    $table->softDeletes();
 });
     }
 

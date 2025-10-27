@@ -14,15 +14,12 @@ return new class extends Migration
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')
-                ->constrained()
+                ->constrained('users')
                 ->onDelete('cascade');
-            $table->foreignId('course_id')
-                ->constrained()
-                ->onDelete('cascade');
-            $table->string('semester');
-            $table->enum('status', ['enrolled', 'completed', 'dropped', 'withdrawn']);
-            $table->date('enrolled_at')->nullable();
+            $table->enum('status', ['enrolled', 'completed', 'dropped', 'withdrawn'])->default('enrolled');
+            $table->date('enrollment_date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

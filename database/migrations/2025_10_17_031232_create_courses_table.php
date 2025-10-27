@@ -25,6 +25,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->string('status')->default('active'); // e.g., active, inactive, archived
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -16,6 +16,7 @@ Schema::create('course_prerequisites', function (Blueprint $table) {
     $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
     $table->foreignId('prerequisite_id')->constrained('courses')->onDelete('cascade');
     $table->timestamps();
+    $table->softDeletes();
 
     $table->unique(['course_id', 'prerequisite_id']);
 });

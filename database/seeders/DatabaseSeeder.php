@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             ProgramSeeder::class,
             StudentManagementSeeder::class,
+            AcademicYearDashboardSeeder::class,
         ]);
     }
 }

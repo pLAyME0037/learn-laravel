@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Gender;
 
 class Student extends Model
 {
@@ -17,7 +18,7 @@ class Student extends Model
         'registration_number',
         // Personal Information
         'date_of_birth',
-        'gender',
+        'gender_id',
         'nationality',
         'id_card_number',
         'passport_number',
@@ -89,6 +90,11 @@ class Student extends Model
     public function academicRecords()
     {
         return $this->hasMany(AcademicRecord::class);
+    }
+
+    public function gender()
+    {
+        return $this->belongsTo(Gender::class);
     }
 
     // Accessors

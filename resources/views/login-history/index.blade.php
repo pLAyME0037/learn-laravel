@@ -1,3 +1,7 @@
+<?php
+use Illuminate\Support\HtmlString;
+use Carbon\Carbon;
+?>
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -7,48 +11,54 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-900 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-100 uppercase tracking-wider">
-                                    User
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-100  uppercase tracking-wider">
-                                    IP Address
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-100  uppercase tracking-wider">
-                                    User Agent
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-100  uppercase tracking-wider">
-                                    Login At
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
-                            @foreach ($loginHistories as $history)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-100">
-                                        {{ $history->user->name }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-100">
-                                        {{ $history->ip_address }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-100">
-                                        {!! nl2br(e(rtrim(chunk_split($history->user_agent, 60, "\n"), "\n"))) !!}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-100">
-                                        {{ $history->login_at ? \Carbon\Carbon::parse($history->login_at)->format('Y-m-d H:i:s') : '' }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <div class="flex justify-end mb-4">
+                        <a href="{{ route('admin.academic_years.create') }}"
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Add Academic Year
+                        </a>
+                    </div>
+
+                    @php
+                        $headers = [
+                            'user_id' => 'User Name',
+                            'ip_address' => 'IP Address',
+                            'Sec_Ch_Ua' => 'Browser',
+                            'Sec_Ch_Ua_Platform' => 'OS Platform',
+                            'user_agent' => 'User Agent',
+                            'login_at' => 'Login At',
+                        ];
+
+                        $data = $loginHistories->map(function ($history) {
+                            return [
+                                'user_id' => $history->user->name,
+                                'ip_address' => $history->ip_address,
+                                'Sec_Ch_Ua' => new HtmlString(nl2br(e(wordwrap($history->Sec_Ch_Ua, 30, "\n", true)))),
+                                'Sec_Ch_Ua_Platform' => $history->Sec_Ch_Ua_Platform,
+                                'user_agent' => new HtmlString(
+                                    nl2br(e(wordwrap($history->user_agent, 50, "\n", true))),
+                                ),
+                                'login_at' => $history->login_at
+                                    ? Carbon::parse($history->login_at)->format('d-m-Y H:i:s')
+                                    : '',
+                            ];
+                        });
+
+                        $actions = [
+                            // Define any actions if needed
+                        ];
+                    @endphp
+                    @if (session('success'))
+                        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <x-dynamic-table :headers="$headers"
+                        :data="$data"
+                        :actions="$actions"
+                        :options="['wrapperClass' => 'border border-gray-200']" />
 
                     <div class="mt-4">
                         {{ $loginHistories->links() }}

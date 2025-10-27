@@ -200,7 +200,6 @@ class RolePermissionSeeder extends Seeder
         $user->username = 'superuser';
         $user->email = 'superuser@example.com';
         $user->password = bcrypt('password');
-        $user->role_id = 1;
         $user->save();
 
         // Assign the Spatie role 'Super Administrator' directly using the Spatie Role model

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Program extends Model
 {
     use HasFactory, SoftDeletes;
+    
     protected $fillable = [
         'department_id',
         'name',

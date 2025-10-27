@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('ip_address', 45)->nullable();
+            $table->text('Sec_Ch_Ua')->nullable();
+            $table->text('Sec_Ch_Ua_Platform')->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamp('login_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

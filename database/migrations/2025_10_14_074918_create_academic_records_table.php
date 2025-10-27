@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('academic_records', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('semester_id')->constrained('semesters')->onDelete('cascade');
+            $table->foreignId('academic_year_id')->constrained('academic_years')->onDelete('cascade');
+            $table->string('grade')->nullable();
+            $table->decimal('marks', 5, 2)->nullable();
+            $table->enum('status', ['completed', 'in_progress', 'withdrawn', 'failed'])->default('in_progress');
             $table->timestamps();
+            $table->softDeletes();
+
+            $table->unique(['student_id', 'course_id', 'semester_id', 'academic_year_id'], 'academic_records_unique_record');
         });
     }
 

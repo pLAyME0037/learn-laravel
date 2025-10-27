@@ -16,67 +16,57 @@
                         </a>
                     </div>
 
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Name
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Start Date
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    End Date
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Current
-                                </th>
-                                <th scope="col"
-                                    class="relative px-6 py-3">
-                                    <span class="sr-only">Actions</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach ($academicYears as $academicYear)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $academicYear->name }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $academicYear->start_date }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $academicYear->end_date }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ $academicYear->is_current ? 'Yes' : 'No' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('admin.academic_years.edit', $academicYear->id) }}"
-                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600 mr-2">Edit</a>
-                                        <form action="{{ route('admin.academic_years.destroy', $academicYear->id) }}"
-                                            method="POST"
-                                            class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600"
-                                                onclick="return confirm('Are you sure you want to delete this academic year?')">
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    @php
+                        $headers = [
+                            'name' => 'Name',
+                            'start_date' => 'Start Date',
+                            'end_date' => 'End Date',
+                            'is_current' => 'Current',
+                        ];
+                        $data = $academicYears->map(function ($year) {
+                            return [
+                                'id' => $year->id,
+                                'name' => $year->name,
+                                'start_date' => $year->start_date,
+                                'end_date' => $year->end_date,
+                                'is_current' => $year->is_current ? 'Yes' : 'No',
+                            ];
+                        });
+                        $actions = [
+                            [
+                                'label' => 'View',
+                                'route' => 'admin.academic_years.show',
+                                'class' =>
+                                    'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-600',
+                            ],
+                            [
+                                'label' => 'Edit',
+                                'route' => 'admin.academic_years.edit',
+                                'class' =>
+                                    'text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-600',
+                            ],
+                            [
+                                'label' => 'Delete',
+                                'route' => 'admin.academic_years.destroy',
+                                'method' => 'DELETE',
+                                'class' => 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600',
+                            ],
+                        ];
+                    @endphp
+
+                    @if (session('success'))
+                        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <x-dynamic-table :headers="$headers"
+                        :data="$data"
+                        :actions="$actions"
+                        :options="['wrapperClass' => 'border border-gray-200']" />
                 </div>
             </div>
         </div>
     </div>
+
 </x-app-layout>

@@ -113,11 +113,16 @@ Route::middleware(['auth', 'verified'])
 
         // Role Management
         Route::resource('roles', RoleController::class)->except(['show']);
-        Route::get('roles/{role}/edit-permissions', [RoleController::class, 'editPermissions'])->name('roles.edit-permissions');
-        Route::put('roles/{role}/update-permissions', [RoleController::class, 'updatePermissions'])->name('roles.update-permissions');
+        Route::get('roles/{role}/edit-permissions', [
+            RoleController::class, 'editPermissions'
+        ])->name('roles.edit-permissions');
+        Route::put('roles/{role}/update-permissions', [
+            RoleController::class, 'updatePermissions'
+        ])->name('roles.update-permissions');
 
         // Permission Management
-        Route::resource('permissions', PermissionController::class)->only(['index']);
+        Route::resource('permissions', PermissionController::class)
+            ->only(['index']);
 
         // Notification Sending
         Route::post('send-notification', [

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +25,6 @@ class Course extends Model
         'credits',
         'department_id',
         'program_id',
-        'instructor_id',
         'max_students',
         'start_date',
         'end_date',
@@ -50,10 +50,6 @@ class Course extends Model
     /**
      * Get the user (instructor) for the Course.
      */
-    public function instructor(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'instructor_id');
-    }
 
     /**
      * The prerequisites that belong to the Course.
@@ -84,7 +80,12 @@ class Course extends Model
      */
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class, 'course_id', 'id');
+        return $this->hasMany(Student::class);
+    }
+
+    public function instructors(): BelongsToMany
+    {
+        return $this->belongsToMany(Instructor::class, 'course_instructor_pivot', 'course_id', 'instructor_id');
     }
 
     /**

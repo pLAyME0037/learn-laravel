@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Student;
 use Illuminate\Database\Seeder;
+use App\Models\Gender;
 use Illuminate\Support\Facades\Hash;
 
 class StudentManagementSeeder extends Seeder
@@ -46,7 +47,6 @@ class StudentManagementSeeder extends Seeder
             'email' => 'john.smith@student.edu',
             'password' => Hash::make('password'),
             'department_id' => $csDepartment->id,
-            'role_id' => $role->getKey(),
             'is_active' => true,
         ]);
 
@@ -56,7 +56,7 @@ class StudentManagementSeeder extends Seeder
             'department_id' => $eeDepartment->id,
             'program_id' => $bscCs->id,
             'date_of_birth' => '2000-05-15',
-            'gender' => 'male',
+            'gender_id' => Gender::where('name', 'male')->first()->id,
             'nationality' => 'American',
             'phone' => '+1234567890',
             'emergency_contact_name' => 'Jane Smith',
@@ -86,7 +86,6 @@ class StudentManagementSeeder extends Seeder
             'email' => 'sarah.johnson@student.edu',
             'password' => Hash::make('password'),
             'department_id' => $csDepartment->id,
-            'role_id' => $role->getKey(),
             'is_active' => true,
         ]);
 
@@ -96,7 +95,7 @@ class StudentManagementSeeder extends Seeder
             'department_id' => $csDepartment->id,
             'program_id' => $bscEe->id,
             'date_of_birth' => '2001-08-22',
-            'gender' => 'female',
+            'gender_id' => Gender::where('name', 'female')->first()->id,
             'nationality' => 'Canadian',
             'phone' => '+1987654321',
             'emergency_contact_name' => 'Robert Johnson',

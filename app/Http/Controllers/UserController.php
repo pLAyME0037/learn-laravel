@@ -22,7 +22,7 @@ class UserController extends Controller
         $this->middleware('has_permission:users.delete')
             ->only('restore', 'forceDelete');
         $this->middleware('has_permission:users.edit')
-            ->only('updateStatus');
+            ->only('updateStatus');                                                         
     }
 
     /**
@@ -135,7 +135,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user->load('role');
+        $user->load('roles'); // Use the correct 'roles' relationship for Spatie
         return view('users.show', compact('user'));
     }
 
@@ -158,24 +158,22 @@ class UserController extends Controller
             'name'      => 'required|string|max:255',
             'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->getKey(),
             'email'     => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
-            'role'      => 'required|in:super_user,admin,hod,register,staff,user,student',
+            'role'      => 'required|string|exists:roles,name', // Validate role name exists
             'bio'       => 'nullable|string|max:500',
-            'is_active' => 'boolean',
+            'is_active' => 'sometimes|boolean',
         ]);
 
-        $role = Role::where('name', $validated['role'])->firstOrFail();
-        // Remove the old role assignment
-        $user->roles()->detach();
-
-        // Assign new role(s) using Spatie's syncRoles
+        // Sync the role from the edit form. This will replace all existing roles.
         $user->syncRoles([$validated['role']]);
 
-        unset($validated['role']);
-        unset($validated['role_id']); // Remove role_id as it's handled by Spatie
+        // Prepare data for user update, excluding the role
+        $updateData = $request->only('name', 'username', 'email', 'bio');
+        $updateData['is_active'] = $request->has('is_active');
 
-        $user->update($validated);
+        $user->update($updateData);
+
         return redirect()->route('admin.users.index')
-            ->with('success', 'User Update Successfully');
+            ->with('success', 'User updated successfully.');
     }
 
     private function checkSelfModification(User $user, string $key, string $value)

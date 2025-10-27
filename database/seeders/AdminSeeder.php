@@ -1,7 +1,6 @@
 <?php
 namespace Database\Seeders;
 
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,12 +13,11 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $roleId = Role::where('name', 'Super Administrator')->first();
         // Get the super admin role
         $superAdminRole = SpatieRole::where('name', 'Super Administrator')->first();
 
         if (! $superAdminRole) {
-            $this->command->error('Super admin role not found! Please run PermissionSeeder first.');
+            $this->command->error('Super admin role not found! Please run RolePermissionSeeder first.');
             return;
         }
 
@@ -33,7 +31,6 @@ class AdminSeeder extends Seeder
                 'bio'               => 'Super Administrator with full access rights.',
                 'email_verified_at' => now(),
                 'is_active'         => true,
-                'role_id'           => $roleId->getKey(),
             ]
         );
 

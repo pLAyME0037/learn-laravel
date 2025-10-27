@@ -11,14 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('class_schedules', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
-    $table->foreignId('professor_id')->constrained('users')->onDelete('cascade');
-    $table->string('room_number');
-    $table->integer('capacity');
-    $table->timestamps();
-});
+        Schema::create('class_schedules', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('professor_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('classroom_id')->constrained('classrooms')->onDelete('cascade');
+            $table->integer('capacity');
+            $table->string('day_of_week')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+            $table->index(['classroom_id', 'start_time', 'end_time']);
+        });
     }
 
     /**

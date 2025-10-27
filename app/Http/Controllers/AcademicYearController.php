@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\Semester;
+use App\Models\Course;
+use App\Models\Department;
+use App\Models\ClassSchedule;
+use App\Models\Enrollment;
 use Illuminate\Http\Request;
 
 class AcademicYearController extends Controller
@@ -11,6 +16,24 @@ class AcademicYearController extends Controller
     {
         $academicYears = AcademicYear::orderBy('is_current', 'desc')->orderBy('start_date', 'desc')->get();
         return view('academic_years.index', compact('academicYears'));
+    }
+
+    public function show(AcademicYear $academicYear)
+    {
+        $academicYear->load([
+            'semesters' => function ($query) {
+                $query->with([
+                    'courses.department',
+                    'courses.classSchedules' => function ($q) {
+                        $q->withCount('enrollments');
+                    }
+                ]);
+            }
+        ]);
+
+        $departments = Department::all();
+
+        return view('academic_years.show', compact('academicYear', 'departments'));
     }
 
     public function create()

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
@@ -10,7 +9,7 @@ class SemesterController extends Controller
 {
     public function index()
     {
-        $semesters = Semester::with('academicYear')->get();
+        $semesters     = Semester::with('academicYear')->get();
         $academicYears = AcademicYear::all();
         return view('semesters.index', compact('semesters', 'academicYears'));
     }
@@ -19,10 +18,10 @@ class SemesterController extends Controller
     {
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'name' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'is_current' => 'boolean',
+            'name'             => 'required|string',
+            'start_date'       => 'required|date',
+            'end_date'         => 'required|date|after:start_date',
+            'is_current'       => 'boolean',
         ]);
 
         Semester::create($request->all());
@@ -34,10 +33,10 @@ class SemesterController extends Controller
     {
         $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'name' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'is_current' => 'boolean',
+            'name'             => 'required|string',
+            'start_date'       => 'required|date',
+            'end_date'         => 'required|date|after:start_date',
+            'is_current'       => 'boolean',
         ]);
 
         $semester->update($request->all());

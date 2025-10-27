@@ -13,7 +13,6 @@ class User extends Authenticatable
 
     protected $fillable = [
         'department_id',
-        'role_id',
         'name',
         'username',
         'email',
@@ -40,13 +39,14 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class);
     }
 
     public function loginHistories()
@@ -81,7 +81,7 @@ class User extends Authenticatable
     // Custom permission checks
     public function isSuperUser(): bool
     {
-        return $this->hasRole('Super Administrator'); // Updated to match Spatie role name
+        return $this->hasRole('Super Administrator');
     }
 
     public function isAdmin(): bool
@@ -91,7 +91,14 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return $this->hasAnyRole(['super_user', 'admin', 'registrar', 'hod', 'professor', 'staff']);
+        return $this->hasAnyRole([
+            'super_user', 
+            'admin', 
+            'registrar', 
+            'hod', 
+            'professor', 
+            'staff'
+        ]);
     }
 
     public function isStudent(): bool

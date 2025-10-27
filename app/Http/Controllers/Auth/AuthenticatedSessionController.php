@@ -1,7 +1,7 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Concerns\ClientHints;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\LoginHistory;
@@ -12,6 +12,7 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    use ClientHints;
     /**
      * Display the login view.
      */
@@ -34,12 +35,16 @@ class AuthenticatedSessionController extends Controller
         // Update last login timestamp
         $request->user()->update(['last_login_at' => now()]);
 
-        // Record login history
+        // Record login history (include Client Hints when available)
+        $hints = $this->getClientHints($request);
+
         LoginHistory::create([
-            'user_id' => $request->user()->id,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'login_at' => now(),
+            'user_id'            => $request->user()->id,
+            'ip_address'         => $request->ip(),
+            'Sec_Ch_Ua'          => $hints['sec_ch_ua'],
+            'Sec_Ch_Ua_Platform' => $hints['sec_ch_ua_platform'],
+            'user_agent'         => $request->userAgent(),
+            'login_at'           => now(),
         ]);
 
         return redirect()->intended(route(

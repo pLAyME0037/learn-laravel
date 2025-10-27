@@ -32,11 +32,18 @@
                             <p class="text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
 
                             <div class="mt-2 flex flex-wrap gap-2">
-                                <span
-                                    class="px-3 py-1 text-sm font-semibold rounded-full 
-                                    {{ ($user->role->name ?? '') === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' }}">
-                                    {{ ucfirst($user->role->name ?? '') }}
-                                </span>
+                                @forelse ($user->roles as $role)
+                                    <span
+                                        class="px-3 py-1 text-sm font-semibold rounded-full 
+                                        {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100' : 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' }}">
+                                        {{ ucfirst(str_replace('_', ' ', $role->name)) }}
+                                    </span>
+                                @empty
+                                    <span
+                                        class="px-3 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+                                        No Role Assigned
+                                    </span>
+                                @endforelse
                                 <span
                                     class="px-3 py-1 text-sm font-semibold rounded-full 
                                     {{ $user->is_active ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
@@ -71,7 +78,8 @@
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Username</dt>
                                 <dd class="mt-1 text-sm text-gray-900 dark:text-white">
-                                    <span>@</span>{{ $user->username }}</dd>
+                                    <span>@</span>{{ $user->username }}
+                                </dd>
                             </div>
 
                             <div>
@@ -93,8 +101,9 @@
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Account Information</h3>
 
                             <div>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Role</dt>
-                                <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">{{ $user->role->name ?? 'N/A' }}
+                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Roles</dt>
+                                <dd class="mt-1 text-sm text-gray-900 dark:text-white capitalize">
+                                    {{ $user->roles->pluck('name')->implode(', ') ?: 'N/A' }}
                                 </dd>
                             </div>
 

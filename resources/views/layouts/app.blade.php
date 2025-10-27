@@ -10,6 +10,7 @@
         content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Dashboard' }} - School Manage</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     <script>
         // Initialize theme from session or localStorage
         function initTheme() {
@@ -50,6 +51,7 @@
     </div>
 
     @stack('scripts')
+    @livewireScripts
 </body>
 
 </html>
