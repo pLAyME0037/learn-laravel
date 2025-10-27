@@ -141,7 +141,7 @@
                                             Gender
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
-                                            {{ ucfirst($student->gender) }}
+                                            {{ ucfirst($student->gender->name) }}
                                         </p>
                                     </div>
                                     <div>
