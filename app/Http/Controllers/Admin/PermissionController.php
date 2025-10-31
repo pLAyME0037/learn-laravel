@@ -22,4 +22,8 @@ class PermissionController extends Controller
 
         return view('admin.permissions.index', compact('permissions', 'search'));
     }
+
+    public function edit(Permission $permission) {
+        return view('admin.permission.edit', compact('permission'));
+    }
 }

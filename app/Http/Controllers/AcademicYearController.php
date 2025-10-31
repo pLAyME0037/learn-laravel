@@ -1,24 +1,30 @@
 <?php
 
+declare (strict_types = 1);
+
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
-use App\Models\Semester;
-use App\Models\Course;
 use App\Models\Department;
-use App\Models\ClassSchedule;
-use App\Models\Enrollment;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AcademicYearController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): View
     {
-        $academicYears = AcademicYear::orderBy('is_current', 'desc')->orderBy('start_date', 'desc')->get();
-        return view('academic_years.index', compact('academicYears'));
+        $academicYears = AcademicYear::orderBy('is_current', 'desc')->orderBy('start_date', 'desc')->paginate(4);
+        return view('admin.academic_years.index', compact('academicYears'));
     }
 
-    public function show(AcademicYear $academicYear)
+    /**
+     * Display the specified resource.
+     */
+    public function show(AcademicYear $academicYear): View
     {
         $academicYear->load([
             'semesters' => function ($query) {
@@ -26,60 +32,75 @@ class AcademicYearController extends Controller
                     'courses.department',
                     'courses.classSchedules' => function ($q) {
                         $q->withCount('enrollments');
-                    }
+                    },
                 ]);
-            }
+            },
         ]);
 
         $departments = Department::all();
 
-        return view('academic_years.show', compact('academicYear', 'departments'));
+        return view('admin.academic_years.show', compact('academicYear', 'departments'));
     }
 
-    public function create()
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): View
     {
-        return view('academic_years.create');
+        return view('admin.academic_years.create');
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|unique:academic_years,name',
+            'name'       => 'required|string|unique:academic_years,name',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date'   => 'required|date|after:start_date',
             'is_current' => 'boolean',
         ]);
 
         AcademicYear::create($request->all());
 
-        return redirect()->route('admin.academic_years.index')
+        return redirect()->route('admin.academic-years.index')
             ->with('success', 'Academic Year created successfully.');
     }
 
-    public function edit(AcademicYear $academicYear)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(AcademicYear $academicYear): View
     {
-        return view('academic_years.edit', compact('academicYear'));
+        return view('admin.academic_years.edit', compact('academicYear'));
     }
 
-    public function update(Request $request, AcademicYear $academicYear)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, AcademicYear $academicYear): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|unique:academic_years,name,' . $academicYear->id,
+            'name'       => 'required|string|unique:academic_years,name,' . $academicYear->id,
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'end_date'   => 'required|date|after:start_date',
             'is_current' => 'boolean',
         ]);
 
         $academicYear->update($request->all());
 
-        return redirect()->route('admin.academic_years.index')
+        return redirect()->route('admin.academic-years.index')
             ->with('success', 'Academic Year updated successfully.');
     }
 
-    public function destroy(AcademicYear $academicYear)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(AcademicYear $academicYear): RedirectResponse
     {
         $academicYear->delete();
-        return redirect()->route('admin.academic_years.index')
+        return redirect()->route('admin.academic-years.index')
             ->with('success', 'Academic Year deleted successfully.');
     }
 }

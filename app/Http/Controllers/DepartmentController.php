@@ -46,7 +46,7 @@ class DepartmentController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('departments.index', compact('departments', 'search', 'status'));
+        return view('admin.departments.index', compact('departments', 'search', 'status'));
     }
 
     public function create(): View
@@ -54,7 +54,7 @@ class DepartmentController extends Controller
         $hods = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['hod', 'professor']);
         })->active()->get();
-        return view('departments.create', compact('hods'));
+        return view('admin.departments.create', compact('hods'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -84,7 +84,7 @@ class DepartmentController extends Controller
             $query->with('roles')->latest()->take(10);
         }, 'programs']);
 
-        return view('departments.show', compact('department'));
+        return view('admin.departments.show', compact('department'));
     }
 
     public function edit(Department $department): View
@@ -92,7 +92,7 @@ class DepartmentController extends Controller
         $hods = User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['hod', 'professor']);
         })->active()->get();
-        return view('departments.edit', compact('department', 'hods'));
+        return view('admin.departments.edit', compact('department', 'hods'));
     }
 
     public function update(Request $request, Department $department): RedirectResponse

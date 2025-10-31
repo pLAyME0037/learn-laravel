@@ -42,6 +42,11 @@ class Program extends Model
         return $this->belongsTo(Department::class);
     }
 
+    public function degree(): BelongsTo
+    {
+        return $this->belongsTo(Degree::class);
+    }
+
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);

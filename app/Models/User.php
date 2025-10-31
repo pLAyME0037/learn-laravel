@@ -183,30 +183,6 @@ class User extends Authenticatable
         return $this->hasRole('registrar');
     }
 
-    /**
-     * Wrapper for Spatie's `hasPermissionTo` for consistency.
-     */
-    public function hasPermissionTo($permission): bool
-    {
-        return parent::hasPermissionTo($permission);
-    }
-
-    /**
-     * Wrapper for Spatie's `assignRole`.
-     */
-    public function assignRole($role, $guard = null): static
-    {
-        return parent::assignRole($role, $guard);
-    }
-
-    /**
-     * Wrapper for Spatie's `removeRole`.
-     */
-    public function removeRole($role, $guard = null): static
-    {
-        return parent::removeRole($role, $guard);
-    }
-
     // Scopes
     public function scopeActive(Builder $query): void
     {

@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class AcademicYear extends Model
 {
@@ -24,8 +24,8 @@ class AcademicYear extends Model
     protected function startDate(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => new Carbon($value),
-            set: fn (Carbon $value) => $value,
+            get: fn(string $value) => new Carbon($value),
+            set: fn(Carbon $value) => $value,
         );
     }
 
@@ -35,8 +35,8 @@ class AcademicYear extends Model
     protected function endDate(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => new Carbon($value),
-            set: fn (Carbon $value) => $value,
+            get: fn(string $value) => new Carbon($value),
+            set: fn(Carbon $value) => $value,
         );
     }
 
@@ -46,8 +46,8 @@ class AcademicYear extends Model
     protected function isCurrent(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => (bool) $value,
-            set: fn (bool $value) => $value,
+            get: fn(string $value) => (bool) $value,
+            set: fn(bool $value)   => $value,
         );
     }
 
@@ -57,14 +57,6 @@ class AcademicYear extends Model
     public function getYearRangeAttribute(): string
     {
         return "{$this->start_date->format('Y')}-{$this->end_date->format('Y')}";
-    }
-
-    /**
-     * Get a boolean indicating if it's the current academic year.
-     */
-    public function getIsCurrentAttribute(): bool
-    {
-        return (bool) $this->is_current;
     }
 
     /**
@@ -82,7 +74,7 @@ class AcademicYear extends Model
     {
         $now = Carbon::now();
         $query->where('start_date', '<=', $now)
-              ->where('end_date', '>=', $now);
+            ->where('end_date', '>=', $now);
     }
 
     /**

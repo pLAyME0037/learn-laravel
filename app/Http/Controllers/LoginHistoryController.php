@@ -1,87 +1,50 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ClientHints;
 use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class LoginHistoryController extends Controller
 {
     use ClientHints;
-    public function index(Request $request, Response $response)
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): View
     {
         $loginHistories = LoginHistory::with('user')
             ->latest()
-            ->paginate(15);
-        return view('login-history.index', compact('loginHistories'));
+            ->paginate(10);
+        return view('admin.login_histories.index', compact('loginHistories'));
     }
 
     /**
-     * Store a new login history record.
-     * This method would typically be called after a successful user login.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Display the specified resource.
      */
-    public function store(Request $request, Response $response)
-    {
-        // Get the authenticated user's ID
-        $userId = Auth::id();
-
-        // Get client IP address
-        $ipAddress = $request->ip();
-
-        // Capture raw user agent and use the ClientHints trait to extract hints with fallbacks
-        $userAgent       = $request->userAgent();
-        $hints           = $this->getClientHints($request);
-        $secChUa         = $hints['sec_ch_ua'];
-        $secChUaPlatform = $hints['sec_ch_ua_platform'];
-
-        // Create a new LoginHistory record
-        $loginHistory = LoginHistory::create([
-            'user_id'            => $userId,
-            'ip_address'         => $ipAddress,
-            'Sec_Ch_Ua'          => $secChUa,
-            'Sec_Ch_Ua_Platform' => $secChUaPlatform,
-            'user_agent'         => $userAgent,
-            'login_at'           => now(),
-        ]);
-
-        return $response->json([
-            'message' => 'Login history recorded successfully',
-            'data'    => $loginHistory,
-        ], 201);
-    }
+    // public function show(LoginHistory $loginHistory): View
+    // {
+    //     $loginHistory->load('user');
+    //     return view('admin.login_histories.show', compact('loginHistory'));
+    // }
 
     /**
-     * Display a specific login history record by ID.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified resource from storage.
      */
-    public function show($id, Response $response)
+    public function destroy(LoginHistory $loginHistory): RedirectResponse
     {
-        $history = LoginHistory::find($id);
+        $loginHistory->delete();
 
-        if (! $history) {
-            return $response->json(['message' => 'Login history not found'], 404);
-        }
-
-        // Accessing specific attributes
-        $secChUa         = $history->Sec_Ch_Ua;
-        $secChUaPlatform = $history->Sec_Ch_Ua_Platform;
-        $userAgent       = $history->user_agent;
-
-        return $response->json([
-            'user_id'            => $history->user_id,
-            'ip_address'         => $history->ip_address,
-            'Sec_Ch_Ua'          => $secChUa,
-            'Sec_Ch_Ua_Platform' => $secChUaPlatform,
-            'user_agent'         => $userAgent,
-            'login_at'           => $history->login_at,
-        ]);
+        return redirect()->route('admin.login-histories.index')
+            ->with('success', 'Login history deleted successfully.');
     }
 
     /**

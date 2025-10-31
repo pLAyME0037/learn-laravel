@@ -1,19 +1,37 @@
 <?php
 
+use App\Http\Controllers\AcademicRecordController;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\ClassScheduleController;
+use App\Http\Controllers\ContactDetailController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CoursePrerequisiteController;
+use App\Http\Controllers\CreditScoreController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DegreeController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\GenderController;
+use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\LoginHistoryController;
+use App\Http\Controllers\MajorController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SidebarController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SystemConfigController;
 use App\Http\Controllers\ThemeController;
+use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -95,30 +113,79 @@ Route::middleware(['auth', 'verified'])
         // Login History
         Route::get('login-history', [
             LoginHistoryController::class, 'index',
-        ])->name('login-history.index');
-
+        ])->name('login-histories.index');
         // System Configuration
-        Route::get('system-configs', [
-            SystemConfigController::class, 'index',
-        ])->name('system-configs.index');
-        Route::post('system-configs', [
-            SystemConfigController::class, 'update',
-        ])->name('system-configs.update');
+        Route::resource('system-configs', SystemConfigController::class);
 
         // Academic Year Management
-        Route::resource('academic_years', AcademicYearController::class);
+        Route::resource('academic-years', AcademicYearController::class);
+
+        // Academic Record Management
+        Route::resource('academic-records', AcademicRecordController::class);
+
+        // Attendance Management
+        Route::resource('attendances', AttendanceController::class);
+
+        // Audit Log Management
+        Route::resource('audit-logs', AuditLogController::class);
+
+        // Classroom Management
+        Route::resource('classrooms', ClassroomController::class);
+
+        // Class Schedule Management
+        Route::resource('class-schedules', ClassScheduleController::class);
+
+        // Contact Detail Management
+        Route::resource('contact-details', ContactDetailController::class);
+
+        // Course Management
+        Route::resource('courses', CourseController::class);
+
+        // Course Prerequisite Management
+        Route::resource('course-prerequisites', CoursePrerequisiteController::class);
+
+        // Credit Score Management
+        Route::resource('credit-scores', CreditScoreController::class);
+
+        // Degree Management
+        Route::resource('degrees', DegreeController::class);
+
+        // Enrollment Management
+        Route::resource('enrollments', EnrollmentController::class);
+
+        // Faculty Management
+        Route::resource('faculties', FacultyController::class);
+
+        // Gender Management
+        Route::resource('genders', GenderController::class);
+
+        // Instructor Management
+        Route::resource('instructors', InstructorController::class);
+
+        // Major Management
+        Route::resource('majors', MajorController::class);
+
+        // Payment Management
+        Route::resource('payments', PaymentController::class);
+
+        // Program Management
+        Route::resource('programs', ProgramController::class);
+
+        // Role Management
+        Route::resource('roles', RoleController::class);
+        
+        Route::get('roles/{role}/edit-permissions', [
+            RoleController::class, 'editPermissions',
+        ])->name('roles.edit-permissions');
+        Route::put('roles/{role}/update-permissions', [
+            RoleController::class, 'updatePermissions',
+        ])->name('roles.update-permissions');
 
         // Semester Management
         Route::resource('semesters', SemesterController::class);
 
-        // Role Management
-        Route::resource('roles', RoleController::class)->except(['show']);
-        Route::get('roles/{role}/edit-permissions', [
-            RoleController::class, 'editPermissions'
-        ])->name('roles.edit-permissions');
-        Route::put('roles/{role}/update-permissions', [
-            RoleController::class, 'updatePermissions'
-        ])->name('roles.update-permissions');
+        // Transaction Ledger Management
+        Route::resource('transaction-ledgers', TransactionLedgerController::class);
 
         // Permission Management
         Route::resource('permissions', PermissionController::class)

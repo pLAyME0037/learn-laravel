@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
@@ -42,10 +43,16 @@ class UserController extends Controller
                         ->orWhere('username', 'like', "%{$search}%");
                 });
             })
-            ->when($selectedRole, function ($query, $selectedRole) {
-                return $query->whereHas('roles', function ($q) use ($selectedRole) {
-                    $q->where('name', $selectedRole);
-                });
+            ->when($selectedRole !== null && $selectedRole !== '', function ($query) use ($selectedRole) {
+                if ($selectedRole === 'no_roles') {
+                    // Filter for users with no roles
+                    return $query->doesntHave('roles');
+                } else {
+                    // Filter for users with a specific role
+                    return $query->whereHas('roles', function ($q) use ($selectedRole) {
+                        $q->where('name', $selectedRole);
+                    });
+                }
             })
             ->when($status === 'active', function ($query) {
                 return $query->where('is_active', true);
@@ -57,23 +64,23 @@ class UserController extends Controller
                 return $query->onlyTrashed();
             })
             ->with('roles') // Eager load Spatie roles
-            ->orderBy('name', 'asc') // Sort users alphabetically
-            ->paginate(15)
+            ->orderBy('name', 'asc')
+            ->paginate(10)
             ->withQueryString()
         ;
-        $roles = Role::orderBy('name', 'asc')->get(); // Sort roles alphabetically
-        return view('users.index', compact('users', 'roles', 'search', 'selectedRole', 'status'));
+        $roles = Role::orderBy('name', 'asc')->get();
+        return view('admin.users.index', compact('users', 'roles', 'search', 'selectedRole', 'status'));
     }
 
     public function editAccess(User $user)
     {
-        $allRoles = Role::orderBy('name', 'asc')->get(); // Sort roles alphabetically
+        $allRoles = Role::orderBy('name', 'asc')->get();
         $userRoles = $user->roles->pluck('id')->toArray();
 
-        $allPermissions = \Spatie\Permission\Models\Permission::orderBy('name', 'asc')->get()->groupBy('group_name'); // Sort permissions alphabetically
+        $allPermissions = Permission::orderBy('name', 'asc')->get()->groupBy('group_name'); // Sort permissions alphabetically
         $userPermissions = $user->permissions->pluck('name')->toArray();
 
-        return view('users.edit-access', compact('user', 'allRoles', 'userRoles', 'allPermissions', 'userPermissions'));
+        return view('admin.users.edit-access', compact('user', 'allRoles', 'userRoles', 'allPermissions', 'userPermissions'));
     }
 
     public function updateAccess(Request $request, User $user)
@@ -98,7 +105,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view('users.create', compact('roles'));
+        return view('admin.users.create', compact('roles'));
     }
 
     /**
@@ -136,7 +143,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load('roles'); // Use the correct 'roles' relationship for Spatie
-        return view('users.show', compact('user'));
+        return view('admin.users.show', compact('user'));
     }
 
     /**
@@ -146,7 +153,7 @@ class UserController extends Controller
     {
         $roles         = Role::all();
         $userRoleNames = $user->getRoleNames()->toArray(); // Get Spatie role names
-        return view('users.edit', compact('user', 'roles', 'userRoleNames'));
+        return view('admin.users.edit', compact('user', 'roles', 'userRoleNames'));
     }
 
     /**

@@ -42,12 +42,20 @@ class RoleController extends Controller
             'guard_name' => 'web', // Default guard for web
         ]);
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
+        return redirect()->route('admin.roles.index')
+            ->with('success', 'Role created successfully.');
+    }
+
+    public function show(Role $role) {
+        return view('admin.roles.show', compact('role'));
     }
 
     public function edit(Role $role)
     {
-        return view('admin.roles.edit', compact('role'));
+        $permissions = DB::table('permissions')->get()->groupBy('group_name');
+        $rolePermissions = $role->permissions->pluck('name')->toArray();
+
+        return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }
 
     public function update(Request $request, Role $role)
