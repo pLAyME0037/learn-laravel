@@ -34,6 +34,7 @@ use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Admin\UserManagement;
 
 Route::get('/', function () {
     return view('welcome');
@@ -93,6 +94,8 @@ Route::middleware(['auth', 'verified'])
         Route::post('users/{user}/force-delete', [
             UserController::class, 'forceDelete',
         ])->name('users.force-delete');
+
+        Route::get('user-management', UserManagement::class)->name('users.management');
 
         // Student Management Routes
         Route::resource('students', StudentController::class)

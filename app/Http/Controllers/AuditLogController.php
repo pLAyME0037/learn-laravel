@@ -1,16 +1,26 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class AuditLogController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.audit-logs')
+            ->only('index', 'show');
+        $this->middleware('permission:create.audit-logs')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.audit-logs')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.audit-logs')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */

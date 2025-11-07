@@ -1,14 +1,21 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Response; // Add this line
+// Add this line
 
 class BackupController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.backups')->only('index');
+        $this->middleware('permission:create.backups')->only('create');
+        $this->middleware('permission:download.backups')->only('download');
+        $this->middleware('permission:restore.backups')->only('restore');
+        $this->middleware('permission:delete.backups')->only('destroy');
+    }
     public function index()
     {
         $backups = collect(Storage::disk('local')->files('backups'))
@@ -17,15 +24,15 @@ class BackupController extends Controller
             })
             ->map(function ($file) {
                 return [
-                    'name' => basename($file),
-                    'size' => Storage::disk('local')->size($file),
+                    'name'          => basename($file),
+                    'size'          => Storage::disk('local')->size($file),
                     'last_modified' => Storage::disk('local')->lastModified($file),
                 ];
             })
             ->sortByDesc('last_modified')
             ->values();
 
-        return view('backups.index', compact('backups'));
+        return view('admin.backups.index', compact('backups'));
     }
 
     public function create()
@@ -59,7 +66,7 @@ class BackupController extends Controller
         $database = env('DB_DATABASE');
         $username = env('DB_USERNAME');
         $password = env('DB_PASSWORD');
-        $host = env('DB_HOST', '127.0.0.1');
+        $host     = env('DB_HOST', '127.0.0.1');
 
         $command = sprintf(
             'mysql -h%s -u%s -p%s %s < %s',

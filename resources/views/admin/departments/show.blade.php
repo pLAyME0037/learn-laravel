@@ -5,7 +5,7 @@
                 {{ __('Department Details') }}
             </h2>
             <div class="flex space-x-2">
-                @can('departments.edit')
+                @can('edit.departments')
                     <a href="{{ route('admin.departments.edit', $department) }}" 
                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                         {{ __('Edit Department') }}
@@ -192,7 +192,7 @@
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-3">Quick Actions</h3>
                                 <div class="space-y-2">
-                                    @can('students.view')
+                                    @can('view.students')
                                         <a href="{{ route('admin.students.index', ['department' => $department->id]) }}" 
                                            class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">View Students</span>
@@ -202,7 +202,7 @@
                                         </a>
                                     @endcan
                                     
-                                    @can('users.view')
+                                    @can('view.users')
                                         <a href="#" 
                                            class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">View Staff</span>
@@ -212,7 +212,7 @@
                                         </a>
                                     @endcan
                                     
-                                    @can('programs.manage')
+                                    @can('manage.programs')
                                         <a href="#" 
                                            class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
                                             <span class="text-sm font-medium text-gray-900 dark:text-white">View Programs</span>

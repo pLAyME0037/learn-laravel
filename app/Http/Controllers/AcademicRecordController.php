@@ -1,14 +1,28 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\AcademicRecord;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AcademicRecordController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.academic-records')
+            ->only('index', 'show');
+        $this->middleware('permission:create.academic-records')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.academic-records')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.academic-records')
+            ->only('destroy');
+        // $this->middleware('has_permission:delete.academic-records')
+        //     ->only('restore', 'forceDelete');
+        // $this->middleware('has_permission:edit.academic-records')
+        //     ->only('updateStatus');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -25,10 +39,10 @@ class AcademicRecordController extends Controller
      */
     public function create(): View
     {
-        $students = \App\Models\Student::with('user')->get();
-        $courses = \App\Models\Course::all();
+        $students      = \App\Models\Student::with('user')->get();
+        $courses       = \App\Models\Course::all();
         $academicYears = \App\Models\AcademicYear::all();
-        $semesters = \App\Models\Semester::all();
+        $semesters     = \App\Models\Semester::all();
         return view('admin.academic_records.create', compact('students', 'courses', 'academicYears', 'semesters'));
     }
 
@@ -38,13 +52,13 @@ class AcademicRecordController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'student_id'       => 'required|exists:students,id',
+            'course_id'        => 'required|exists:courses,id',
+            'semester_id'      => 'required|exists:semesters,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'grade' => 'nullable|string|max:5',
-            'gpa_score' => 'nullable|numeric',
-            'status' => 'required|string|max:255',
+            'grade'            => 'nullable|string|max:5',
+            'gpa_score'        => 'nullable|numeric',
+            'status'           => 'required|string|max:255',
         ]);
 
         AcademicRecord::create($validated);
@@ -65,10 +79,10 @@ class AcademicRecordController extends Controller
      */
     public function edit(AcademicRecord $academicRecord): View
     {
-        $students = \App\Models\Student::with('user')->get();
-        $courses = \App\Models\Course::all();
+        $students      = \App\Models\Student::with('user')->get();
+        $courses       = \App\Models\Course::all();
         $academicYears = \App\Models\AcademicYear::all();
-        $semesters = \App\Models\Semester::all();
+        $semesters     = \App\Models\Semester::all();
         return view('admin.academic_records.edit', compact('academicRecord', 'students', 'courses', 'academicYears', 'semesters'));
     }
 
@@ -78,13 +92,13 @@ class AcademicRecordController extends Controller
     public function update(Request $request, AcademicRecord $academicRecord): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'student_id'       => 'required|exists:students,id',
+            'course_id'        => 'required|exists:courses,id',
+            'semester_id'      => 'required|exists:semesters,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'grade' => 'nullable|string|max:5',
-            'gpa_score' => 'nullable|numeric',
-            'status' => 'required|string|max:255',
+            'grade'            => 'nullable|string|max:5',
+            'gpa_score'        => 'nullable|numeric',
+            'status'           => 'required|string|max:255',
         ]);
 
         $academicRecord->update($validated);

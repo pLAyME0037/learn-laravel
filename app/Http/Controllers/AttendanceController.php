@@ -1,18 +1,29 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\ClassSchedule;
 use App\Models\Student;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.attendances')
+            ->only('index', 'show');
+        $this->middleware('permission:create.attendances')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.attendances')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.attendances')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -27,7 +38,7 @@ class AttendanceController extends Controller
      */
     public function create(): View
     {
-        $students = Student::with('user')->get();
+        $students       = Student::with('user')->get();
         $classSchedules = ClassSchedule::all();
         return view('admin.attendances.create', compact('students', 'classSchedules'));
     }
@@ -38,11 +49,11 @@ class AttendanceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_id'        => 'required|exists:students,id',
             'class_schedule_id' => 'required|exists:class_schedules,id',
-            'date' => 'required|date',
-            'status' => 'required|string|max:255', // e.g., Present, Absent, Late
-            'notes' => 'nullable|string',
+            'date'              => 'required|date',
+            'status'            => 'required|string|max:255', // e.g., Present, Absent, Late
+            'notes'             => 'nullable|string',
         ]);
 
         Attendance::create($validated);
@@ -63,7 +74,7 @@ class AttendanceController extends Controller
      */
     public function edit(Attendance $attendance): View
     {
-        $students = \App\Models\Student::with('user')->get();
+        $students       = \App\Models\Student::with('user')->get();
         $classSchedules = \App\Models\ClassSchedule::all();
         return view('admin.attendances.edit', compact('attendance', 'students', 'classSchedules'));
     }
@@ -74,11 +85,11 @@ class AttendanceController extends Controller
     public function update(Request $request, Attendance $attendance): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
+            'student_id'        => 'required|exists:students,id',
             'class_schedule_id' => 'required|exists:class_schedules,id',
-            'date' => 'required|date',
-            'status' => 'required|string|max:255',
-            'notes' => 'nullable|string',
+            'date'              => 'required|date',
+            'status'            => 'required|string|max:255',
+            'notes'             => 'nullable|string',
         ]);
 
         $attendance->update($validated);

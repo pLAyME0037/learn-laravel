@@ -1,18 +1,29 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Semester;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CourseController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.contact-details')
+            ->only('index', 'show');
+        $this->middleware('permission:create.contact-details')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.contact-details')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.contact-details')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -28,7 +39,7 @@ class CourseController extends Controller
     public function create(): View
     {
         $departments = Department::all();
-        $semesters = Semester::all();
+        $semesters   = Semester::all();
         return view('admin.courses.create', compact('departments', 'semesters'));
     }
 
@@ -38,12 +49,12 @@ class CourseController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:courses,code',
-            'credits' => 'required|integer|min:1',
-            'description' => 'nullable|string',
+            'name'          => 'required|string|max:255',
+            'code'          => 'required|string|max:255|unique:courses,code',
+            'credits'       => 'required|integer|min:1',
+            'description'   => 'nullable|string',
             'department_id' => 'required|exists:departments,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'semester_id'   => 'required|exists:semesters,id',
         ]);
 
         Course::create($validated);
@@ -66,7 +77,7 @@ class CourseController extends Controller
     public function edit(Course $course): View
     {
         $departments = Department::all();
-        $semesters = Semester::all();
+        $semesters   = Semester::all();
         return view('admin.courses.edit', compact('course', 'departments', 'semesters'));
     }
 
@@ -76,12 +87,12 @@ class CourseController extends Controller
     public function update(Request $request, Course $course): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:courses,code,' . $course->id,
-            'credits' => 'required|integer|min:1',
-            'description' => 'nullable|string',
+            'name'          => 'required|string|max:255',
+            'code'          => 'required|string|max:255|unique:courses,code,' . $course->id,
+            'credits'       => 'required|integer|min:1',
+            'description'   => 'nullable|string',
             'department_id' => 'required|exists:departments,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'semester_id'   => 'required|exists:semesters,id',
         ]);
 
         $course->update($validated);

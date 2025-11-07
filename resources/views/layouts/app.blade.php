@@ -35,18 +35,18 @@
 
 <body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
     <div class="flex h-screen">
-        <!-- Sidebar -->
-        <x-sidebar :collapsed="session('sidebar_collapsed', false)" />
-
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Header -->
             <x-header :title="$pageTitle ?? 'Dashboard'" />
-
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-3">
-                {{ $slot }}
-            </main>
+            <div class="flex flex-1 overflow-hidden">
+                <div class="flex flex-shrink-0 overflow-y-auto">
+                    @include('layouts/sidebar');
+                </div>
+                <main class="flex-1 overflow-y-auto p-3">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </div>
 

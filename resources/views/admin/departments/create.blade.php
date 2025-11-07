@@ -216,9 +216,11 @@
                                     class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
                                     {{ __('Cancel') }}
                                 </a>
-                                <x-primary-button>
-                                    {{ __('Create Department') }}
-                                </x-primary-button>
+                                @can('create.departments')
+                                    <x-primary-button>
+                                        {{ __('Create Department') }}
+                                    </x-primary-button>
+                                @endcan
                             </div>
                         </div>
                     </form>

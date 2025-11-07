@@ -11,206 +11,204 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[PermissionRegistrar::class]
-            ->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create permissions
         $permissions = [
             // User Management
-            'users.view',
-            'users.create',
-            'users.edit',
-            'users.delete',
-            'users.impersonate',
-            'users.edit-access',
-            'users.update-access',
-            'users.status',
-            'users.restore',
-            'users.force-delete',
+            'view.users',
+            'create.users',
+            'edit.users',
+            'delete.users',
+            'impersonate.users',
+            'edit-access.users',
+            'update-access.users',
+            'status.users',
+            'restore.users',
+            'force-delete.users',
 
             // Role Management
-            'roles.view',
-            'roles.create',
-            'roles.edit',
-            'roles.delete',
-            'roles.assign',
-            'roles.edit-permissions',
-            'roles.update-permissions',
+            'view.roles',
+            'create.roles',
+            'edit.roles',
+            'delete.roles',
+            'assign.roles',
+            'edit-permissions.roles',
+            'update-permissions.roles',
 
             // Department Management
-            'departments.view',
-            'departments.create',
-            'departments.edit',
-            'departments.delete',
-            'departments.restore',
-            'departments.force-delete',
-            'departments.manage', // Keep for broader access if needed
+            'view.departments',
+            'create.departments',
+            'edit.departments',
+            'delete.departments',
+            'restore.departments',
+            'force-delete.departments',
+            'manage.departments',
 
             // Student Management
-            'students.view',
-            'students.create',
-            'students.edit',
-            'students.delete',
-            'students.restore',
-            'students.force-delete',
-            'students.status',
-            'students.manage_records',
+            'view.students',
+            'create.students',
+            'edit.students',
+            'delete.students',
+            'restore.students',
+            'force-delete.students',
+            'status.students',
+            'manage_records.students',
 
             // System Configuration
-            'system-configs.view',
-            'system-configs.create',
-            'system-configs.edit',
-            'system-configs.delete',
-            'system.config', // Keep for broader access if needed
+            'view.system-configs',
+            'create.system-configs',
+            'edit.system-configs',
+            'delete.system-configs',
+            'system.config',
 
             // Academic Year Management
-            'academic-years.view',
-            'academic-years.create',
-            'academic-years.edit',
-            'academic-years.delete',
-            'academic-years.manage', // Keep for broader access if needed
-            'syllabus.manage', // Re-added
-            'classes.manage', // Re-added
+            'view.academic-years',
+            'create.academic-years',
+            'edit.academic-years',
+            'delete.academic-years',
+            'manage.academic-years',
+            'manage.syllabus',
+            'manage.classes',
 
             // Academic Record Management
-            'academic-records.view',
-            'academic-records.create',
-            'academic-records.edit',
-            'academic-records.delete',
+            'view.academic-records',
+            'create.academic-records',
+            'edit.academic-records',
+            'delete.academic-records',
 
             // Attendance Management
-            'attendances.view',
-            'attendances.create',
-            'attendances.edit',
-            'attendances.delete',
+            'view.attendances',
+            'create.attendances',
+            'edit.attendances',
+            'delete.attendances',
 
             // Audit Log Management
-            'audit-logs.view',
-            'audit-logs.create',
-            'audit-logs.edit',
-            'audit-logs.delete',
-            'audit.view', // Keep for broader access if needed
+            'view.audit-logs',
+            'create.audit-logs',
+            'edit.audit-logs',
+            'delete.audit-logs',
 
             // Classroom Management
-            'classrooms.view',
-            'classrooms.create',
-            'classrooms.edit',
-            'classrooms.delete',
+            'view.classrooms',
+            'create.classrooms',
+            'edit.classrooms',
+            'delete.classrooms',
 
             // Class Schedule Management
-            'class-schedules.view',
-            'class-schedules.create',
-            'class-schedules.edit',
-            'class-schedules.delete',
+            'view.class-schedules',
+            'create.class-schedules',
+            'edit.class-schedules',
+            'delete.class-schedules',
 
             // Contact Detail Management
-            'contact-details.view',
-            'contact-details.create',
-            'contact-details.edit',
-            'contact-details.delete',
+            'view.contact-details',
+            'create.contact-details',
+            'edit.contact-details',
+            'delete.contact-details',
 
             // Course Management
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
-            'courses.manage', // Keep for broader access if needed
+            'view.courses',
+            'create.courses',
+            'edit.courses',
+            'delete.courses',
+            'manage.courses',
 
             // Course Prerequisite Management
-            'course-prerequisites.view',
-            'course-prerequisites.create',
-            'course-prerequisites.edit',
-            'course-prerequisites.delete',
+            'view.course-prerequisites',
+            'create.course-prerequisites',
+            'edit.course-prerequisites',
+            'delete.course-prerequisites',
 
             // Credit Score Management
-            'credit-scores.view',
-            'credit-scores.create',
-            'credit-scores.edit',
-            'credit-scores.delete',
+            'view.credit-scores',
+            'create.credit-scores',
+            'edit.credit-scores',
+            'delete.credit-scores',
 
             // Degree Management
-            'degrees.view',
-            'degrees.create',
-            'degrees.edit',
-            'degrees.delete',
+            'view.degrees',
+            'create.degrees',
+            'edit.degrees',
+            'delete.degrees',
 
             // Enrollment Management
-            'enrollments.view',
-            'enrollments.create',
-            'enrollments.edit',
-            'enrollments.delete',
+            'view.enrollments',
+            'create.enrollments',
+            'edit.enrollments',
+            'delete.enrollments',
 
             // Faculty Management
-            'faculties.view',
-            'faculties.create',
-            'faculties.edit',
-            'faculties.delete',
+            'view.faculties',
+            'create.faculties',
+            'edit.faculties',
+            'delete.faculties',
 
             // Gender Management
-            'genders.view',
-            'genders.create',
-            'genders.edit',
-            'genders.delete',
+            'view.genders',
+            'create.genders',
+            'edit.genders',
+            'delete.genders',
 
             // Instructor Management
-            'instructors.view',
-            'instructors.create',
-            'instructors.edit',
-            'instructors.delete',
+            'view.instructors',
+            'create.instructors',
+            'edit.instructors',
+            'delete.instructors',
 
             // Major Management
-            'majors.view',
-            'majors.create',
-            'majors.edit',
-            'majors.delete',
+            'view.majors',
+            'create.majors',
+            'edit.majors',
+            'delete.majors',
 
             // Financial Management
-            'fees.manage',
-            'payments.view',
-            'payments.create',
-            'payments.edit',
-            'payments.delete',
-            'payments.manage', // Keep for broader access if needed
-            'scholarships.manage',
+            'manage.fees',
+            'view.payments',
+            'create.payments',
+            'edit.payments',
+            'delete.payments',
+            'manage.payments',
+            'manage.scholarships',
 
             // Program Management
-            'programs.view',
-            'programs.create',
-            'programs.edit',
-            'programs.delete',
-            'programs.manage', // Keep for broader access if needed
+            'view.programs',
+            'create.programs',
+            'edit.programs',
+            'delete.programs',
+            'manage.programs',
 
             // Semester Management
-            'semesters.view',
-            'semesters.create',
-            'semesters.edit',
-            'semesters.delete',
+            'view.semesters',
+            'create.semesters',
+            'edit.semesters',
+            'delete.semesters',
 
             // Transaction Ledger Management
-            'transaction-ledgers.view',
-            'transaction-ledgers.create',
-            'transaction-ledgers.edit',
-            'transaction-ledgers.delete',
+            'view.transaction-ledgers',
+            'create.transaction-ledgers',
+            'edit.transaction-ledgers',
+            'delete.transaction-ledgers',
 
             // Permission Management
-            'permissions.view',
+            'view.permissions',
 
             // Notification
             'send-notification',
 
             // Backup & Recovery
-            'backups.view',
-            'backups.create',
-            'backups.download',
-            'backups.restore',
-            'backups.delete',
-            'backup.manage', // Keep for broader access if needed
+            'view.backups',
+            'create.backups',
+            'download.backups',
+            'restore.backups',
+            'delete.backups',
+            'manage.backup',
 
             // Login History
-            'login-histories.view',
+            'view.login-histories',
 
             // Reports
-            'reports.view',
+            'view.reports',
         ];
 
         foreach ($permissions as $permission) {
@@ -245,57 +243,57 @@ class RolePermissionSeeder extends Seeder
 
         ]);
         $registrar->givePermissionTo([
-            'students.view',
-            'students.create',
-            'students.edit',
-            'students.manage_records',
-            'programs.view',
-            'programs.create',
-            'programs.edit',
-            'programs.delete',
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
-            'syllabus.manage',
-            'classes.manage',
-            'reports.view',
-            'semesters.view',
-            'semesters.create',
-            'semesters.edit',
-            'semesters.delete',
-            'enrollments.view',
-            'enrollments.create',
-            'enrollments.edit',
-            'enrollments.delete',
-            'academic-years.view',
-            'academic-years.create',
-            'academic-years.edit',
-            'academic-years.delete',
-            'academic-records.view',
-            'academic-records.create',
-            'academic-records.edit',
-            'academic-records.delete',
-            'class-schedules.view',
-            'class-schedules.create',
-            'class-schedules.edit',
-            'class-schedules.delete',
-            'degrees.view',
-            'degrees.create',
-            'degrees.edit',
-            'degrees.delete',
-            'majors.view',
-            'majors.create',
-            'majors.edit',
-            'majors.delete',
-            'genders.view',
-            'genders.create',
-            'genders.edit',
-            'genders.delete',
-            'contact-details.view',
-            'contact-details.create',
-            'contact-details.edit',
-            'contact-details.delete',
+            'view.students',
+            'create.students',
+            'edit.students',
+            'manage_records.students',
+            'view.programs',
+            'create.programs',
+            'edit.programs',
+            'delete.programs',
+            'view.courses',
+            'create.courses',
+            'edit.courses',
+            'delete.courses',
+            'manage.syllabus',
+            'manage.classes',
+            'view.reports',
+            'view.semesters',
+            'create.semesters',
+            'edit.semesters',
+            'delete.semesters',
+            'view.enrollments',
+            'create.enrollments',
+            'edit.enrollments',
+            'delete.enrollments',
+            'view.academic-years',
+            'create.academic-years',
+            'edit.academic-years',
+            'delete.academic-years',
+            'view.academic-records',
+            'create.academic-records',
+            'edit.academic-records',
+            'delete.academic-records',
+            'view.class-schedules',
+            'create.class-schedules',
+            'edit.class-schedules',
+            'delete.class-schedules',
+            'view.degrees',
+            'create.degrees',
+            'edit.degrees',
+            'delete.degrees',
+            'view.majors',
+            'create.majors',
+            'edit.majors',
+            'delete.majors',
+            'view.genders',
+            'create.genders',
+            'edit.genders',
+            'delete.genders',
+            'view.contact-details',
+            'create.contact-details',
+            'edit.contact-details',
+            'delete.contact-details',
         ]);
 
         $hod = SpatieRole::create([
@@ -304,28 +302,28 @@ class RolePermissionSeeder extends Seeder
             'is_system_role' => true,
         ]);
         $hod->givePermissionTo([
-            'departments.view',
-            'departments.create',
-            'departments.edit',
-            'departments.delete',
-            'departments.manage', // Keep for broader access if needed
-            'students.view',
-            'students.manage_records',
-            'programs.view',
-            'programs.create',
-            'programs.edit',
-            'programs.delete',
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
-            'syllabus.manage',
-            'classes.manage',
-            'academic-years.view',
-            'academic-records.view',
-            'class-schedules.view',
-            'instructors.view',
-            'semesters.view',
+            'view.departments',
+            'create.departments',
+            'edit.departments',
+            'delete.departments',
+            'manage.departments',
+            'view.students',
+            'manage_records.students',
+            'view.programs',
+            'create.programs',
+            'edit.programs',
+            'delete.programs',
+            'view.courses',
+            'create.courses',
+            'edit.courses',
+            'delete.courses',
+            'manage.syllabus',
+            'manage.classes',
+            'view.academic-years',
+            'view.academic-records',
+            'view.class-schedules',
+            'view.instructors',
+            'view.semesters',
         ]);
 
         $professor = SpatieRole::create([
@@ -334,29 +332,29 @@ class RolePermissionSeeder extends Seeder
             'is_system_role' => true,
         ]);
         $professor->givePermissionTo([
-            'students.view',
-            'courses.view',
-            'courses.create',
-            'courses.edit',
-            'courses.delete',
-            'syllabus.manage',
-            'classes.manage',
-            'academic-records.view',
-            'academic-records.create',
-            'academic-records.edit',
-            'academic-records.delete',
-            'attendances.view',
-            'attendances.create',
-            'attendances.edit',
-            'attendances.delete',
-            'class-schedules.view',
-            'class-schedules.create',
-            'class-schedules.edit',
-            'class-schedules.delete',
-            'enrollments.view',
-            'enrollments.create',
-            'enrollments.edit',
-            'enrollments.delete',
+            'view.students',
+            'view.courses',
+            'create.courses',
+            'edit.courses',
+            'delete.courses',
+            'manage.syllabus',
+            'manage.classes',
+            'view.academic-records',
+            'create.academic-records',
+            'edit.academic-records',
+            'delete.academic-records',
+            'view.attendances',
+            'create.attendances',
+            'edit.attendances',
+            'delete.attendances',
+            'view.class-schedules',
+            'create.class-schedules',
+            'edit.class-schedules',
+            'delete.class-schedules',
+            'view.enrollments',
+            'create.enrollments',
+            'edit.enrollments',
+            'delete.enrollments',
             // Assuming a 'grades.manage' permission for professors, if applicable
             // 'grades.manage',
         ]);
@@ -367,31 +365,31 @@ class RolePermissionSeeder extends Seeder
             'is_system_role' => true,
         ]);
         $staff->givePermissionTo([
-            'students.view',
-            'payments.view',
-            'payments.create',
-            'payments.edit',
-            'payments.delete',
-            'academic-records.view',
-            'attendances.view',
-            'classrooms.view',
-            'class-schedules.view',
-            'contact-details.view',
-            'courses.view',
-            'degrees.view',
-            'enrollments.view',
-            'faculties.view',
-            'genders.view',
-            'instructors.view',
-            'majors.view',
-            'programs.view',
-            'semesters.view',
-            'transaction-ledgers.view',
-            'audit-logs.view',
-            'login-histories.view',
-            'reports.view',
-            'system-configs.view',
-            'academic-years.view',
+            'view.students',
+            'view.payments',
+            'create.payments',
+            'edit.payments',
+            'delete.payments',
+            'view.academic-records',
+            'view.attendances',
+            'view.classrooms',
+            'view.class-schedules',
+            'view.contact-details',
+            'view.courses',
+            'view.degrees',
+            'view.enrollments',
+            'view.faculties',
+            'view.genders',
+            'view.instructors',
+            'view.majors',
+            'view.programs',
+            'view.semesters',
+            'view.transaction-ledgers',
+            'view.audit-logs',
+            'view.login-histories',
+            'view.reports',
+            'view.system-configs',
+            'view.academic-years',
         ]);
 
         $student = SpatieRole::create([
@@ -400,14 +398,14 @@ class RolePermissionSeeder extends Seeder
             'is_system_role' => true,
         ]);
         $student->givePermissionTo([
-            'academic-records.view',
-            'attendances.view',
-            'courses.view',
-            'enrollments.view',
-            'payments.view',
-            'semesters.view',
-            'academic-years.view',
-            'class-schedules.view',
+            'view.academic-records',
+            'view.attendances',
+            'view.courses',
+            'view.enrollments',
+            'view.payments',
+            'view.semesters',
+            'view.academic-years',
+            'view.class-schedules',
             // Assuming a 'grades.view' permission for students, if applicable
             // 'grades.view',
         ]);
@@ -431,106 +429,106 @@ class RolePermissionSeeder extends Seeder
 
     private function getPermissionGroup($permission): string
     {
-        if (str_starts_with($permission, 'users.')) {
+        if (str_ends_with($permission, '.users')) {
             return 'User Management';
         }
-        if (str_starts_with($permission, 'roles.')) {
+        if (str_ends_with($permission, '.roles')) {
             return 'Role Management';
         }
-        if (str_starts_with($permission, 'departments.')) {
+        if (str_ends_with($permission, '.departments')) {
             return 'Department Management';
         }
-        if (str_starts_with($permission, 'students.')) {
+        if (str_ends_with($permission, '.students')) {
             return 'Student Management';
         }
-        if (str_starts_with($permission, 'system-configs.')) {
+        if (str_ends_with($permission, '.system-configs')) {
             return 'System Configuration';
         }
-        if (str_starts_with($permission, 'academic-years.')) {
+        if (str_ends_with($permission, '.academic-years')) {
             return 'Academic Year Management';
         }
-        if (str_starts_with($permission, 'academic-records.')) {
+        if (str_ends_with($permission, '.academic-records')) {
             return 'Academic Record Management';
         }
-        if (str_starts_with($permission, 'attendances.')) {
+        if (str_ends_with($permission, '.attendances')) {
             return 'Attendance Management';
         }
-        if (str_starts_with($permission, 'audit-logs.')) {
+        if (str_ends_with($permission, '.audit-logs')) {
             return 'Audit Log Management';
         }
-        if (str_starts_with($permission, 'classrooms.')) {
+        if (str_ends_with($permission, '.classrooms')) {
             return 'Classroom Management';
         }
-        if (str_starts_with($permission, 'class-schedules.')) {
+        if (str_ends_with($permission, '.class-schedules')) {
             return 'Class Schedule Management';
         }
-        if (str_starts_with($permission, 'contact-details.')) {
+        if (str_ends_with($permission, '.contact-details')) {
             return 'Contact Detail Management';
         }
-        if (str_starts_with($permission, 'courses.')) {
+        if (str_ends_with($permission, '.courses')) {
             return 'Course Management';
         }
-        if (str_starts_with($permission, 'course-prerequisites.')) {
+        if (str_ends_with($permission, '.course-prerequisites')) {
             return 'Course Prerequisite Management';
         }
-        if (str_starts_with($permission, 'credit-scores.')) {
+        if (str_ends_with($permission, '.credit-scores')) {
             return 'Credit Score Management';
         }
-        if (str_starts_with($permission, 'degrees.')) {
+        if (str_ends_with($permission, '.degrees')) {
             return 'Degree Management';
         }
-        if (str_starts_with($permission, 'enrollments.')) {
+        if (str_ends_with($permission, '.enrollments')) {
             return 'Enrollment Management';
         }
-        if (str_starts_with($permission, 'faculties.')) {
+        if (str_ends_with($permission, '.faculties')) {
             return 'Faculty Management';
         }
-        if (str_starts_with($permission, 'genders.')) {
+        if (str_ends_with($permission, '.genders')) {
             return 'Gender Management';
         }
-        if (str_starts_with($permission, 'instructors.')) {
+        if (str_ends_with($permission, '.instructors')) {
             return 'Instructor Management';
         }
-        if (str_starts_with($permission, 'majors.')) {
+        if (str_ends_with($permission, '.majors')) {
             return 'Major Management';
         }
-        if (str_starts_with($permission, 'payments.')) {
+        if (str_ends_with($permission, '.payments')) {
             return 'Payment Management';
         }
-        if (str_starts_with($permission, 'programs.')) {
+        if (str_ends_with($permission, '.programs')) {
             return 'Program Management';
         }
-        if (str_starts_with($permission, 'semesters.')) {
+        if (str_ends_with($permission, '.semesters')) {
             return 'Semester Management';
         }
-        if (str_starts_with($permission, 'transaction-ledgers.')) {
+        if (str_ends_with($permission, '.transaction-ledgers')) {
             return 'Transaction Ledger Management';
         }
-        if (str_starts_with($permission, 'permissions.')) {
+        if (str_ends_with($permission, '.permissions')) {
             return 'Permission Management';
         }
-        if (str_starts_with($permission, 'send-notification')) {
+        if (str_ends_with($permission, 'send-notification')) {
             return 'Notification';
         }
-        if (str_starts_with($permission, 'backups.')) {
+        if (str_ends_with($permission, '.backups')) {
             return 'Backup & Recovery';
         }
-        if (str_starts_with($permission, 'login-histories.')) {
+        if (str_ends_with($permission, '.login-histories')) {
             return 'Login History';
         }
-        if (str_starts_with($permission, 'reports.')) {
+        if (str_ends_with($permission, '.reports')) {
             return 'Reports';
         }
-        if (str_starts_with($permission, 'audit.')) {
+        if (str_ends_with($permission, '.audit')) {
             return 'Audit Management';
         }
-        if (str_starts_with($permission, 'system.')) {
+        if (str_ends_with($permission, '.system')) {
             return 'System Management';
         }
-        if (str_starts_with($permission, 'fees.') || str_starts_with($permission, 'scholarships.')) {
+        if (str_ends_with($permission, '.fees') || str_ends_with($permission, '.scholarships')) {
             return 'Financial Management';
         }
-        if (str_starts_with($permission, 'syllabus.') || str_starts_with($permission, 'classes.')) {
+        if (str_ends_with($permission, '.syllabus') || str_ends_with($permission, '.classes')) {
             return 'Academic Management';
         }
 
@@ -541,178 +539,177 @@ class RolePermissionSeeder extends Seeder
     {
         $descriptions = [
             // User Management
-            'users.view' => 'View user accounts',
-            'users.create' => 'Create new user accounts',
-            'users.edit' => 'Edit existing user accounts',
-            'users.delete' => 'Delete user accounts',
-            'users.impersonate' => 'Impersonate other users',
-            'users.edit-access' => 'Edit user access permissions',
-            'users.update-access' => 'Update user access permissions',
-            'users.status' => 'Update user account status',
-            'users.restore' => 'Restore soft-deleted user accounts',
-            'users.force-delete' => 'Permanently delete user accounts',
+            'view.users' => 'View user accounts',
+            'create.users' => 'Create new user accounts',
+            'edit.users' => 'Edit existing user accounts',
+            'delete.users' => 'Delete user accounts',
+            'impersonate.users' => 'Impersonate other users',
+            'edit-access.users' => 'Edit user access permissions',
+            'update-access.users' => 'Update user access permissions',
+            'status.users' => 'Update user account status',
+            'restore.users' => 'Restore soft-deleted user accounts',
+            'force-delete.users' => 'Permanently delete user accounts',
 
             // Role Management
-            'roles.view' => 'View roles',
-            'roles.create' => 'Create new roles',
-            'roles.edit' => 'Edit existing roles',
-            'roles.delete' => 'Delete roles',
-            'roles.assign' => 'Assign roles to users',
-            'roles.edit-permissions' => 'Edit permissions assigned to roles',
-            'roles.update-permissions' => 'Update permissions assigned to roles',
+            'view.roles' => 'View roles',
+            'create.roles' => 'Create new roles',
+            'edit.roles' => 'Edit existing roles',
+            'delete.roles' => 'Delete roles',
+            'assign.roles' => 'Assign roles to users',
+            'edit-permissions.roles' => 'Edit permissions assigned to roles',
+            'update-permissions.roles' => 'Update permissions assigned to roles',
 
             // Department Management
-            'departments.view' => 'View departments',
-            'departments.create' => 'Create new departments',
-            'departments.edit' => 'Edit departments',
-            'departments.delete' => 'Delete departments',
-            'departments.restore' => 'Restore soft-deleted departments',
-            'departments.force-delete' => 'Permanently delete departments',
-            'departments.manage' => 'Manage department settings and data',
+            'view.departments' => 'View departments',
+            'create.departments' => 'Create new departments',
+            'edit.departments' => 'Edit departments',
+            'delete.departments' => 'Delete departments',
+            'restore.departments' => 'Restore soft-deleted departments',
+            'force-delete.departments' => 'Permanently delete departments',
+            'manage.departments' => 'Manage department settings and data',
 
             // Student Management
-            'students.view' => 'View student records',
-            'students.create' => 'Create new student records',
-            'students.edit' => 'Edit student records',
-            'students.delete' => 'Delete student records',
-            'students.restore' => 'Restore soft-deleted student records',
-            'students.force-delete' => 'Permanently delete student records',
-            'students.status' => 'Update student account status',
-            'students.manage_records' => 'Manage student academic records',
+            'view.students' => 'View student records',
+            'create.students' => 'Create new student records',
+            'edit.students' => 'Edit student records',
+            'delete.students' => 'Delete student records',
+            'restore.students' => 'Restore soft-deleted student records',
+            'force-delete.students' => 'Permanently delete student records',
+            'status.students' => 'Update student account status',
+            'manage_records.students' => 'Manage student academic records',
 
             // System Configuration
-            'system-configs.view' => 'View system configurations',
-            'system-configs.create' => 'Create new system configurations',
-            'system-configs.edit' => 'Edit existing system configurations',
-            'system-configs.delete' => 'Delete system configurations',
+            'view.system-configs' => 'View system configurations',
+            'create.system-configs' => 'Create new system configurations',
+            'edit.system-configs' => 'Edit existing system configurations',
+            'delete.system-configs' => 'Delete system configurations',
             'system.config' => 'Access and modify system configurations (broad)',
 
             // Academic Year Management
-            'academic-years.view' => 'View academic years',
-            'academic-years.create' => 'Create new academic years',
-            'academic-years.edit' => 'Edit existing academic years',
-            'academic-years.delete' => 'Delete academic years',
-            'academic-years.manage' => 'Manage academic year settings and data',
+            'view.academic-years' => 'View academic years',
+            'create.academic-years' => 'Create new academic years',
+            'edit.academic-years' => 'Edit existing academic years',
+            'delete.academic-years' => 'Delete academic years',
+            'manage.academic-years' => 'Manage academic year settings and data',
 
             // Academic Record Management
-            'academic-records.view' => 'View academic records',
-            'academic-records.create' => 'Create new academic records',
-            'academic-records.edit' => 'Edit existing academic records',
-            'academic-records.delete' => 'Delete academic records',
+            'view.academic-records' => 'View academic records',
+            'create.academic-records' => 'Create new academic records',
+            'edit.academic-records' => 'Edit existing academic records',
+            'delete.academic-records' => 'Delete academic records',
 
             // Attendance Management
-            'attendances.view' => 'View attendance records',
-            'attendances.create' => 'Create new attendance records',
-            'attendances.edit' => 'Edit existing attendance records',
-            'attendances.delete' => 'Delete attendance records',
+            'view.attendances' => 'View attendance records',
+            'create.attendances' => 'Create new attendance records',
+            'edit.attendances' => 'Edit existing attendance records',
+            'delete.attendances' => 'Delete attendance records',
 
             // Audit Log Management
-            'audit-logs.view' => 'View audit logs',
-            'audit-logs.create' => 'Create new audit logs', // Though typically auto-generated
-            'audit-logs.edit' => 'Edit audit logs', // Though typically not editable
-            'audit-logs.delete' => 'Delete audit logs',
-            'audit.view' => 'View audit logs (broad)',
+            'view.audit-logs' => 'View audit logs',
+            'create.audit-logs' => 'Create new audit logs', // Though typically auto-generated
+            'edit.audit-logs' => 'Edit audit logs', // Though typically not editable
+            'delete.audit-logs' => 'Delete audit logs',
 
             // Classroom Management
-            'classrooms.view' => 'View classrooms',
-            'classrooms.create' => 'Create new classrooms',
-            'classrooms.edit' => 'Edit existing classrooms',
-            'classrooms.delete' => 'Delete classrooms',
+            'view.classrooms' => 'View classrooms',
+            'create.classrooms' => 'Create new classrooms',
+            'edit.classrooms' => 'Edit existing classrooms',
+            'delete.classrooms' => 'Delete classrooms',
 
             // Class Schedule Management
-            'class-schedules.view' => 'View class schedules',
-            'class-schedules.create' => 'Create new class schedules',
-            'class-schedules.edit' => 'Edit existing class schedules',
-            'class-schedules.delete' => 'Delete class schedules',
+            'view.class-schedules' => 'View class schedules',
+            'create.class-schedules' => 'Create new class schedules',
+            'edit.class-schedules' => 'Edit existing class schedules',
+            'delete.class-schedules' => 'Delete class schedules',
 
             // Contact Detail Management
-            'contact-details.view' => 'View contact details',
-            'contact-details.create' => 'Create new contact details',
-            'contact-details.edit' => 'Edit existing contact details',
-            'contact-details.delete' => 'Delete contact details',
+            'view.contact-details' => 'View contact details',
+            'create.contact-details' => 'Create new contact details',
+            'edit.contact-details' => 'Edit existing contact details',
+            'delete.contact-details' => 'Delete contact details',
 
             // Course Management
-            'courses.view' => 'View courses',
-            'courses.create' => 'Create new courses',
-            'courses.edit' => 'Edit existing courses',
-            'courses.delete' => 'Delete courses',
-            'courses.manage' => 'Manage courses (broad)',
+            'view.courses' => 'View courses',
+            'create.courses' => 'Create new courses',
+            'edit.courses' => 'Edit existing courses',
+            'delete.courses' => 'Delete courses',
+            'manage.courses' => 'Manage courses (broad)',
 
             // Course Prerequisite Management
-            'course-prerequisites.view' => 'View course prerequisites',
-            'course-prerequisites.create' => 'Create new course prerequisites',
-            'course-prerequisites.edit' => 'Edit existing course prerequisites',
-            'course-prerequisites.delete' => 'Delete course prerequisites',
+            'view.course-prerequisites' => 'View course prerequisites',
+            'create.course-prerequisites' => 'Create new course prerequisites',
+            'edit.course-prerequisites' => 'Edit existing course prerequisites',
+            'delete.course-prerequisites' => 'Delete course prerequisites',
 
             // Credit Score Management
-            'credit-scores.view' => 'View credit scores',
-            'credit-scores.create' => 'Create new credit scores',
-            'credit-scores.edit' => 'Edit existing credit scores',
-            'credit-scores.delete' => 'Delete credit scores',
+            'view.credit-scores' => 'View credit scores',
+            'create.credit-scores' => 'Create new credit scores',
+            'edit.credit-scores' => 'Edit existing credit scores',
+            'delete.credit-scores' => 'Delete credit scores',
 
             // Degree Management
-            'degrees.view' => 'View degrees',
-            'degrees.create' => 'Create new degrees',
-            'degrees.edit' => 'Edit existing degrees',
-            'degrees.delete' => 'Delete degrees',
+            'view.degrees' => 'View degrees',
+            'create.degrees' => 'Create new degrees',
+            'edit.degrees' => 'Edit existing degrees',
+            'delete.degrees' => 'Delete degrees',
 
             // Enrollment Management
-            'enrollments.view' => 'View enrollments',
-            'enrollments.create' => 'Create new enrollments',
-            'enrollments.edit' => 'Edit existing enrollments',
-            'enrollments.delete' => 'Delete enrollments',
+            'view.enrollments' => 'View enrollments',
+            'create.enrollments' => 'Create new enrollments',
+            'edit.enrollments' => 'Edit existing enrollments',
+            'delete.enrollments' => 'Delete enrollments',
 
             // Faculty Management
-            'faculties.view' => 'View faculties',
-            'faculties.create' => 'Create new faculties',
-            'faculties.edit' => 'Edit existing faculties',
-            'faculties.delete' => 'Delete faculties',
+            'view.faculties' => 'View faculties',
+            'create.faculties' => 'Create new faculties',
+            'edit.faculties' => 'Edit existing faculties',
+            'delete.faculties' => 'Delete faculties',
 
             // Gender Management
-            'genders.view' => 'View genders',
-            'genders.create' => 'Create new genders',
-            'genders.edit' => 'Edit existing genders',
-            'genders.delete' => 'Delete genders',
+            'view.genders' => 'View genders',
+            'create.genders' => 'Create new genders',
+            'edit.genders' => 'Edit existing genders',
+            'delete.genders' => 'Delete genders',
 
             // Instructor Management
-            'instructors.view' => 'View instructors',
-            'instructors.create' => 'Create new instructors',
-            'instructors.edit' => 'Edit existing instructors',
-            'instructors.delete' => 'Delete instructors',
+            'view.instructors' => 'View instructors',
+            'create.instructors' => 'Create new instructors',
+            'edit.instructors' => 'Edit existing instructors',
+            'delete.instructors' => 'Delete instructors',
 
             // Major Management
-            'majors.view' => 'View majors',
-            'majors.create' => 'Create new majors',
-            'majors.edit' => 'Edit existing majors',
-            'majors.delete' => 'Delete majors',
+            'view.majors' => 'View majors',
+            'create.majors' => 'Create new majors',
+            'edit.majors' => 'Edit existing majors',
+            'delete.majors' => 'Delete majors',
 
             // Financial Management
-            'fees.manage' => 'Manage student fees',
-            'payments.view' => 'View payment records',
-            'payments.create' => 'Create new payment records',
-            'payments.edit' => 'Edit existing payment records',
-            'payments.delete' => 'Delete payment records',
-            'payments.manage' => 'Manage student payments (broad)',
-            'scholarships.manage' => 'Manage scholarships',
+            'manage.fees' => 'Manage student fees',
+            'view.payments' => 'View payment records',
+            'create.payments' => 'Create new payment records',
+            'edit.payments' => 'Edit existing payment records',
+            'delete.payments' => 'Delete payment records',
+            'manage.payments' => 'Manage student payments (broad)',
+            'manage.scholarships' => 'Manage scholarships',
 
             // Program Management
-            'programs.view' => 'View academic programs',
-            'programs.create' => 'Create new academic programs',
-            'programs.edit' => 'Edit existing academic programs',
-            'programs.delete' => 'Delete academic programs',
-            'programs.manage' => 'Manage academic programs (broad)',
+            'view.programs' => 'View academic programs',
+            'create.programs' => 'Create new academic programs',
+            'edit.programs' => 'Edit existing academic programs',
+            'delete.programs' => 'Delete academic programs',
+            'manage.programs' => 'Manage academic programs (broad)',
 
             // Semester Management
-            'semesters.view' => 'View semesters',
-            'semesters.create' => 'Create new semesters',
-            'semesters.edit' => 'Edit existing semesters',
-            'semesters.delete' => 'Delete semesters',
+            'view.semesters' => 'View semesters',
+            'create.semesters' => 'Create new semesters',
+            'edit.semesters' => 'Edit existing semesters',
+            'delete.semesters' => 'Delete semesters',
 
             // Transaction Ledger Management
-            'transaction-ledgers.view' => 'View transaction ledger entries',
-            'transaction-ledgers.create' => 'Create new transaction ledger entries',
-            'transaction-ledgers.edit' => 'Edit existing transaction ledger entries',
-            'transaction-ledgers.delete' => 'Delete transaction ledger entries',
+            'view.transaction-ledgers' => 'View transaction ledger entries',
+            'create.transaction-ledgers' => 'Create new transaction ledger entries',
+            'edit.transaction-ledgers' => 'Edit existing transaction ledger entries',
+            'delete.transaction-ledgers' => 'Delete transaction ledger entries',
 
             // Permission Management
             'permissions.view' => 'View permissions',
@@ -721,18 +718,18 @@ class RolePermissionSeeder extends Seeder
             'send-notification' => 'Send general notifications',
 
             // Backup & Recovery
-            'backups.view' => 'View backup records',
-            'backups.create' => 'Create new system backups',
-            'backups.download' => 'Download system backups',
-            'backups.restore' => 'Restore system from backup',
-            'backups.delete' => 'Delete system backups',
-            'backup.manage' => 'Manage system backups (broad)',
+            'view.backups' => 'View backup records',
+            'create.backups' => 'Create new system backups',
+            'download.backups' => 'Download system backups',
+            'restore.backups' => 'Restore system from backup',
+            'delete.backups' => 'Delete system backups',
+            'manage.backup' => 'Manage system backups (broad)',
 
             // Login History
-            'login-histories.view' => 'View login history records',
+            'view.login-histories' => 'View login history records',
 
             // Reports
-            'reports.view' => 'View system reports',
+            'view.reports' => 'View system reports',
         ];
 
         return $descriptions[$permission] ?? 'No description available';

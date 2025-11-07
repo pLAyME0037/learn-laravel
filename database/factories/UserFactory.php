@@ -24,13 +24,9 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->name();
-        $user = new User();
-        $icon = $user->getProfilePictureUrlAttribute();
         return [
-            'profile_pic'       => $icon,
             'username'          => Str::slug(fake()->unique()->userName()),
-            'name'              => $name,
+            'name'              => fake()->name(),
             'email'             => fake()->unique()->safeEmail(),
             'bio'               => fake()->optional(0.7)->sentence(10), // 70% chance of having a bio
             'is_active'         => true,

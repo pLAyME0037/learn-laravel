@@ -1,16 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Classroom;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ClassroomController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.classrooms')
+            ->only('index', 'show');
+        $this->middleware('permission:create.classrooms')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.classrooms')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.classrooms')
+            ->only('destroy');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -34,9 +46,9 @@ class ClassroomController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:classrooms,name',
+            'name'     => 'required|string|max:255|unique:classrooms,name',
             'capacity' => 'required|integer|min:1',
-            'type' => 'nullable|string|max:255', // e.g., Lecture Hall, Lab, Seminar Room
+            'type'     => 'nullable|string|max:255', // e.g., Lecture Hall, Lab, Seminar Room
             'location' => 'nullable|string|max:255',
         ]);
 
@@ -67,9 +79,9 @@ class ClassroomController extends Controller
     public function update(Request $request, Classroom $classroom): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
+            'name'     => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
             'capacity' => 'required|integer|min:1',
-            'type' => 'nullable|string|max:255',
+            'type'     => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
         ]);
 

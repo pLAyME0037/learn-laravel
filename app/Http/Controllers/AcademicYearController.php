@@ -12,6 +12,21 @@ use Illuminate\View\View;
 
 class AcademicYearController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.academic-years')
+            ->only('index', 'show');
+        $this->middleware('permission:create.academic-years')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.academic-years')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.academic-years')
+            ->only('destroy');
+        // $this->middleware('has_permission:delete.academic-records')
+        //     ->only('restore', 'forceDelete');
+        // $this->middleware('has_permission:edit.academic-records')
+        //     ->only('updateStatus');
+    }
     /**
      * Display a listing of the resource.
      */

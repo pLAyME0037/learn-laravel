@@ -1,10 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Department Management') }}
-            </h2>
-            @can('departments.create')
+            @can('manage.departments')
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                    {{ __('Department Management') }}
+                </h2>
+            @endcan
+            @can('create.departments')
                 <a href="{{ route('admin.departments.create') }}"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                     {{ __('Add Department') }}
@@ -163,20 +165,20 @@
                                 <!-- Actions -->
                                 <div class="flex justify-between items-center pt-4 border-t dark:border-gray-700">
                                     <div class="flex space-x-2">
-                                        @can('departments.view')
+                                        @can('view.departments')
                                             <a href="{{ route('admin.departments.show', $department) }}"
                                                 class="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400 text-sm">
                                                 View
                                             </a>
                                         @endcan
-                                        @can('departments.edit')
+                                        @can('edit.departments')
                                             <a href="{{ route('admin.departments.edit', $department) }}"
                                                 class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 text-sm">
                                                 Edit
                                             </a>
                                         @endcan
                                     </div>
-                                    @can('departments.delete')
+                                    @can('delete.departments')
                                         @if ($department->trashed())
                                             <form action="{{ route('admin.departments.restore', $department->id) }}"
                                                 method="POST"
@@ -229,7 +231,7 @@
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             {{ $search || $status ? 'Try adjusting your search filters.' : 'Get started by creating your first department.' }}
                         </p>
-                        @can('departments.create')
+                        @can('create.departments')
                             <div class="mt-6">
                                 <a href="{{ route('admin.departments.create') }}"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">

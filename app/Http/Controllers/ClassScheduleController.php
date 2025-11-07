@@ -1,20 +1,31 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Classroom;
 use App\Models\ClassSchedule;
 use App\Models\Course;
 use App\Models\Instructor;
-use App\Models\Classroom;
 use App\Models\Semester;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ClassScheduleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.class-schedules')
+            ->only('index', 'show');
+        $this->middleware('permission:create.class-schedules')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.class-schedules')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.class-schedules')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -29,10 +40,10 @@ class ClassScheduleController extends Controller
      */
     public function create(): View
     {
-        $courses = Course::all();
+        $courses     = Course::all();
         $instructors = Instructor::all();
-        $classrooms = Classroom::all();
-        $semesters = Semester::all();
+        $classrooms  = Classroom::all();
+        $semesters   = Semester::all();
         return view('admin.class_schedules.create', compact('courses', 'instructors', 'classrooms', 'semesters'));
     }
 
@@ -42,13 +53,13 @@ class ClassScheduleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'course_id' => 'required|exists:courses,id',
+            'course_id'     => 'required|exists:courses,id',
             'instructor_id' => 'required|exists:instructors,id',
-            'classroom_id' => 'required|exists:classrooms,id',
-            'semester_id' => 'required|exists:semesters,id',
-            'day_of_week' => 'required|string|max:255',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'classroom_id'  => 'required|exists:classrooms,id',
+            'semester_id'   => 'required|exists:semesters,id',
+            'day_of_week'   => 'required|string|max:255',
+            'start_time'    => 'required|date_format:H:i',
+            'end_time'      => 'required|date_format:H:i|after:start_time',
         ]);
 
         ClassSchedule::create($validated);
@@ -70,10 +81,10 @@ class ClassScheduleController extends Controller
      */
     public function edit(ClassSchedule $classSchedule): View
     {
-        $courses = Course::all();
+        $courses     = Course::all();
         $instructors = Instructor::all();
-        $classrooms = Classroom::all();
-        $semesters = Semester::all();
+        $classrooms  = Classroom::all();
+        $semesters   = Semester::all();
         return view('admin.class_schedules.edit', compact('classSchedule', 'courses', 'instructors', 'classrooms', 'semesters'));
     }
 
@@ -83,13 +94,13 @@ class ClassScheduleController extends Controller
     public function update(Request $request, ClassSchedule $classSchedule): RedirectResponse
     {
         $validated = $request->validate([
-            'course_id' => 'required|exists:courses,id',
+            'course_id'     => 'required|exists:courses,id',
             'instructor_id' => 'required|exists:instructors,id',
-            'classroom_id' => 'required|exists:classrooms,id',
-            'semester_id' => 'required|exists:semesters,id',
-            'day_of_week' => 'required|string|max:255',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'classroom_id'  => 'required|exists:classrooms,id',
+            'semester_id'   => 'required|exists:semesters,id',
+            'day_of_week'   => 'required|string|max:255',
+            'start_time'    => 'required|date_format:H:i',
+            'end_time'      => 'required|date_format:H:i|after:start_time',
         ]);
 
         $classSchedule->update($validated);

@@ -11,6 +11,17 @@ use Illuminate\View\View;
 
 class ContactDetailController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.contact-details')
+            ->only('index', 'show');
+        $this->middleware('permission:create.contact-details')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.contact-details')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.contact-details')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
