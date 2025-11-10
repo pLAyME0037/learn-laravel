@@ -1,17 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Degree;
 use App\Models\Faculty;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DegreeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.degrees')
+            ->only('index', 'show');
+        $this->middleware('permission:create.degrees')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.degrees')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.degrees')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -36,9 +47,9 @@ class DegreeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:degrees,name',
-            'level' => 'required|string|max:255', // e.g., Bachelor, Master, PhD
-            'faculty_id' => 'required|exists:faculties,id',
+            'name'        => 'required|string|max:255|unique:degrees,name',
+            'level'       => 'required|string|max:255', // e.g., Bachelor, Master, PhD
+            'faculty_id'  => 'required|exists:faculties,id',
             'description' => 'nullable|string',
         ]);
 
@@ -71,9 +82,9 @@ class DegreeController extends Controller
     public function update(Request $request, Degree $degree): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:degrees,name,' . $degree->id,
-            'level' => 'required|string|max:255',
-            'faculty_id' => 'required|exists:faculties,id',
+            'name'        => 'required|string|max:255|unique:degrees,name,' . $degree->id,
+            'level'       => 'required|string|max:255',
+            'faculty_id'  => 'required|exists:faculties,id',
             'description' => 'nullable|string',
         ]);
 

@@ -33,6 +33,7 @@
 
                         $data = $semesters->map(function ($semester) {
                             return [
+                                'id' => $semester->id,
                                 'name' => $semester->name,
                                 'academic_year_name' => $semester->academicYear->name,
                                 'start_date' => $semester->start_date->format('Y-m-d'),

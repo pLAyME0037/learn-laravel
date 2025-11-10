@@ -13,6 +13,18 @@ use Illuminate\View\View;
 
 class MajorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.majors')
+            ->only('index', 'show');
+        $this->middleware('permission:create.majors')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.majors')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.majors')
+            ->only('destroy');
+    }
+
     /**
      * Display a listing of the resource.
      */

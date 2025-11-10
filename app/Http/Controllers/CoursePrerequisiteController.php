@@ -12,12 +12,24 @@ use Illuminate\View\View;
 
 class CoursePrerequisiteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.course-prerequisites')
+            ->only('index', 'show');
+        $this->middleware('permission:create.course-prerequisites')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.course-prerequisites')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.course-prerequisites')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $coursePrerequisites = CoursePrerequisite::with(['course', 'prerequisite'])->paginate(10);
+        $coursePrerequisites = CoursePrerequisite::with(['course', 'prerequisite'])
+            ->paginate(10);
         return view('admin.course_prerequisites.index', compact('coursePrerequisites'));
     }
 

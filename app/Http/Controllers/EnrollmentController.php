@@ -1,25 +1,37 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
+use App\Models\ClassSchedule;
+use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Student;
-use App\Models\Course;
-use App\Models\ClassSchedule;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EnrollmentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.enrollments')
+            ->only('index', 'show');
+        $this->middleware('permission:create.enrollments')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.enrollments')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.enrollments')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $enrollments = Enrollment::with(['student', 'course', 'classSchedule'])->paginate(10);
+        $enrollments = Enrollment::with(['student.user', 'course', 'classSchedule'])
+            ->paginate(10);
         return view('admin.enrollments.index', compact('enrollments'));
     }
 
@@ -28,8 +40,8 @@ class EnrollmentController extends Controller
      */
     public function create(): View
     {
-        $students = Student::all();
-        $courses = Course::all();
+        $students       = Student::all();
+        $courses        = Course::all();
         $classSchedules = ClassSchedule::all();
         return view('admin.enrollments.create', compact('students', 'courses', 'classSchedules'));
     }
@@ -40,10 +52,10 @@ class EnrollmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'enrollment_date' => 'required|date',
-            'status' => 'required|string|max:255', // e.g., Enrolled, Completed, Dropped
+            'student_id'        => 'required|exists:students,id',
+            'course_id'         => 'required|exists:courses,id',
+            'enrollment_date'   => 'required|date',
+            'status'            => 'required|string|max:255', // e.g., Enrolled, Completed, Dropped
             'class_schedule_id' => 'nullable|exists:class_schedules,id',
         ]);
 
@@ -66,8 +78,8 @@ class EnrollmentController extends Controller
      */
     public function edit(Enrollment $enrollment): View
     {
-        $students = Student::all();
-        $courses = Course::all();
+        $students       = Student::all();
+        $courses        = Course::all();
         $classSchedules = ClassSchedule::all();
         return view('admin.enrollments.edit', compact('enrollment', 'students', 'courses', 'classSchedules'));
     }
@@ -78,10 +90,10 @@ class EnrollmentController extends Controller
     public function update(Request $request, Enrollment $enrollment): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'enrollment_date' => 'required|date',
-            'status' => 'required|string|max:255',
+            'student_id'        => 'required|exists:students,id',
+            'course_id'         => 'required|exists:courses,id',
+            'enrollment_date'   => 'required|date',
+            'status'            => 'required|string|max:255',
             'class_schedule_id' => 'nullable|exists:class_schedules,id',
         ]);
 

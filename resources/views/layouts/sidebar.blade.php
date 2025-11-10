@@ -2,7 +2,7 @@
 
 <div x-data="{ collapsed: {{ $collapsed ? 'true' : 'false' }} }"
     id="sidebar"
-    class="bg-white dark:bg-gray-800 shadow-lg transition-all duration-300"
+    class="bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 overflow-y-auto overflow-x-hidden"
     :class="collapsed ? 'w-14' : 'w-64'">
     <!-- Logo and Hamburger -->
     <div class="border-b dark:border-gray-700 flex items-center"
@@ -27,13 +27,15 @@
             </svg>
         </button>
     </div>
-
+    {{-- @php
+        dd(Auth::user()->profile_picture_url);
+    @endphp --}}
     {{-- Profile Icon --}}
     <div class="flex items-center space-x-3 px-6 py-3 text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 border-r-4 border-blue-500"
         x-show="!collapsed">
         <x-profile-image src="{{ Auth::user()->profile_picture_url }}"
             alt="{{ Auth::user()->username }}"
-            size="lg" />
+            size="md" />
         <div class="text-left">
             <div class="font-semibold text-gray-900 dark:text-white">
                 {{ Auth::user()->name }}
@@ -46,7 +48,7 @@
                 ) }}
             </div>
             <div class="font-mono text-xs text-gray-900 dark:text-white">
-                {{ Auth::user()->email }}
+                {{ \Illuminate\Support\Str::limit(Auth::user()->email, 20, '...') }}
             </div>
         </div>
     </div>
@@ -455,6 +457,14 @@
                         'can' => 'users.access',
                     ],
                 ],
+            ],
+            // Transaction Ledger
+            [
+                'type' => 'link',
+                'label' => 'Transaction Ledger',
+                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                'route' => 'admin.transaction_ledgers.index',
+                'can' => ['view.transaction_ledgers'],
             ],
             // V
             // W

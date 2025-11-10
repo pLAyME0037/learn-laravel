@@ -72,7 +72,7 @@ class Course extends Model
     /**
      * The courses that this course is a prerequisite for.
      */
-    public function prerequisiteFor(): BelongsToMany
+    public function prerequisiteForCourses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_prerequisites', 'prerequisite_id', 'course_id');
     }
@@ -104,6 +104,14 @@ class Course extends Model
     public function classSchedules(): HasMany
     {
         return $this->hasMany(ClassSchedule::class);
+    }
+
+    /**
+     * Get the semester that the Course belongs to.
+     */
+    public function semester(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class);
     }
 
     /**

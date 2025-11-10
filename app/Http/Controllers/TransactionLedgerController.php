@@ -12,6 +12,17 @@ use Illuminate\View\View;
 
 class TransactionLedgerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.transaction-ledgers')
+            ->only('index', 'show');
+        $this->middleware('permission:create.transaction-ledgers')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.transaction-ledgers')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.transaction-ledgers')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -46,7 +57,8 @@ class TransactionLedgerController extends Controller
 
         TransactionLedger::create($validated);
 
-        return redirect()->route('transaction-ledgers.index')->with('success', 'Transaction ledger entry created successfully.');
+        return redirect()->route('admin.transaction-ledgers.index')
+            ->with('success', 'Transaction ledger entry created successfully.');
     }
 
     /**
@@ -83,7 +95,8 @@ class TransactionLedgerController extends Controller
 
         $transactionLedger->update($validated);
 
-        return redirect()->route('transaction-ledgers.show', $transactionLedger)->with('success', 'Transaction ledger entry updated successfully.');
+        return redirect()->route('admin.transaction-ledgers.show', $transactionLedger)
+            ->with('success', 'Transaction ledger entry updated successfully.');
     }
 
     /**
@@ -93,6 +106,7 @@ class TransactionLedgerController extends Controller
     {
         $transactionLedger->delete();
 
-        return redirect()->route('transaction-ledgers.index')->with('success', 'Transaction ledger entry deleted successfully.');
+        return redirect()->route('admin.transaction-ledgers.index')
+            ->with('success', 'Transaction ledger entry deleted successfully.');
     }
 }

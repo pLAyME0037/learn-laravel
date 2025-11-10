@@ -9,25 +9,25 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class StudentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:students.view')->only('index', 'show');
-        $this->middleware('permission:students.create')->only('create', 'store');
-        $this->middleware('permission:students.edit')->only('edit', 'update');
-        $this->middleware('permission:students.delete')->only('destroy');
-        $this->middleware('has_permission:students.delete')->only('restore', 'forceDelete');
-        $this->middleware('has_permission:students.edit')->only('updateStatus');
+        $this->middleware('permission:view.students')->only('index', 'show');
+        $this->middleware('permission:create.students')->only('create', 'store');
+        $this->middleware('permission:edit.students')->only('edit', 'update');
+        $this->middleware('permission:delete.students')->only('destroy');
+        $this->middleware('has_permission:delete.students')->only('restore', 'forceDelete');
+        $this->middleware('has_permission:edit.students')->only('updateStatus');
     }
     public function index(Request $request): View
     {
         $search     = $request->get('search');
         $department = $request->get('department');
         $program    = $request->get('program');
+        $studentId  = $request->get('student_id');
         $status     = $request->get('status', 'active');
 
         $students = Student::with(['user', 'department', 'program'])
@@ -40,6 +40,9 @@ class StudentController extends Controller
             ->when($program, function ($query, $program) {
                 return $query->where('program_id', $program);
             })
+            ->when($studentId, function ($query, $studentId) {
+                return $query->where('student_id', $studentId);
+            })
             ->when($status === 'active', function ($query) {
                 return $query->active();
             })
@@ -50,13 +53,22 @@ class StudentController extends Controller
                 return $query->onlyTrashed();
             })
             ->latest()
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         $departments = Department::active()->get();
         $programs    = Program::active()->get();
 
-        return view('students.index', compact('students', 'search', 'department', 'program', 'status', 'departments', 'programs'));
+        return view('admin.students.index', compact(
+            'students',
+            'search',
+            'department',
+            'program',
+            'studentId',
+            'status',
+            'departments',
+            'programs'
+        ));
     }
 
     public function create(): View
@@ -64,7 +76,7 @@ class StudentController extends Controller
         $departments = Department::active()->get();
         $programs    = Program::active()->get();
 
-        return view('students.create', compact('departments', 'programs'));
+        return view('admin.students.create', compact('departments', 'programs'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -158,7 +170,7 @@ class StudentController extends Controller
     {
         $student->load(['user', 'department', 'program', 'enrollments', 'academicRecords']);
 
-        return view('students.show', compact('student'));
+        return view('admin.students.show', compact('student'));
     }
 
     public function edit(Student $student): View
@@ -167,7 +179,7 @@ class StudentController extends Controller
         $departments = Department::active()->get();
         $programs    = Program::active()->get();
 
-        return view('students.edit',
+        return view('admin.students.edit',
             compact(
                 'student',
                 'departments', 'programs'

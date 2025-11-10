@@ -1,17 +1,28 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Instructor;
 use App\Models\Department;
-use Illuminate\Http\Request;
+use App\Models\Instructor;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class InstructorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.instructors')
+            ->only('index', 'show');
+        $this->middleware('permission:create.instructors')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.instructors')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.instructors')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -36,11 +47,11 @@ class InstructorController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:instructors,user_id',
+            'user_id'       => 'required|exists:users,id|unique:instructors,user_id',
             'department_id' => 'required|exists:departments,id',
-            'employee_id' => 'required|string|max:255|unique:instructors,employee_id',
-            'rank' => 'nullable|string|max:255', // e.g., Professor, Associate Professor, Lecturer
-            'hire_date' => 'required|date',
+            'employee_id'   => 'required|string|max:255|unique:instructors,employee_id',
+            'rank'          => 'nullable|string|max:255', // e.g., Professor, Associate Professor, Lecturer
+            'hire_date'     => 'required|date',
         ]);
 
         Instructor::create($validated);
@@ -72,11 +83,11 @@ class InstructorController extends Controller
     public function update(Request $request, Instructor $instructor): RedirectResponse
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:instructors,user_id,' . $instructor->id,
+            'user_id'       => 'required|exists:users,id|unique:instructors,user_id,' . $instructor->id,
             'department_id' => 'required|exists:departments,id',
-            'employee_id' => 'required|string|max:255|unique:instructors,employee_id,' . $instructor->id,
-            'rank' => 'nullable|string|max:255',
-            'hire_date' => 'required|date',
+            'employee_id'   => 'required|string|max:255|unique:instructors,employee_id,' . $instructor->id,
+            'rank'          => 'nullable|string|max:255',
+            'hire_date'     => 'required|date',
         ]);
 
         $instructor->update($validated);

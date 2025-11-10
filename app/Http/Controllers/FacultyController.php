@@ -1,16 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Faculty;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class FacultyController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.faculties')
+            ->only('index', 'show');
+        $this->middleware('permission:create.faculties')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.faculties')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.faculties')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -35,8 +46,8 @@ class FacultyController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:faculties,name',
-            'dean_id' => 'nullable|exists:users,id',
+            'name'        => 'required|string|max:255|unique:faculties,name',
+            'dean_id'     => 'nullable|exists:users,id',
             'description' => 'nullable|string',
         ]);
 
@@ -68,8 +79,8 @@ class FacultyController extends Controller
     public function update(Request $request, Faculty $faculty): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:faculties,name,' . $faculty->id,
-            'dean_id' => 'nullable|exists:users,id',
+            'name'        => 'required|string|max:255|unique:faculties,name,' . $faculty->id,
+            'dean_id'     => 'nullable|exists:users,id',
             'description' => 'nullable|string',
         ]);
 

@@ -1,18 +1,29 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\CreditScore;
 use App\Models\Student;
-use App\Models\Course;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CreditScoreController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.credit-scores')
+            ->only('index', 'show');
+        $this->middleware('permission:create.credit-scores')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.credit-scores')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.credit-scores')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -27,10 +38,10 @@ class CreditScoreController extends Controller
      */
     public function create(): View
     {
-        $students = Student::all();
-        $courses = Course::all();
+        $students      = Student::all();
+        $courses       = Course::all();
         $academicYears = \App\Models\AcademicYear::all();
-        $semesters = \App\Models\Semester::all();
+        $semesters     = \App\Models\Semester::all();
         return view('admin.credit_scores.create', compact('students', 'courses', 'academicYears', 'semesters'));
     }
 
@@ -40,12 +51,12 @@ class CreditScoreController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'score' => 'required|integer|min:0|max:100',
-            'grade_letter' => 'nullable|string|max:5',
+            'student_id'       => 'required|exists:students,id',
+            'course_id'        => 'required|exists:courses,id',
+            'score'            => 'required|integer|min:0|max:100',
+            'grade_letter'     => 'nullable|string|max:5',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'semester_id'      => 'required|exists:semesters,id',
         ]);
 
         CreditScore::create($validated);
@@ -67,10 +78,10 @@ class CreditScoreController extends Controller
      */
     public function edit(CreditScore $creditScore): View
     {
-        $students = Student::all();
-        $courses = Course::all();
+        $students      = Student::all();
+        $courses       = Course::all();
         $academicYears = \App\Models\AcademicYear::all();
-        $semesters = \App\Models\Semester::all();
+        $semesters     = \App\Models\Semester::all();
         return view('admin.credit_scores.edit', compact('creditScore', 'students', 'courses', 'academicYears', 'semesters'));
     }
 
@@ -80,12 +91,12 @@ class CreditScoreController extends Controller
     public function update(Request $request, CreditScore $creditScore): RedirectResponse
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'course_id' => 'required|exists:courses,id',
-            'score' => 'required|integer|min:0|max:100',
-            'grade_letter' => 'nullable|string|max:5',
+            'student_id'       => 'required|exists:students,id',
+            'course_id'        => 'required|exists:courses,id',
+            'score'            => 'required|integer|min:0|max:100',
+            'grade_letter'     => 'nullable|string|max:5',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'semester_id' => 'required|exists:semesters,id',
+            'semester_id'      => 'required|exists:semesters,id',
         ]);
 
         $creditScore->update($validated);

@@ -1,16 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\Gender;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GenderController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view.genders')
+            ->only('index', 'show');
+        $this->middleware('permission:create.genders')
+            ->only('create', 'store');
+        $this->middleware('permission:edit.genders')
+            ->only('edit', 'update');
+        $this->middleware('permission:delete.genders')
+            ->only('destroy');
+    }
     /**
      * Display a listing of the resource.
      */

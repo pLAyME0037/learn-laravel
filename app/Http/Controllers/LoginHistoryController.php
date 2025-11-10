@@ -15,6 +15,11 @@ use Illuminate\View\View;
 class LoginHistoryController extends Controller
 {
     use ClientHints;
+    public function __construct()
+    {
+        $this->middleware('permission:view.login-histories')
+            ->only('index');
+    }
 
     /**
      * Display a listing of the resource.

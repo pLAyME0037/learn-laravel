@@ -30,15 +30,19 @@
 
                         $data = $enrollments->map(function ($enrollment) {
                             return [
-                                'student_name' => $enrollment->student->user->name,
+                                'id' => $enrollment->id,
+                                'student_name' => $enrollment->student->user?->name ?? 'N/A',
                                 'course_name' => $enrollment->course->name,
-                                'class_schedule_details' => $enrollment->classSchedule->schedule_date
-                                    ->format('Y-m-d') 
-                                    . ' (' 
-                                    . $enrollment->classSchedule->start_time->format('H:i') 
-                                    . '-' 
-                                    . $enrollment->classSchedule->end_time->format('H:i') 
-                                    . ')',
+                                'class_schedule_details' => $enrollment->classSchedule
+                                    ? (
+                                        ($enrollment->classSchedule->schedule_date?->format('Y-m-d') ?? 'N/A')
+                                        . ' ('
+                                        . ($enrollment->classSchedule->start_time?->format('H:i') ?? 'N/A')
+                                        . '-'
+                                        . ($enrollment->classSchedule->end_time?->format('H:i') ?? 'N/A')
+                                        . ')'
+                                    )
+                                    : 'N/A',
                                 'enrollment_date' => $enrollment->formatted_enrollment_date,
                                 'status' => $enrollment->enrollment_status,
                             ];

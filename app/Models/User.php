@@ -98,10 +98,11 @@ class User extends Authenticatable
     public function getProfilePictureUrlAttribute(): string
     {
         if ($this->profile_pic) {
-            if (filter_var($this->profile_pic, FILTER_VALIDATE_URL)) {
-                return $this->profile_pic;
-            }
-            return asset('storage/' . $this->profile_pic);
+            $url = filter_var($this->profile_pic, FILTER_VALIDATE_URL)
+                ? $this->profile_pic
+                : asset('storage/' . $this->profile_pic);
+
+            return $url;
         }
         return $this->generateDefaultAvatar();
     }
@@ -150,8 +151,8 @@ class User extends Authenticatable
         return $this->hasAnyRole([
             'super_user', 
             'admin', 
-            'registrar', 
-            'hod', 
+            'registrar',
+            'hod',
             'professor', 
             'staff'
         ]);

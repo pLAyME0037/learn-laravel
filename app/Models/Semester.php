@@ -45,14 +45,6 @@ class Semester extends Model
     }
 
     /**
-     * Returns a boolean indicating if it's the current semester.
-     */
-    public function getIsCurrentAttribute(): bool
-    {
-        return (bool) $this->is_current;
-    }
-
-    /**
      * Scope a query to filter for the current semester.
      */
     public function scopeCurrent(Builder $query): void

@@ -15,13 +15,13 @@ class CourseController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:view.contact-details')
+        $this->middleware('permission:view.courses')
             ->only('index', 'show');
-        $this->middleware('permission:create.contact-details')
+        $this->middleware('permission:create.courses')
             ->only('create', 'store');
-        $this->middleware('permission:edit.contact-details')
+        $this->middleware('permission:edit.courses')
             ->only('edit', 'update');
-        $this->middleware('permission:delete.contact-details')
+        $this->middleware('permission:delete.courses')
             ->only('destroy');
     }
     /**
@@ -29,7 +29,8 @@ class CourseController extends Controller
      */
     public function index(): View
     {
-        $courses = Course::with(['department', 'instructors', 'semester'])->paginate(10);
+        $courses = Course::with(['department', 'instructors', 'semester'])
+            ->paginate(10);
         return view('admin.courses.index', compact('courses'));
     }
 

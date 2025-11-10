@@ -10,14 +10,19 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Manage Courses</h3>
-                        <a href="{{ route('admin.courses.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <h3 class="text-lg font-medium text-gray-900">
+                            Manage Courses
+                        </h3>
+                        <a href="{{ route('admin.courses.create') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Add New Course') }}
                         </a>
                     </div>
 
                     <div class="mb-4">
-                        <input type="text" placeholder="Search courses..." class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
+                        <input type="text"
+                            placeholder="Search courses..."
+                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
                     </div>
 
                     @php
@@ -33,6 +38,7 @@
 
                         $data = $courses->map(function ($course) {
                             return [
+                                'id' => $course->id,
                                 'name' => $course->name,
                                 'code' => $course->code,
                                 'credits' => $course->credits,
