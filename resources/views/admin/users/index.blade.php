@@ -58,6 +58,17 @@
                         'selectedValue' => $status,
                         'defaultOptionText' => 'All Status',
                     ],
+                    [
+                        'type' => 'select',
+                        'name' => 'orderby',
+                        'label' => 'Order By',
+                        'options' => [
+                            ['value' => 'newest', 'text' => 'Newest'],
+                            ['value' => 'oldest', 'text' => 'Oldest'],
+                        ],
+                        'selectedValue' => $orderby,
+                        'defaultOptionText' => ['value' => 'default', 'text' => 'Default'],
+                    ],
                 ];
             @endphp
 

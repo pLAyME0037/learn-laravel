@@ -39,7 +39,12 @@
                             <select id="{{ $filter['name'] }}"
                                 name="{{ $filter['name'] }}"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                <option value="">{{ $filter['defaultOptionText'] ?? 'All' }}</option>
+                                @php
+                                    $defaultOptionText = is_array($filter['defaultOptionText'] ?? null)
+                                        ? ($filter['defaultOptionText']['text'] ?? 'All')
+                                        : ($filter['defaultOptionText'] ?? 'All');
+                                @endphp
+                                <option value="">{{ $defaultOptionText }}</option>
                                 @foreach ($filter['options'] as $option)
                                     @php
                                         $optionValue = is_array($option) ? $option['value'] : $option;

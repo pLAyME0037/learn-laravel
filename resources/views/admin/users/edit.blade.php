@@ -23,14 +23,15 @@
                         <div class="space-y-6">
                             <!-- Current User Info -->
                             <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <img class="h-16 w-16 rounded-full"
-                                    src="{{ $user->profile_picture_url }}"
-                                    alt="{{ $user->name }}">
+                                <x-profile-image src="{{ $user->profile_picture_url }}"
+                                    alt="{{ $user->username }}"
+                                    size="lg" />
                                 <div>
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ $user->name }}
                                     </h3>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        <span>@</span>{{ $user->username }}</p>
+                                        <span>@</span>{{ $user->username }}
+                                    </p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
                                 </div>
                             </div>
@@ -78,19 +79,33 @@
                                     :messages="$errors->get('email')" />
                             </div>
 
-                            <!-- Password -->
-                            <div>
-                                <x-input-label for="password"
-                                    :value="__('Password')" />
-                                <x-text-input id="password"
-                                    name="password"
-                                    type="password"
-                                    class="mt-1 block w-full"
-                                    :value="old('password', $user->password)"
-                                    required />
-                                <x-input-error class="mt-2"
-                                    :messages="$errors->get('password')" />
-                            </div>
+                            @if ($canChangePassword)
+                                <!-- Password -->
+                                <div>
+                                    <x-input-label for="password"
+                                        :value="__('Password')" />
+                                    <x-text-input id="password"
+                                        name="password"
+                                        type="password"
+                                        class="mt-1 block w-full"
+                                        required />
+                                    <x-input-error class="mt-2"
+                                        :messages="$errors->get('password')" />
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div>
+                                    <x-input-label for="password_confirmation"
+                                        :value="__('Confirm Password')" />
+                                    <x-text-input id="password_confirmation"
+                                        name="password_confirmation"
+                                        type="password"
+                                        class="mt-1 block w-full"
+                                        required />
+                                    <x-input-error class="mt-2"
+                                        :messages="$errors->get('password_confirmation')" />
+                                </div>
+                            @endif
 
                             <!-- Active Status -->
                             <div>
