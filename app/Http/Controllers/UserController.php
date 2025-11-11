@@ -96,7 +96,8 @@ class UserController extends Controller
         $user->syncRoles($roles);
         $user->syncPermissions($request->permissions);
 
-        return redirect()->route('admin.users.index')->with('success', 'User roles and permissions updated successfully.');
+        return redirect()->route('admin.users.index')
+        ->with('success', 'User roles and permissions updated successfully.');
     }
 
     /**
@@ -165,7 +166,7 @@ class UserController extends Controller
             'name'      => 'required|string|max:255',
             'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->getKey(),
             'email'     => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
-            'role'      => 'required|string|exists:roles,name', // Validate role name exists
+            'role'      => 'required|string|exists:roles,name',
             'bio'       => 'nullable|string|max:500',
             'is_active' => 'sometimes|boolean',
         ]);

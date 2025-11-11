@@ -25,8 +25,12 @@
         <tbody class="bg-white divide-y divide-gray-200">
             @foreach ($users as $user)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ $user->name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ $user->email }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ $user->name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ $user->email }}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         @foreach ($user->roles as $role)
                             <span
@@ -41,7 +45,9 @@
                         <select wire:change="assignRole({{ $user->id }}, $event.target.value)">
                             <option>Assign Role</option>
                             @foreach ($roles as $role)
-                                <option value="{{ $role->name }}">{{ $role->name }}</option>
+                                <option value="{{ $role->name }}">
+                                    {{ $role->name }}
+                                </option>
                             @endforeach
                         </select>
                     </td>

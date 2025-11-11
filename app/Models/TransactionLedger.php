@@ -90,7 +90,10 @@ class TransactionLedger extends Model
      */
     public function scopeBetweenDates(Builder $query, string $startDate, string $endDate): void
     {
-        $query->whereBetween('created_at', [Carbon::parse($startDate)->startOfDay(), Carbon::parse($endDate)->endOfDay()]);
+        $query->whereBetween('created_at', [
+            Carbon::parse($startDate)->startOfDay(), 
+            Carbon::parse($endDate)->endOfDay()
+        ]);
     }
 
     /**

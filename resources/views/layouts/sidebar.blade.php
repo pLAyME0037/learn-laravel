@@ -426,8 +426,8 @@
                 'label' => 'Transaction Ledger',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
-                'route' => 'admin.transaction_ledgers.index',
-                'can' => ['view.transaction_ledgers'],
+                'route' => 'admin.transaction-ledgers.index',
+                'can' => ['view.transaction-ledgers'],
             ],
             // U
             // Users
@@ -436,35 +436,27 @@
                 'label' => 'Users',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />',
-                'can' => ['view.users', 'create.users'],
+                'can' => ['view.users'],
                 'children' => [
                     [
                         'type' => 'link',
                         'label' => 'All Users',
                         'route' => 'admin.users.index',
-                        'can' => 'users.view',
+                        'can' => 'view.users',
                     ],
                     [
                         'type' => 'link',
                         'label' => 'Add User',
                         'route' => 'admin.users.create',
-                        'can' => 'users.create',
+                        'can' => 'create.users',
                     ],
                     [
                         'type' => 'link',
                         'label' => 'Manage Users',
                         'route' => 'admin.users.management',
-                        'can' => 'users.access',
+                        'can' => 'edit-access.users',
                     ],
                 ],
-            ],
-            // Transaction Ledger
-            [
-                'type' => 'link',
-                'label' => 'Transaction Ledger',
-                'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
-                'route' => 'admin.transaction_ledgers.index',
-                'can' => ['view.transaction_ledgers'],
             ],
             // V
             // W

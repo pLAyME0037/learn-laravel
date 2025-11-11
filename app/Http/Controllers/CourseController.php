@@ -98,7 +98,8 @@ class CourseController extends Controller
 
         $course->update($validated);
 
-        return redirect()->route('admin.courses.show', $course)->with('success', 'Course updated successfully.');
+        return redirect()->route('admin.courses.show', $course)
+        ->with('success', 'Course updated successfully.');
     }
 
     /**
@@ -108,6 +109,7 @@ class CourseController extends Controller
     {
         $course->delete();
 
-        return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully.');
+        return redirect()->route('admin.courses.index')
+        ->with('success', 'Course deleted successfully.');
     }
 }

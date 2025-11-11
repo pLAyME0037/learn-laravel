@@ -191,8 +191,7 @@ Route::middleware(['auth', 'verified'])
         Route::resource('transaction-ledgers', TransactionLedgerController::class);
 
         // Permission Management
-        Route::resource('permissions', PermissionController::class)
-            ->only(['index']);
+        Route::resource('permissions', PermissionController::class)->except(['show']);
 
         // Notification Sending
         Route::post('send-notification', [

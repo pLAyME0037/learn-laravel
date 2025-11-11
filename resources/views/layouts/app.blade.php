@@ -34,6 +34,12 @@
 </head>
 
 <body class="h-full bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    @if (session('success'))
+        <x-flash-message type="success" :message="session('success')" />
+    @endif
+    @if (session('error'))
+        <x-flash-message type="error" :message="session('error')" />
+    @endif
     <div class="flex h-screen">
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
