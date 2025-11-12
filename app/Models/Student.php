@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
@@ -224,7 +224,11 @@ class Student extends Model
      */
     public function getEmergencyContactInfoAttribute(): string
     {
-        return "Name: {$this->emergency_contact_name}, Phone: {$this->emergency_contact_phone}, Relation: {$this->emergency_contact_relation}";
+        return "
+        Name: {$this->emergency_contact_name},
+        Phone: {$this->emergency_contact_phone},
+        Relation: {$this->emergency_contact_relation}
+        ";
     }
 
     // Scopes
@@ -278,10 +282,10 @@ class Student extends Model
      */
     public function scopeByAcademicStanding(Builder $query, string $standing): void
     {
+        $query->where('academic_status', $standing); // Reusing academic_status for simplicity
         // This scope would require a more complex implementation if academic standing is not a direct column.
         // For now, it assumes 'academic_standing' is a column or can be derived easily.
         // A more robust solution might involve calculating it on the fly or having a dedicated column.
-        $query->where('academic_status', $standing); // Reusing academic_status for simplicity
     }
 
     // Helper Methods
@@ -312,13 +316,13 @@ class Student extends Model
     public function calculateGpa(): float
     {
         // Assuming AcademicRecord has 'grade' and 'credits_earned'
-        $totalCredits = 0;
+        $totalCredits     = 0;
         $totalGradePoints = 0;
 
         foreach ($this->academicRecords as $record) {
             // You might need a method to convert grade to grade points (e.g., A=4, B=3)
             $gradePoints = $this->convertGradeToPoints($record->grade);
-            $totalGradePoints += ($gradePoints * $record->credits_earned);
+            $totalGradePoints += $gradePoints * $record->credits_earned;
             $totalCredits += $record->credits_earned;
         }
 
@@ -360,21 +364,21 @@ class Student extends Model
         $departmentCode = 'GEN';
         if ($departmentId) {
             $department     = Department::find($departmentId);
-            $departmentCode = (string) ($department->code ?? 'GEN'); // Explicitly cast to string
+            $departmentCode = (string) ($department->code ?? 'GEN');
         } elseif ($this->department_id) {
             $department     = Department::find($this->department_id);
-            $departmentCode = (string) ($department->code ?? 'GEN'); // Explicitly cast to string
+            $departmentCode = (string) ($department->code ?? 'GEN');
         }
 
         $year = now()->format('y');
 
-        // Count students created in the current year for the given department.
-        // Use 'created_at' instead of 'create_at'.
         $sequence = Student::where('department_id', $departmentId ?? $this->department_id)
             ->whereYear('created_at', now()->year)
             ->count() + 1;
 
-        return $departmentCode . $year . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        return $departmentCode
+        . $year
+        . str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -392,8 +396,8 @@ class Student extends Model
     public function addPayment(float $amount, string $periodDescription): Payment
     {
         return $this->payments()->create([
-            'amount' => $amount,
-            'payment_date' => Carbon::now(),
+            'amount'                     => $amount,
+            'payment_date'               => Carbon::now(),
             'payment_period_description' => $periodDescription,
         ]);
     }

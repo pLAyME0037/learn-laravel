@@ -25,28 +25,30 @@
         <div class="mt-4">
             @if ($sourceType === 'role')
                 <x-input-label for="source_role_id"
-                    value="{{ __('Source Role') }}" />
-                <select wire:model="sourceId"
+                    value="{{ __('Source Role(s)') }}" />
+                <select wire:model="selectedSourceIds"
                     id="source_role_id"
+                    multiple
                     class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm mt-1 block w-full">
-                    <option value="">{{ __('Select a role') }}</option>
                     @foreach ($roles as $role)
                         <option value="{{ $role->id }}">{{ $role->name }}</option>
                     @endforeach
                 </select>
             @elseif ($sourceType === 'user')
                 <x-input-label for="source_user_id"
-                    value="{{ __('Source User') }}" />
-                <select wire:model="sourceId"
+                    value="{{ __('Source User(s)') }}" />
+                <select wire:model="selectedSourceIds"
                     id="source_user_id"
-                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm mt-1 block w-full">
-                    <option value="">{{ __('Select a user') }}</option>
+                    multiple
+                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 dark:focus:ring-indigo-600 rounded-md shadow-sm mt-1 block w-full">
                     @foreach ($users as $user)
-                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        <option value="{{ $user->id }}">
+                            {{ $user->name }} ({{ $user->email }})
+                        </option>
                     @endforeach
                 </select>
             @endif
-            <x-input-error :messages="$errors->get('sourceId')"
+            <x-input-error :messages="$errors->get('selectedSourceIds')"
                 class="mt-2" />
         </div>
 
@@ -56,7 +58,7 @@
             </x-secondary-button>
 
             <x-primary-button class="ms-3"
-                :disabled="!$sourceId">
+                :disabled="empty($selectedSourceIds)">
                 {{ __('Copy Permissions') }}
             </x-primary-button>
         </div>

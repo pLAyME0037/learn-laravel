@@ -17,8 +17,8 @@ class DegreeFactory extends Factory
     public function definition(): array
     {
         return [
-            'degree_name' => $this->faker->bs(),
-            'degree_level' => $this->faker->randomElement(['Bachelor', 'Master', 'Doctorate']),
+            'name' => $this->faker->bs(),
+            'level' => $this->faker->randomElement(['Bachelor', 'Master', 'Doctorate']),
         ];
     }
 }

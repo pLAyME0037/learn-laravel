@@ -252,21 +252,22 @@
 
                                     <!-- Gender -->
                                     <div>
-                                        <x-input-label for="gender"
+                                        <x-input-label for="gender_id"
                                             :value="__('Gender')" />
-                                        <select id="gender"
-                                            name="gender"
+                                        <select id="gender_id"
+                                            name="gender_id"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                             required>
-                                            <option value="male"
-                                                {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                            <option value="female"
-                                                {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                            <option value="other"
-                                                {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                                            <option value="">Select Gender</option>
+                                            @foreach ($genders as $gender)
+                                                <option value="{{ $gender->id }}"
+                                                    {{ old('gender_id') == $gender->id ? 'selected' : '' }}>
+                                                    {{ $gender->name }}
+                                                </option>
+                                            @endforeach
                                         </select>
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('gender')" />
+                                            :messages="$errors->get('gender_id')" />
                                     </div>
 
                                     <!-- Nationality -->
@@ -329,8 +330,7 @@
                                         <textarea id="disability_details"
                                             name="disability_details"
                                             rows="3"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('disability_details') }}
-                                        </textarea>
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('disability_details') }}</textarea>
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('disability_details')" />
                                     </div>
@@ -342,8 +342,7 @@
                                         <textarea id="previous_education"
                                             name="previous_education"
                                             rows="3"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('previous_education') }}
-                                        </textarea>
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('previous_education') }}</textarea>
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('previous_education')" />
                                     </div>
@@ -363,8 +362,7 @@
                                             name="current_address"
                                             rows="3"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            required>{{ old('current_address') }}
-                                        </textarea>
+                                            required>{{ old('current_address') }}</textarea>
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('current_address')" />
                                     </div>
@@ -377,8 +375,7 @@
                                             name="permanent_address"
                                             rows="3"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            required>{{ old('permanent_address') }}
-                                        </textarea>
+                                            required>{{ old('permanent_address') }}</textarea>
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('permanent_address')" />
                                     </div>

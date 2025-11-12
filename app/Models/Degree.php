@@ -20,8 +20,8 @@ class Degree extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'degree_name',
-        'degree_level',
+        'name',
+        'level',
     ];
 
     /**
@@ -30,8 +30,8 @@ class Degree extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'degree_name' => 'string',
-        'degree_level' => 'string',
+        'name' => 'string',
+        'level' => 'string',
     ];
 
     /**
@@ -55,7 +55,7 @@ class Degree extends Model
      */
     public function getFullDegreeNameAttribute(): string
     {
-        return "{$this->degree_level} of {$this->degree_name}";
+        return "{$this->level} of {$this->name}";
     }
 
     /**
@@ -63,7 +63,7 @@ class Degree extends Model
      */
     public function scopeByLevel(Builder $query, string $level): void
     {
-        $query->where('degree_level', $level);
+        $query->where('level', $level);
     }
 
     /**
@@ -71,7 +71,7 @@ class Degree extends Model
      */
     public function scopeByName(Builder $query, string $name): void
     {
-        $query->where('degree_name', 'like', '%' . $name . '%');
+        $query->where('name', 'like', '%' . $name . '%');
     }
 
     /**

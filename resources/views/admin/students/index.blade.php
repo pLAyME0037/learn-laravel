@@ -29,7 +29,9 @@
                         'type' => 'select',
                         'name' => 'department',
                         'label' => 'Department',
-                        'options' => $departments->map(fn($dept) => ['value' => $dept->id, 'text' => $dept->name])->toArray(),
+                        'options' => $departments
+                            ->map(fn($dept) => ['value' => $dept->id, 'text' => $dept->name])
+                            ->toArray(),
                         'selectedValue' => $department,
                         'defaultOptionText' => 'None',
                         'errorMessages' => $errors->get('department'),
@@ -38,7 +40,9 @@
                         'type' => 'select',
                         'name' => 'program',
                         'label' => 'Program',
-                        'options' => $programs->map(fn($prog) => ['value' => $prog->id, 'text' => $prog->name])->toArray(),
+                        'options' => $programs
+                            ->map(fn($prog) => ['value' => $prog->id, 'text' => $prog->name])
+                            ->toArray(),
                         'selectedValue' => $program,
                         'defaultOptionText' => 'None',
                         'errorMessages' => $errors->get('program'),
@@ -59,7 +63,10 @@
             @endphp
 
             <x-filter-box :action="route('admin.students.index')"
-                :filters="$filters" />
+                :filters="$filters"
+                uri="{{ 'admin.students.create' }}"
+                button="{{ 'Add New Student' }}" />
+
 
             <!-- Students Table -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -92,10 +99,10 @@
                                             Admission Date</th>
                                         @can('edit.students')
                                             <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Actions</th>
+                                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                                Actions</th>
                                         @endcan
-                                        
+
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-600">

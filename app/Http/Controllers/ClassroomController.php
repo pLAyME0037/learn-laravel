@@ -48,13 +48,15 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255|unique:classrooms,name',
             'capacity' => 'required|integer|min:1',
+            'room_number' => 'required|string|max:255', // e.g., 101, A203
             'type'     => 'nullable|string|max:255', // e.g., Lecture Hall, Lab, Seminar Room
             'location' => 'nullable|string|max:255',
         ]);
 
         Classroom::create($validated);
 
-        return redirect()->route('admin.classrooms.index')->with('success', 'Classroom created successfully.');
+        return redirect()->route('admin.classrooms.index')
+        ->with('success', 'Classroom created successfully.');
     }
 
     /**
@@ -81,13 +83,15 @@ class ClassroomController extends Controller
         $validated = $request->validate([
             'name'     => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
             'capacity' => 'required|integer|min:1',
+            'room_number' => 'required|string|max:255', // e.g., 101, A203
             'type'     => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
         ]);
 
         $classroom->update($validated);
 
-        return redirect()->route('admin.classrooms.show', $classroom)->with('success', 'Classroom updated successfully.');
+        return redirect()->route('admin.classrooms.show', $classroom)
+        ->with('success', 'Classroom updated successfully.');
     }
 
     /**
@@ -97,6 +101,7 @@ class ClassroomController extends Controller
     {
         $classroom->delete();
 
-        return redirect()->route('admin.classrooms.index')->with('success', 'Classroom deleted successfully.');
+        return redirect()->route('admin.classrooms.index')
+        ->with('success', 'Classroom deleted successfully.');
     }
 }

@@ -1,4 +1,4 @@
-@props(['item', 'collapsed'])
+@props(['item', 'collapsed', 'level' => 0])
 
 @php
     use Illuminate\Support\Facades\Gate;
@@ -10,6 +10,8 @@
             $hasPermission = Gate::allows($item['can']);
         }
     }
+
+    $paddingLeft = ($level * 4) + 6; // Tailwind's 'px-6' is 1.5rem, 'pl-4' is 1rem. So 6 for base, then 4 for each level.
 @endphp
 
 @if ($hasPermission)
@@ -22,15 +24,17 @@
         </div>
     @elseif ($item['type'] === 'link')
         <li>
-            <a href="{{ route($item['route']) }}"
+            <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}"
                 class="w-full flex items-center py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                :class="collapsed ? 'justify-center px-4' : 'px-6'">
-                <svg :class="collapsed ? 'w-6 h-6' : 'w-5 h-5'"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    {!! $item['icon'] !!}
-                </svg>
+                :class="collapsed ? 'justify-center px-4' : 'pl-{{ $paddingLeft }}'">
+                @if (isset($item['icon']))
+                    <svg :class="collapsed ? 'w-6 h-6' : 'w-5 h-5'"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        {!! $item['icon'] !!}
+                    </svg>
+                @endif
                 <span x-show="!collapsed"
                     class="mx-3">
                     {{ $item['label'] }}
@@ -41,7 +45,7 @@
         <li x-data="{ open: false }">
             <button @click="open = !open"
                 class="w-full flex items-center py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                :class="collapsed ? 'justify-center px-4' : 'px-6'">
+                :class="collapsed ? 'justify-center px-4' : 'pl-{{ $paddingLeft }}'">
                 <svg :class="collapsed ? 'w-6 h-6' : 'w-4 h-4'"
                     fill="none"
                     stroke="currentColor"
@@ -71,25 +75,13 @@
                 x-collapse
                 class="bg-gray-50 dark:bg-gray-700">
                 @if (isset($item['children']))
-                    @foreach ($item['children'] as $child)
-                        @php
-                            $childHasPermission = true;
-                            if (isset($child['can'])) {
-                                if (is_array($child['can'])) {
-                                    $childHasPermission = Gate::any($child['can']);
-                                } else {
-                                    $childHasPermission = Gate::allows($child['can']);
-                                }
-                            }
-                        @endphp
-
-                        @if ($childHasPermission)
-                            <a href="{{ route($child['route']) }}"
-                                class="flex items-center px-6 py-2 pl-14 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                {{ $child['label'] }}
-                            </a>
-                        @endif
-                    @endforeach
+                    <ul>
+                        @foreach ($item['children'] as $child)
+                            <x-sidebar-menu-item :item="$child"
+                                :collapsed="$collapsed"
+                                :level="$level + 1" />
+                        @endforeach
+                    </ul>
                 @endif
             </div>
         </li>

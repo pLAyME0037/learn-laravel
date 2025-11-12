@@ -98,7 +98,7 @@ class ProgramController extends Controller
 
         $program->update($validated);
 
-        return redirect()->route('admin.programs.show', $program)
+        return redirect()->route('admin.programs.index')
             ->with('success', 'Program updated successfully.');
     }
 

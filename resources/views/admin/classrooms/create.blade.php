@@ -9,7 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Classroom</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        Add New Classroom
+                    </h3>
 
                     <form method="POST"
                         action="{{ route('admin.classrooms.store') }}">
@@ -43,6 +45,20 @@
                             <x-input-error :messages="$errors->get('capacity')"
                                 class="mt-2" />
                         </div>
+                        
+                        <!-- Room Number -->
+                        <div class="mb-4">
+                            <x-input-label for="room_number"
+                                :value="__('Room Number')" />
+                            <x-text-input id="room_number"
+                                class="block mt-1 w-full"
+                                type="text"
+                                name="room_number"
+                                :value="old('room_number')"
+                                required />
+                            <x-input-error :messages="$errors->get('room_number')"
+                                class="mt-2" />
+                        </div>
 
                         <!-- Type -->
                         <div class="mb-4">
@@ -53,7 +69,7 @@
                                 type="text"
                                 name="type"
                                 :value="old('type')"
-                                required />
+                                 />
                             <x-input-error :messages="$errors->get('type')"
                                 class="mt-2" />
                         </div>
@@ -67,7 +83,7 @@
                                 type="text"
                                 name="location"
                                 :value="old('location')"
-                                required />
+                                 />
                             <x-input-error :messages="$errors->get('location')"
                                 class="mt-2" />
                         </div>

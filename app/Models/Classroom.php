@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
 
 class Classroom extends Model
 {
@@ -20,8 +20,11 @@ class Classroom extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'room_number',
+        'name',
         'capacity',
+        'room_number',
+        'type',
+        'location',
     ];
 
     /**
@@ -73,10 +76,10 @@ class Classroom extends Model
 
         $query->whereDoesntHave('classSchedules', function (Builder $subQuery) use ($dateTime) {
             $subQuery->whereDate('schedule_date', $dateTime->toDateString())
-                     ->where(function ($q) use ($dateTime) {
-                         $q->where('start_time', '<', $dateTime->format('H:i:s'))
-                           ->where('end_time', '>', $dateTime->format('H:i:s'));
-                     });
+                ->where(function ($q) use ($dateTime) {
+                    $q->where('start_time', '<', $dateTime->format('H:i:s'))
+                        ->where('end_time', '>', $dateTime->format('H:i:s'));
+                });
         });
     }
 
@@ -88,10 +91,10 @@ class Classroom extends Model
     {
         $dateTime = Carbon::parse("{$date} {$time}");
 
-        return !$this->classSchedules()->whereDate('schedule_date', $dateTime->toDateString())
-                                     ->where(function ($query) use ($dateTime) {
-                                         $query->where('start_time', '<', $dateTime->format('H:i:s'))
-                                               ->where('end_time', '>', $dateTime->format('H:i:s'));
-                                     })->exists();
+        return ! $this->classSchedules()->whereDate('schedule_date', $dateTime->toDateString())
+            ->where(function ($query) use ($dateTime) {
+                $query->where('start_time', '<', $dateTime->format('H:i:s'))
+                    ->where('end_time', '>', $dateTime->format('H:i:s'));
+            })->exists();
     }
 }

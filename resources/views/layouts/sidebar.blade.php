@@ -74,6 +74,7 @@
             [
                 'type' => 'heading',
                 'label' => 'Admin',
+                'can' => ['view.asAdmin'],
             ],
             // Academic Record
             [
@@ -130,22 +131,9 @@
             ],
             // B
             // C
-            // Class Schedule
-            [
-                'type' => 'link',
-                'label' => 'Class Schedule',
-                'icon' => '<path 
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
-                            />',
-                'route' => 'admin.class-schedules.index',
-                'can' => ['view.class_schedules'],
-            ],
             // Classroom
             [
-                'type' => 'link',
+                'type' => 'dropdown',
                 'label' => 'Classroom',
                 'icon' => '<path 
                                 stroke-linecap="round"
@@ -153,8 +141,34 @@
                                 stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
                             />',
-                'route' => 'admin.classrooms.index',
                 'can' => ['view.classrooms'],
+                'children' => [
+                    [
+                        'type' => 'link',
+                        'label' => 'Classroom',
+                        'icon' => '<path 
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                            />',
+                        'route' => 'admin.classrooms.index',
+                        'can' => ['view.classrooms'],
+                    ],
+                    // Class Schedule
+                    [
+                        'type' => 'link',
+                        'label' => 'Class Schedule',
+                        'icon' => '<path 
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                            />',
+                        'route' => 'admin.class-schedules.index',
+                        'can' => ['view.class_schedules'],
+                    ],
+                ],
             ],
             // Contact Detail
             [
@@ -169,22 +183,9 @@
                 'route' => 'admin.contact_details.index',
                 'can' => ['view.contact_details'],
             ],
-            // Course Prerequisite
-            [
-                'type' => 'link',
-                'label' => 'Course Prerequisite',
-                'icon' => '<path 
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
-                            />',
-                'route' => 'admin.course_prerequisites.index',
-                'can' => ['view.course_prerequisites'],
-            ],
             // Courses
             [
-                'type' => 'link',
+                'type' => 'dropdown',
                 'label' => 'Courses',
                 'icon' => '<path 
                                 stroke-linecap="round"
@@ -192,8 +193,34 @@
                                 stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
                             />',
-                'route' => 'admin.courses.index',
                 'can' => ['view.courses'],
+                'children' => [
+                    [
+                        'type' => 'link',
+                        'label' => 'Courses',
+                        'icon' => '<path 
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                            />',
+                        'route' => 'admin.courses.index',
+                        'can' => ['view.courses'],
+                    ],
+                    // Course Prerequisite
+                    [
+                        'type' => 'link',
+                        'label' => 'Course Prerequisite',
+                        'icon' => '<path 
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                            />',
+                        'route' => 'admin.course-prerequisites.index',
+                        'can' => ['view.course-prerequisites'],
+                    ],
+                ],
             ],
             // Cridit Score
             [
@@ -218,28 +245,6 @@
                 'route' => 'admin.degrees.index',
                 'can' => ['view.degrees'],
             ],
-            // Department
-            [
-                'type' => 'dropdown',
-                'label' => 'Department',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
-                'can' => ['view.departments', 'create.departments'],
-                'children' => [
-                    [
-                        'type' => 'link',
-                        'label' => 'All Department',
-                        'route' => 'admin.departments.index',
-                        'can' => 'view.departments',
-                    ],
-                    [
-                        'type' => 'link',
-                        'label' => 'New Department',
-                        'route' => 'admin.departments.create',
-                        'can' => 'create.departments',
-                    ],
-                ],
-            ],
             // E
             // Enrollment
             [
@@ -253,12 +258,71 @@
             // F
             // Faculty
             [
-                'type' => 'link',
+                'type' => 'dropdown',
                 'label' => 'Faculty',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
-                'route' => 'admin.faculties.index',
                 'can' => ['view.faculties'],
+                'children' => [
+                    // Faculty
+                    [
+                        'type' => 'link',
+                        'label' => 'Faculty',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                        'route' => 'admin.faculties.index',
+                        'can' => ['view.faculties'],
+                    ],
+                    // Department
+                    [
+                        'type' => 'dropdown',
+                        'label' => 'Department',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                        'can' => ['view.departments', 'create.departments'],
+                        'children' => [
+                            // Department
+                            [
+                                'type' => 'link',
+                                'label' => 'All Department',
+                                'icon' =>
+                                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                                'route' => 'admin.departments.index',
+                                'can' => 'view.departments',
+                            ],
+                            [
+                                'type' => 'link',
+                                'label' => 'New Department',
+                                'icon' =>
+                                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                                'route' => 'admin.departments.create',
+                                'can' => 'create.departments',
+                            ],
+                            // Major
+                            [
+                                'type' => 'dropdown',
+                                'label' => 'Majors',
+                                'icon' =>
+                                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />',
+                                'can' => ['view.majors', 'create.majors'],
+                                'children' => [
+                                    [
+                                        'type' => 'link',
+                                        'label' => 'All Majors',
+                                        'route' => 'admin.majors.index',
+                                        'can' => 'view.majors',
+                                    ],
+                                    [
+                                        'type' => 'link',
+                                        'label' => 'Add Major',
+                                        'route' => 'admin.majors.create',
+                                        'can' => 'create.majors',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ],
             // G
             // H
@@ -285,44 +349,9 @@
                 'can' => 'view.login-histories',
             ],
             // M
-            // Major
-            [
-                'type' => 'dropdown',
-                'label' => 'Majors',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />',
-                'can' => ['view.majors', 'create.majors'],
-                'children' => [
-                    [
-                        'type' => 'link',
-                        'label' => 'All Majors',
-                        'route' => 'admin.majors.index',
-                        'can' => 'view.majors',
-                    ],
-                    [
-                        'type' => 'link',
-                        'label' => 'Add Major',
-                        'route' => 'admin.majors.create',
-                        'can' => 'create.majors',
-                    ],
-                ],
-            ],
             // N
             // O
             // P
-            // Permission
-            [
-                'type' => 'link',
-                'label' => 'Permissions',
-                'icon' => '<path 
-                    stroke-linecap="round" 
-                    stroke-linejoin="round" 
-                    stroke-width="2" 
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
-                />',
-                'route' => 'admin.permissions.index',
-                'can' => 'view.permissions',
-            ],
             // Payment
             [
                 'type' => 'dropdown',
@@ -372,7 +401,7 @@
             // Roles
             [
                 'type' => 'dropdown',
-                'label' => 'Roles',
+                'label' => 'Roles & Permission',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-2A2 2 0 0113 18V6a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2zM10 18H8a2 2 0 01-2-2V8a2 2 0 012-2h2m-2 8h4" />',
                 'can' => ['view.roles', 'create.roles'],
@@ -389,6 +418,19 @@
                         'route' => 'admin.roles.create',
                         'can' => 'create.roles',
                     ],
+                    // Permission
+                    [
+                        'type' => 'link',
+                        'label' => 'Permissions',
+                        'icon' => '<path 
+                            stroke-linecap="round" 
+                            stroke-linejoin="round" 
+                            stroke-width="2" 
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                        />',
+                        'route' => 'admin.permissions.index',
+                        'can' => 'view.permissions',
+                    ],
                 ],
             ],
             // S
@@ -403,12 +445,30 @@
             ],
             // Student
             [
-                'type' => 'link',
+                'type' => 'dropdown',
                 'label' => 'Student',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
                 'route' => 'admin.students.index',
                 'can' => ['view.students'],
+                'children' => [
+                    [
+                        'type' => 'link',
+                        'label' => 'Student',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                        'route' => 'admin.students.index',
+                        'can' => ['view.students'],
+                    ],
+                    [
+                        'type' => 'link',
+                        'label' => 'Create Student',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
+                        'route' => 'admin.students.create',
+                        'can' => ['create.students'],
+                    ],
+                ],
             ],
             // System Configs
             [

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
+use App\Models\Gender;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
@@ -75,57 +76,65 @@ class StudentController extends Controller
     {
         $departments = Department::active()->get();
         $programs    = Program::active()->get();
+        $genders     = Gender::all();
 
-        return view('admin.students.create', compact('departments', 'programs'));
+        return view(
+            'admin.students.create',
+            compact(
+                'departments',
+                'programs',
+                'genders',
+            )
+        );
     }
 
     public function store(Request $request): RedirectResponse
     {
+        // Validate user data
+        $userData = $request->validate([
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|string|email|max:255|unique:users,email',
+            'username'    => 'required|string|max:255|alpha_dash|unique:users,username',
+            'password'    => 'required|string|min:8|confirmed',
+            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Validate student data
+        $studentData = $request->validate([
+            'department_id'              => 'required|exists:departments,id',
+            'program_id'                 => 'required|exists:programs,id',
+            'date_of_birth'              => 'required|date',
+            'gender_id'                  => 'required|exists:genders,id',
+            'nationality'                => 'required|string|max:100',
+            'phone'                      => 'required|string|max:20',
+            'emergency_contact_name'     => 'required|string|max:255',
+            'emergency_contact_phone'    => 'required|string|max:20',
+            'emergency_contact_relation' => 'required|string|max:100',
+            'current_address'            => 'required|string',
+            'permanent_address'          => 'required|string',
+            'city'                       => 'required|string|max:100',
+            'state'                      => 'required|string|max:100',
+            'country'                    => 'required|string|max:100',
+            'postal_code'                => 'required|string|max:20',
+            'admission_date'             => 'required|date',
+            'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
+            'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
+            'previous_education'         => 'nullable|string',
+            'blood_group'                => 'nullable|string|max:10',
+            'has_disability'             => 'boolean',
+            'disability_details'         => 'nullable|string',
+        ]);
+
         DB::beginTransaction();
 
         try {
-            // Validate user data
-            $userData = $request->validate([
-                'name'        => 'required|string|max:255',
-                'email'       => 'required|string|email|max:255|unique:users',
-                'username'    => 'required|string|max:255|alpha_dash|unique:users',
-                'password'    => 'required|string|min:8|confirmed',
-                'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
+            $studentData['academic_status'] = 'active';
 
-            // Validate student data
-            $studentData = $request->validate([
-                'department_id'              => 'required|exists:departments,id',
-                'program_id'                 => 'required|exists:programs,id',
-                'date_of_birth'              => 'required|date',
-                'gender'                     => 'required|in:male,female,other',
-                'nationality'                => 'required|string|max:100',
-                'phone'                      => 'required|string|max:20',
-                'emergency_contact_name'     => 'required|string|max:255',
-                'emergency_contact_phone'    => 'required|string|max:20',
-                'emergency_contact_relation' => 'required|string|max:100',
-                'current_address'            => 'required|string',
-                'permanent_address'          => 'required|string',
-                'city'                       => 'required|string|max:100',
-                'state'                      => 'required|string|max:100',
-                'country'                    => 'required|string|max:100',
-                'postal_code'                => 'required|string|max:20',
-                'admission_date'             => 'required|date',
-                'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
-                'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
-                'previous_education'         => 'nullable|string',
-                'blood_group'                => 'nullable|string|max:10',
-                'has_disability'             => 'boolean',
-                'disability_details'         => 'nullable|string',
-            ]);
-
-            // Create user
             $user = User::create([
                 'name'          => $userData['name'],
                 'email'         => $userData['email'],
                 'username'      => $userData['username'],
                 'password'      => Hash::make($userData['password']),
-                'department_id' => $studentData['department_id'],
                 'is_active'     => true,
             ]);
 
@@ -141,7 +150,7 @@ class StudentController extends Controller
             // Create student record
             Student::create(array_merge($studentData, [
                 'user_id'    => $user->id,
-                'student_id' => (new Student())->generateStudentId(),
+                'student_id' => (new Student())->generateStudentId($studentData['department_id']), // Pass department_id for generation
             ]));
 
             DB::commit();
@@ -149,13 +158,18 @@ class StudentController extends Controller
             return redirect()->route('admin.students.index')
                 ->with('success', 'Student created successfully.');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) { // Catch Throwable to ensure DB rollback for any exception
             DB::rollBack();
             // Log the exception for debugging purposes
-            \Log::error('Student creation failed: ' . $e->getMessage(), [
+            \Illuminate\Support\Facades\Log::error('Student creation failed: ' . $e->getMessage(), [
                 'exception'    => $e,
                 'request_data' => $request->all(),
             ]);
+
+            // Re-throw the exception if it's a ValidationException, so Laravel's default handler can process it
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                throw $e;
+            }
 
             return redirect()->back()
                 ->with(
@@ -178,11 +192,14 @@ class StudentController extends Controller
         $student->load('user');
         $departments = Department::active()->get();
         $programs    = Program::active()->get();
+        $genders     = Gender::all();
 
         return view('admin.students.edit',
             compact(
                 'student',
-                'departments', 'programs'
+                'departments',
+                'programs',
+                'genders',
             )
         );
     }
@@ -195,15 +212,9 @@ class StudentController extends Controller
             // Validate user data
             $userData = $request->validate([
                 'name'     => 'required|string|max:255',
-                'email'    => 'required
-                    |string
-                    |email
-                    |max:255
+                'email'    => 'required|string|email|max:255
                     |unique:users,email,' . $student->user_id,
-                'username' => 'required
-                    |string
-                    |max:255
-                    |alpha_dash
+                'username' => 'required|string|max:255|alpha_dash
                     |unique:users,username,' . $student->user_id,
             ]);
 
@@ -212,7 +223,7 @@ class StudentController extends Controller
                 'department_id'              => 'required|exists:departments,id',
                 'program_id'                 => 'required|exists:programs,id',
                 'date_of_birth'              => 'required|date',
-                'gender'                     => 'required|in:male,female,other',
+                'gender_id'                  => 'required|exists:genders,id',
                 'nationality'                => 'required|string|max:100',
                 'phone'                      => 'required|string|max:20',
                 'emergency_contact_name'     => 'required|string|max:255',
