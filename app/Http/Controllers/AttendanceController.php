@@ -58,7 +58,8 @@ class AttendanceController extends Controller
 
         Attendance::create($validated);
 
-        return redirect()->route('admin.attendances.index')->with('success', 'Attendance record created successfully.');
+        return redirect()->route('admin.attendances.index')
+        ->with('success', 'Attendance record created successfully.');
     }
 
     /**

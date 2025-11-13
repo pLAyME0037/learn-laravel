@@ -16,6 +16,13 @@ class Payment extends Model
     use HasFactory, SoftDeletes;
 
     /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'payment_id';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

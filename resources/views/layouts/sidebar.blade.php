@@ -145,7 +145,7 @@
                 'children' => [
                     [
                         'type' => 'link',
-                        'label' => 'Classroom',
+                        'label' => 'All Classroom',
                         'icon' => '<path 
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -166,7 +166,7 @@
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
                             />',
                         'route' => 'admin.class-schedules.index',
-                        'can' => ['view.class_schedules'],
+                        'can' => ['view.class-schedules'],
                     ],
                 ],
             ],
@@ -267,7 +267,7 @@
                     // Faculty
                     [
                         'type' => 'link',
-                        'label' => 'Faculty',
+                        'label' => 'All Faculty',
                         'icon' =>
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18 M7 21V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12 M7 13h10M7 17h10 M10 9h.01M14 9h.01" />',
                         'route' => 'admin.faculties.index',
@@ -317,6 +317,28 @@
                                         'label' => 'Add Major',
                                         'route' => 'admin.majors.create',
                                         'can' => 'create.majors',
+                                    ],
+                                    // Program
+                                    [
+                                        'type' => 'dropdown',
+                                        'label' => 'Programs',
+                                        'icon' =>
+                                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                                        'can' => ['view.programs', 'create.programs'],
+                                        'children' => [
+                                            [
+                                                'type' => 'link',
+                                                'label' => 'All Programs',
+                                                'route' => 'admin.programs.index',
+                                                'can' => 'view.programs',
+                                            ],
+                                            [
+                                                'type' => 'link',
+                                                'label' => 'Add Program',
+                                                'route' => 'admin.programs.create',
+                                                'can' => 'create.programs',
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
@@ -371,28 +393,6 @@
                         'label' => 'Add Payment',
                         'route' => 'admin.payments.create',
                         'can' => 'create.payments',
-                    ],
-                ],
-            ],
-            // Program
-            [
-                'type' => 'dropdown',
-                'label' => 'Programs',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
-                'can' => ['view.programs', 'create.programs'],
-                'children' => [
-                    [
-                        'type' => 'link',
-                        'label' => 'All Programs',
-                        'route' => 'admin.programs.index',
-                        'can' => 'view.programs',
-                    ],
-                    [
-                        'type' => 'link',
-                        'label' => 'Add Program',
-                        'route' => 'admin.programs.create',
-                        'can' => 'create.programs',
                     ],
                 ],
             ],

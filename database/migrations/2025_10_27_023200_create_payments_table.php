@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->increments('payment_id');
-            $table->integer('student_id');
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
             $table->decimal('amount', 10, 2);
             $table->date('payment_date');
             $table->string('payment_period_description', 50);
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('student_id')->references('student_id')->on('students');
+            // The foreign key is now defined using foreignId, so explicit references are not needed unless custom column names are used.
+            // $table->foreign('student_id')->references('id')->on('students'); // This is implicitly handled by foreignId
             $table->index(['student_id']);
             $table->index(['payment_date']);
         });

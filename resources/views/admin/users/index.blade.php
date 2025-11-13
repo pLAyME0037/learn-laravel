@@ -118,9 +118,9 @@
                                             <td class="px-4 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">
-                                                        <img class="h-10 w-10 rounded-full"
+                                                        <x-profile-image class="border-blue-700"
                                                             src="{{ $user->profile_picture_url }}"
-                                                            alt="{{ $user->name }}">
+                                                            alt="{{ $user->name }}" />
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900 dark:text-white">

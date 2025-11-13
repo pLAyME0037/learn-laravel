@@ -15,7 +15,7 @@ class ClassSchedule extends Model
     protected $fillable = [
         'course_id',
         'professor_id',
-        'room_number',
+        'classroom_id',
         'capacity',
         'schedule_date',
         'start_time',
@@ -48,7 +48,7 @@ class ClassSchedule extends Model
      */
     public function classroom()
     {
-        return $this->belongsTo(Classroom::class, 'room_number', 'room_number');
+        return $this->belongsTo(Classroom::class, 'classroom_id'); // Updated to use classroom_id
     }
 
     /**
@@ -75,13 +75,6 @@ class ClassSchedule extends Model
         $query->where('professor_id', $professorId);
     }
 
-    /**
-     * Scope a query to only include class schedules by a specific room number.
-     */
-    public function scopeByRoom(Builder $query, string $roomNumber): void
-    {
-        $query->where('room_number', $roomNumber);
-    }
 
     /**
      * Scope a query to filter for schedules that still have available capacity.

@@ -10,18 +10,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create specific types of fake users
-        // User::factory(10)->create();
-        // User::factory()->count(5)->withoutProfilePic()->create();
-        // User::factory()->count(3)->withLongBio()->unverified()->create();
-
         $this->call([
             RolePermissionSeeder::class,
+            FacultySeeder::class,
             DepartmentSeeder::class,
             AdminSeeder::class,
+            SystemConfigSeeder::class,
+            InstructorSeeder::class,
             ProgramSeeder::class,
             StudentManagementSeeder::class,
-            AcademicYearDashboardSeeder::class,
+            SemesterSeeder::class, // Creates AcademicYear and Semesters
+            AcademicYearDashboardSeeder::class, // Now fetches existing AcademicYear and Semesters
+            ClassroomSeeder::class,
+            CourseSeeder::class,
+            CoursePrerequisiteSeeder::class,
+            ClassScheduleSeeder::class,
+            AttendanceSeeder::class,
+            ContactDetailSeeder::class,
+            PaymentSeeder::class,
+            TransactionLedgerSeeder::class,
+            AuditLogSeeder::class,
         ]);
     }
 }

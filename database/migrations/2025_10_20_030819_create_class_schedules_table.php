@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('classroom_id')->constrained('classrooms')->onDelete('cascade');
             $table->integer('capacity');
             $table->string('day_of_week')->nullable();
+            $table->date('schedule_date')->nullable();
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->timestamps();
