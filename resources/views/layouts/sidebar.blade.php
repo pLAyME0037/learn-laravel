@@ -82,19 +82,19 @@
                 'label' => 'Academic Records',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />',
-                'can' => ['view.academic_records', 'create.academic_records'],
+                'can' => ['view.academic-records', 'create.academic-records'],
                 'children' => [
                     [
                         'type' => 'link',
                         'label' => 'All Academic Records',
-                        'route' => 'admin.academic_records.index',
-                        'can' => 'view.academic_records',
+                        'route' => 'admin.academic-records.index',
+                        'can' => 'view.academic-records',
                     ],
                     [
                         'type' => 'link',
                         'label' => 'Add Academic Record',
-                        'route' => 'admin.academic_records.create',
-                        'can' => 'create.academic_records',
+                        'route' => 'admin.academic-records.create',
+                        'can' => 'create.academic-records',
                     ],
                 ],
             ],
@@ -180,8 +180,8 @@
                                 stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
                             />',
-                'route' => 'admin.contact_details.index',
-                'can' => ['view.contact_details'],
+                'route' => 'admin.contact-details.index',
+                'can' => ['view.contact-details'],
             ],
             // Courses
             [
@@ -232,8 +232,8 @@
                                 stroke-width="2"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
                             />',
-                'route' => 'admin.credit_scores.index',
-                'can' => ['view.credit_scores'],
+                'route' => 'admin.credit-scores.index',
+                'can' => ['view.credit-scores'],
             ],
             // D
             // Degree
@@ -376,25 +376,12 @@
             // P
             // Payment
             [
-                'type' => 'dropdown',
+                'type' => 'link',
                 'label' => 'Payments',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />',
+                'route' => 'admin.payments.index',
                 'can' => ['view.payments', 'create.payments'],
-                'children' => [
-                    [
-                        'type' => 'link',
-                        'label' => 'All Payments',
-                        'route' => 'admin.payments.index',
-                        'can' => 'view.payments',
-                    ],
-                    [
-                        'type' => 'link',
-                        'label' => 'Add Payment',
-                        'route' => 'admin.payments.create',
-                        'can' => 'create.payments',
-                    ],
-                ],
             ],
             // Q
             // R

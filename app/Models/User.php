@@ -1,19 +1,19 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Builder;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -149,12 +149,12 @@ class User extends Authenticatable
     public function isStaff(): bool
     {
         return $this->hasAnyRole([
-            'super_user', 
-            'admin', 
+            'super_user',
+            'admin',
             'registrar',
             'hod',
-            'professor', 
-            'staff'
+            'professor',
+            'staff',
         ]);
     }
 
@@ -222,6 +222,57 @@ class User extends Authenticatable
     public function scopeLastLoggedInBefore(Builder $query, string $date): void
     {
         $query->where('last_login_at', '<', Carbon::parse($date)->startOfDay());
+    }
+
+    /**
+     * Apply dynamic filters to the user query.
+     *
+     * @param array $filters ['search' => string, 'role' => string, 'status' => string, 'orderby' => string]
+     */
+    public function scopeApplyFilters(Builder $query, array $filters): Builder
+    {
+        // Apply status filter first to narrow down the dataset (withTrashed, onlyTrashed, etc.)
+        $query->when($filters['status'] ?? null, function ($q, $status) {
+            switch ($status) {
+            case 'active':return $q->where('is_active', true)->withoutTrashed();
+            case 'inactive':return $q->where('is_active', false)->withoutTrashed();
+            case 'trashed':return $q->onlyTrashed();
+            default: return $q->withoutTrashed();
+            }
+        },
+            function ($q) {
+                // Default behavior if no status is set: exclude trashed users
+                return $q->withoutTrashed();
+            });
+
+        // Apply search filter
+        $query->when($filters['search'] ?? null, function ($q, $search) {
+            $q->where(fn($subQuery) => $subQuery
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('username', 'like', "%{$search}%")
+            );
+        });
+
+        // Apply role filter
+        $query->when($filters['role'] ?? null, function ($q, $role) {
+            if ($role === 'no_roles') {
+                return $q->doesntHave('roles');
+            }
+            return $q->whereHas('roles', fn($roleQuery) => $roleQuery->where('name', $role));
+        });
+
+        // Apply ordering
+        $query->when($filters['orderby'] ?? 'newest', function ($q, $orderby) {
+            match ($orderby) {
+            'a_to_z' => $q->orderBy('name', 'asc'),
+            'z_to_a' => $q->orderBy('name', 'desc'),
+            'oldest' => $q->orderBy('created_at', 'asc'),
+            default  => $q->orderBy('created_at', 'desc'), // 'newest' and default
+            };
+        });
+
+        return $query;
     }
 
     public function updateLoginInfo(): void

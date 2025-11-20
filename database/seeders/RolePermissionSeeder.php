@@ -145,6 +145,18 @@ class RolePermissionSeeder extends Seeder
                 'delete.departments' => 'Delete departments',
                 'manage.departments' => 'Manage department settings',
             ],
+            'Faculty Management' => [
+                'view.faculties'   => 'View faculties',
+                'create.faculties' => 'Create new faculties',
+                'edit.faculties'   => 'Edit existing faculties',
+                'delete.faculties' => 'Delete faculties',
+            ],
+            'Major Management' => [
+                'view.majors'   => 'View majors',
+                'create.majors' => 'Create new majors',
+                'edit.majors'   => 'Edit existing majors',
+                'delete.majors' => 'Delete majors',
+            ],
             'Program Management'   => [
                 'view.programs'   => 'View academic programs',
                 'create.programs' => 'Create new academic programs',
@@ -177,12 +189,25 @@ class RolePermissionSeeder extends Seeder
                 'delete.attendances' => 'Delete attendances',
                 'manage.attendances' => 'Manage attendance profiles',
             ],
+            'Academic Year Management' => [
+                'view.academic_years'   => 'View academic_years',
+                'create.academic_years' => 'Create new academic_years',
+                'edit.academic_years'   => 'Edit existing academic_years',
+                'delete.academic_years' => 'Delete academic_years',
+                'manage.academic_years' => 'Manage academic_years profiles',
+            ],
             'Report Management' => [
                 'view.reports'   => 'View reports',
                 'create.reports' => 'Create new reports',
                 'edit.reports'   => 'Edit existing reports',
                 'delete.reports' => 'Delete reports',
                 'manage.reports' => 'Manage report profiles',
+            ],
+            'Permission Management' => [
+                'view.permissions'   => 'View permissions',
+                'create.permissions' => 'Create new permissions',
+                'edit.permissions'   => 'Edit existing permissions',
+                'delete.permissions' => 'Delete permissions',
             ],
             'Syllabus Management'   => [
                 'manage.syllabus' => 'Manage course syllabi',
@@ -200,6 +225,36 @@ class RolePermissionSeeder extends Seeder
                 'edit.courses'   => 'Edit existing courses',
                 'delete.courses' => 'Delete courses',
                 'manage.courses' => 'Manage courses (broad)',
+            ],
+            'Course Prerequisites Management'    => [
+                'view.course-prerequisites'   => 'View course-prerequisites',
+                'create.course-prerequisites' => 'Create new course-prerequisites',
+                'edit.course-prerequisites'   => 'Edit existing course-prerequisites',
+                'delete.course-prerequisites' => 'Delete course-prerequisites',
+            ],
+            'Class Schdule Management'    => [
+                'view.class-schedules'   => 'View class-schedules',
+                'create.class-schedules' => 'Create new class-schedules',
+                'edit.class-schedules'   => 'Edit existing class-schedules',
+                'delete.class-schedules' => 'Delete class-schedules',
+            ],
+            'Contact Detail Management'    => [
+                'view.contact-details'   => 'View contact-details',
+                'create.contact-details' => 'Create new contact-details',
+                'edit.contact-details'   => 'Edit existing contact-details',
+                'delete.contact-details' => 'Delete contact-details',
+            ],
+            'Credit Score Management'    => [
+                'view.credit-score'   => 'View credit-score',
+                'create.credit-score' => 'Create new credit-score',
+                'edit.credit-score'   => 'Edit existing credit-score',
+                'delete.credit-score' => 'Delete credit-score',
+            ],
+            'Audit Log Management'    => [
+                'view.audit_logs'   => 'View audit_logs',
+                'create.audit_logs' => 'Create new audit_logs',
+                'edit.audit_logs'   => 'Edit existing audit_logs',
+                'delete.audit_logs' => 'Delete audit_logs',
             ],
             'Financial Management' => [
                 'manage.fees'         => 'Manage student fees',

@@ -49,12 +49,22 @@ class Payment extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function semester(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class);
+    }
+
     /**
      * Returns the amount formatted as currency.
      */
     public function getFormattedAmountAttribute(): string
     {
-        return '$' . number_format($this->amount, 2);
+        return '$' . number_format((float) $this->amount, 2);
     }
 
     /**

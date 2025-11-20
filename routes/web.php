@@ -33,8 +33,8 @@ use App\Http\Controllers\SystemConfigController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\UserManagement;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -90,12 +90,13 @@ Route::middleware(['auth', 'verified'])
         ])->name('users.status');
         Route::post('users/{user}/restore', [
             UserController::class, 'restore',
-        ])->name('users.restore');
-        Route::post('users/{user}/force-delete', [
+        ])->name('users.restore')->withTrashed();
+        Route::delete('users/{user}/force-delete', [
             UserController::class, 'forceDelete',
         ])->name('users.force-delete');
 
-        Route::get('user-management', UserManagement::class)->name('users.management');
+        Route::get('user-management', UserManagement::class)
+        ->name('users.management');
 
         // Student Management Routes
         Route::resource('students', StudentController::class)
@@ -106,7 +107,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('/students/{student}/restore', [
             StudentController::class, 'restore',
         ])->name('students.restore');
-        Route::get('/students/{student}/force-delete', [
+        Route::delete('/students/{student}/force-delete', [
             StudentController::class, 'forceDelete',
         ])->name('students.force-delete');
         Route::get('/students/{student}/status', [
@@ -176,7 +177,7 @@ Route::middleware(['auth', 'verified'])
 
         // Role Management
         Route::resource('roles', RoleController::class);
-        
+
         Route::get('roles/{role}/edit-permissions', [
             RoleController::class, 'editPermissions',
         ])->name('roles.edit-permissions');

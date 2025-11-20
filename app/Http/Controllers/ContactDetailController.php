@@ -27,7 +27,13 @@ class ContactDetailController extends Controller
      */
     public function index(): View
     {
-        $contactDetails = ContactDetail::with(['user', 'student', 'instructor'])->paginate(10);
+        $contactDetails = ContactDetail::with(['user', 'student', 'instructor'])
+            ->paginate(10)
+            ->through(function ($contactDetail) {
+                $contactDetail->id = $contactDetail->person_id; // Explicitly add 'id' key
+                return $contactDetail;
+            });
+
         return view('admin.contact_details.index', compact('contactDetails'));
     }
 
@@ -58,7 +64,8 @@ class ContactDetailController extends Controller
 
         ContactDetail::create($validated);
 
-        return redirect()->route('admin.contact_details.index')->with('success', 'Contact detail created successfully.');
+        return redirect()->route('admin.contact-details.index')
+        ->with('success', 'Contact detail created successfully.');
     }
 
     /**
@@ -96,7 +103,8 @@ class ContactDetailController extends Controller
 
         $contactDetail->update($validated);
 
-        return redirect()->route('admin.contact_details.show', $contactDetail)->with('success', 'Contact detail updated successfully.');
+        return redirect()->route('admin.contact-details.show', $contactDetail)
+        ->with('success', 'Contact detail updated successfully.');
     }
 
     /**
@@ -106,6 +114,7 @@ class ContactDetailController extends Controller
     {
         $contactDetail->delete();
 
-        return redirect()->route('admin.contact_details.index')->with('success', 'Contact detail deleted successfully.');
+        return redirect()->route('admin.contact-details.index')
+        ->with('success', 'Contact detail deleted successfully.');
     }
 }

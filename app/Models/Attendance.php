@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\ClassSchedule;
+use App\Models\Course;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,13 +18,27 @@ class Attendance extends Model
     use HasFactory, SoftDeletes;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'attendances';
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'attendance_id';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'student_id',
-        'course_id',
+        'student_id', // This refers to user_id in the users table
+        'class_schedule_id',
         'date',
         'status',
     ];
@@ -35,14 +52,26 @@ class Attendance extends Model
         'date' => 'date',
     ];
 
-    public function student()
+    public function user()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function classSchedule()
+    {
+        return $this->belongsTo(ClassSchedule::class, 'class_schedule_id');
     }
 
     public function course()
     {
-        return $this->belongsTo(Course::class, 'course_number', 'code');
+        return $this->hasOneThrough(
+            Course::class,
+            ClassSchedule::class,
+            'id', // Foreign key on ClassSchedule table
+            'id', // Foreign key on Course table
+            'class_schedule_id', // Local key on Attendance table
+            'course_id' // Local key on ClassSchedule table
+        );
     }
 
     /**

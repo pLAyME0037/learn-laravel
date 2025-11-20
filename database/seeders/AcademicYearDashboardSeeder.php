@@ -149,7 +149,7 @@ class AcademicYearDashboardSeeder extends Seeder
             return $course;
         })->all();
 
-        Course::upsert($coursesToUpsert, ['code'], array_keys($coursesToUpsert[0]));
+        Course::upsert($coursesToUpsert, ['code', 'semester_id'], array_keys($coursesToUpsert[0]));
         return Course::whereIn('code', array_column($coursesToUpsert, 'code'))->get()->keyBy('code');
     }
 

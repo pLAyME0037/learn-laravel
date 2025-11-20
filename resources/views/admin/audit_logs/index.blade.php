@@ -10,7 +10,9 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Manage Audit Logs</h3>
+                        <h3 class="text-lg font-medium text-gray-900">
+                            Manage Audit Logs
+                        </h3>
                     </div>
 
                     <div class="mb-4">
@@ -28,6 +30,7 @@
 
                         $data = $auditLogs->map(function ($auditLog) {
                             return [
+                                'id' => $auditLog->id, // Add the audit log ID
                                 'user' => $auditLog->user->name,
                                 'action' => $auditLog->action,
                                 'description' => $auditLog->description,
@@ -35,11 +38,17 @@
                         });
 
                         $actions = [
+                            'show' => [
+                                'route' => 'admin.audit-logs.show',
+                                'label' => 'Show',
+                                'params' => ['audit_log' => 'id'],
+                                'class' => 'text-green-600 hover:text-green-500',
+                            ],
                             'delete' => [
-                                'route' => 'admin.auditLogs.destroy',
+                                'route' => 'admin.audit-logs.destroy',
                                 'label' => 'Delete',
                                 'params' => ['audit_log' => 'id'],
-                                'class' => 'text-red-600 hover:text-red-900',
+                                'class' => 'text-red-600 hover:text-red-500',
                                 'method' => 'DELETE',
                             ],
                         ];

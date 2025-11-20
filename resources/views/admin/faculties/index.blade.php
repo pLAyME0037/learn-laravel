@@ -21,12 +21,14 @@
 
                     @php
                         $headers = [
+                            'id' => 'Faculty ID',
                             'faculty_name' => 'Faculty Name',
                         ];
 
                         $data = $faculties->map(function ($faculty) {
                             return [
-                                'faculty_name' => $faculty->faculty_name,
+                                'id'=> $faculty->id,
+                                'faculty_name' => $faculty->name,
                             ];
                         });
 

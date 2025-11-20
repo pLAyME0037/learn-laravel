@@ -69,8 +69,7 @@
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Department
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -78,8 +77,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Program
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -111,6 +109,14 @@
                                         </p>
                                     </div>
                                     <div>
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            Year Level
+                                        </label>
+                                        <p class="text-sm text-gray-900 dark:text-white">
+                                            {{ $student->year_level_name ?? 'N/A' }}
+                                        </p>
+                                    </div>
+                                    <div>
                                         <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Has
                                             Outstanding Balance
                                         </label>
@@ -136,8 +142,7 @@
                                             ({{ $student->date_of_birth->age }} years old)</p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Gender
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -145,8 +150,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Nationality
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -169,8 +173,7 @@
                                     </div>
                                     @if ($student->has_disability)
                                         <div class="md:col-span-2">
-                                            <label
-                                                class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                                 Disability Details
                                             </label>
                                             <p class="text-sm text-gray-900 dark:text-white">
@@ -203,8 +206,8 @@
                                         <p class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $student->permanent_address }}</p>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                            {{ $student->city }}, 
-                                            {{ $student->state }}, 
+                                            {{ $student->city }},
+                                            {{ $student->state }},
                                             {{ $student->country }} -
                                             {{ $student->postal_code }}
                                         </p>
@@ -222,8 +225,7 @@
                                 </h3>
                                 <div class="space-y-3">
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Username
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -231,8 +233,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Email
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -240,8 +241,7 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Phone
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
@@ -260,11 +260,7 @@
                                             Email Verified
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
-                                            {{ 
-                                                $student->user->email_verified_at 
-                                                ? $student->user->email_verified_at->format('M d, Y') 
-                                                : 'Not Verified' 
-                                            }}
+                                            {{ $student->user->email_verified_at ? $student->user->email_verified_at->format('M d, Y') : 'Not Verified' }}
                                         </p>
                                     </div>
                                 </div>
@@ -293,13 +289,12 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <label
-                                            class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                             Relationship
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
                                             {{ $student->emergency_contact_relation }}
-                                        
+
                                         </p>
                                     </div>
                                 </div>
@@ -311,13 +306,17 @@
                                     Quick Actions
                                 </h3>
                                 <div class="space-y-2">
-                                    @can('students.edit')
+                                        <a href="{{ route('admin.students.index') }}"
+                                            class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors text-center block">
+                                            Back
+                                        </a>
+                                    @can('edit.students')
                                         <a href="{{ route('admin.students.edit', $student) }}"
-                                            class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors text-center block">
+                                            class="w-full bg-blue-400 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors text-center block">
                                             Edit Student
                                         </a>
                                     @endcan
-                                    @can('students.delete')
+                                    @can('delete.students')
                                         @if ($student->trashed())
                                             <form action="{{ route('admin.students.restore', $student) }}"
                                                 method="POST"
@@ -325,7 +324,7 @@
                                                 @csrf
                                                 @method('POST')
                                                 <button type="submit"
-                                                    class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                                    class="w-full bg-green-300 hover:bg-green-400 text-white px-4 py-2 rounded-lg transition-colors"
                                                     onclick="return confirm('Are you sure you want to restore this student?')">
                                                     Restore Student
                                                 </button>
@@ -336,7 +335,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                                    class="w-full bg-red-300 hover:bg-red-400 text-white px-4 py-2 rounded-lg transition-colors"
                                                     onclick="return confirm('Are you sure you want to permanently delete this student? This action cannot be undone.')">
                                                     Delete Permanently
                                                 </button>

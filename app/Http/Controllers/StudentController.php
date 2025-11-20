@@ -23,52 +23,37 @@ class StudentController extends Controller
         $this->middleware('has_permission:delete.students')->only('restore', 'forceDelete');
         $this->middleware('has_permission:edit.students')->only('updateStatus');
     }
+
     public function index(Request $request): View
     {
-        $search     = $request->get('search');
-        $department = $request->get('department');
-        $program    = $request->get('program');
-        $studentId  = $request->get('student_id');
-        $status     = $request->get('status', 'active');
+        $filters = $request->validate([
+            'search'            => 'nullable|string|max:100',
+            'department_id'     => 'nullable|integer|exists:departments,id',
+            'program_id'        => 'nullable|integer|exists:programs,id',
+            'academic_status'    => 'nullable|string|in:active,probation,suspended,graduated,withdrawn,transfered,trashed',
+            'enrollment_status' => 'nullable|string|in:full_time,part_time,exchange,study_abroad',
+        ]);
 
-        $students = Student::with(['user', 'department', 'program'])
-            ->when($search, function ($query, $search) {
-                return $query->search($search);
-            })
-            ->when($department, function ($query, $department) {
-                return $query->where('department_id', $department);
-            })
-            ->when($program, function ($query, $program) {
-                return $query->where('program_id', $program);
-            })
-            ->when($studentId, function ($query, $studentId) {
-                return $query->where('student_id', $studentId);
-            })
-            ->when($status === 'active', function ($query) {
-                return $query->active();
-            })
-            ->when($status === 'inactive', function ($query) {
-                return $query->where('academic_status', '!=', 'active');
-            })
-            ->when($status === 'trashed', function ($query) {
-                return $query->onlyTrashed();
-            })
+        $students = Student::with('department', 'program', 'user')
+            ->applyFilters($filters)
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        $departments = Department::active()->get();
-        $programs    = Program::active()->get();
+        $departments = Department::active()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+        $programs = Program::active()
+            ->select('id', 'name', 'department_id')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.students.index', compact(
+            'filters',
             'students',
-            'search',
-            'department',
-            'program',
-            'studentId',
-            'status',
             'departments',
-            'programs'
+            'programs',
         ));
     }
 
@@ -131,11 +116,11 @@ class StudentController extends Controller
             $studentData['academic_status'] = 'active';
 
             $user = User::create([
-                'name'          => $userData['name'],
-                'email'         => $userData['email'],
-                'username'      => $userData['username'],
-                'password'      => Hash::make($userData['password']),
-                'is_active'     => true,
+                'name'      => $userData['name'],
+                'email'     => $userData['email'],
+                'username'  => $userData['username'],
+                'password'  => Hash::make($userData['password']),
+                'is_active' => true,
             ]);
 
             // Assign student role
@@ -171,12 +156,14 @@ class StudentController extends Controller
                 throw $e;
             }
 
-            return redirect()->back()
-                ->with(
-                    'error',
-                    'Failed to create student. Please check the form data and try again. If the problem persists, contact support.'
-                )
-                ->withInput();
+            return redirect()
+            ->back()
+            ->with(
+                'error',
+                'Failed to create student. Please check the form data and try again.'
+                . ' If the problem persists, contact support.'
+            )
+            ->withInput();
         }
     }
 

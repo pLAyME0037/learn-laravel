@@ -1,17 +1,31 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class ContactDetail extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'person_id';
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['id'];
 
     /**
      * The attributes that are mass assignable.
@@ -62,7 +76,12 @@ class ContactDetail extends Model
         // Basic formatting: (XXX) XXX-XXXX
         $phoneNumber = preg_replace('/[^0-9]/', '', $this->phone_number);
         if (strlen($phoneNumber) === 10) {
-            return '(' . substr($phoneNumber, 0, 3) . ') ' . substr($phoneNumber, 3, 3) . '-' . substr($phoneNumber, 6, 4);
+            return '('
+            . substr($phoneNumber, 0, 3)
+            . ') '
+            . substr($phoneNumber, 3, 3)
+            . '-'
+            . substr($phoneNumber, 6, 4);
         }
         return $this->phone_number; // Return as is if not 10 digits
     }
@@ -100,7 +119,7 @@ class ContactDetail extends Model
      */
     public function hasEmail(): bool
     {
-        return !empty($this->email);
+        return ! empty($this->email);
     }
 
     /**
@@ -109,5 +128,15 @@ class ContactDetail extends Model
     public function hasPhoneNumber(): bool
     {
         return !empty($this->phone_number);
+    }
+
+    /**
+     * Get the value of the model's route key.
+     *
+     * @return mixed
+     */
+    public function getIdAttribute()
+    {
+        return $this->person_id;
     }
 }

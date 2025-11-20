@@ -1,96 +1,95 @@
-<!-- resources/views/components/filter-box.blade.php -->
-@props(['action', 'filters', 'initialState' => 'maximized', 'uri' => null, 'button' => null])
+@props(['action', 'filters', 'uri' => null, 'createBtn' => null])
 
-<div x-data="{ minimized: {{ $initialState === 'minimized' ? 'true' : 'false' }} }"
-    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-4">
-    <div class="p-4">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                {{ __('Filters') }}
-            </h3>
-            <button @click="minimized = !minimized"
-                class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                <span x-show="minimized">{{ __('Maximize') }}</span>
-                <span x-show="!minimized">{{ __('Minimize') }}</span>
-            </button>
+<div {{ $attributes->merge(['class' => 'bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6']) }}>
+    <form method="GET"
+        action="{{ $action }}">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            @foreach ($filters as $filter)
+                <div>
+                    <x-input-label :for="$filter['name']"
+                        :value="$filter['label']" />
+
+                    {{-- TEXT INPUT --}}
+                    @if (($filter['type'] ?? 'text') === 'text')
+                        <x-text-input :id="$filter['name']"
+                            :name="$filter['name']"
+                            type="text"
+                            value="{{ $filter['value'] ?? '' }}"
+                            class="mt-1 block w-full"
+                            :placeholder="$filter['placeholder'] ?? ''" />
+
+                        {{-- SELECT INPUT --}}
+                    @elseif (($filter['type'] ?? '') === 'select')
+                        <select id="{{ $filter['name'] }}"
+                            name="{{ $filter['name'] }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                            {{-- 1. Alpine Model Binding --}}
+                            @if (!empty($filter['alpine_model'])) x-model="{{ $filter['alpine_model'] }}" @endif
+                            {{-- 2. Alpine Change Event --}}
+                            @if (!empty($filter['onChange'])) @change="{{ $filter['onChange'] }}" @endif>
+                            <option value="">{{ $filter['defaultOptionText'] ?? 'Select' }}</option>
+
+                            {{-- A. DYNAMIC ALPINE OPTIONS --}}
+                            @if (!empty($filter['alpine_options']))
+                                <template x-for="item in {{ $filter['alpine_options'] }}"
+                                    :key="item.{{ $filter['option_value'] ?? 'id' }}">
+                                    <option :value="item.{{ $filter['option_value'] ?? 'id' }}"
+                                        x-text="item.{{ $filter['option_text'] ?? 'name' }}"
+                                        :selected="item.{{ $filter['option_value'] ?? 'id' }} ==
+                                            {{ $filter['alpine_model'] ?? 'null' }}">
+                                    </option>
+                                </template>
+
+                                {{-- B. STATIC PHP OPTIONS --}}
+                            @else
+                                {{-- FIX: Added '?? []' to prevent crash if options key is missing --}}
+                                @foreach ($filter['options'] ?? [] as $option)
+                                    @php
+                                        $val = is_array($option) ? $option['value'] : $option;
+                                        $txt = is_array($option) ? $option['text'] : ucfirst($option);
+                                        $isSelected = ($filter['selectedValue'] ?? '') == $val;
+                                    @endphp
+                                    <option value="{{ $val }}"
+                                        {{ $isSelected ? 'selected' : '' }}>
+                                        {{ $txt }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    @endif
+
+                    {{-- Error Message --}}
+                    @if (isset($filter['errorMessages']) && is_array($filter['errorMessages']) && count($filter['errorMessages']) > 0)
+                        <p class="text-red-500 text-xs mt-1">
+                            {{ $filter['errorMessages'][0] }}
+                        </p>
+                    @elseif (isset($filter['errorMessages']) && is_string($filter['errorMessages']))
+                        <p class="text-red-500 text-xs mt-1">
+                            {{ $filter['errorMessages'] }}
+                        </p>
+                    @endif
+                </div>
+            @endforeach
         </div>
 
-        <form method="GET"
-            action="{{ $action }}"
-            class="space-y-4"
-            x-show="!minimized">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                @foreach ($filters as $filter)
-                    {{-- Ensure $filter is an array and has the 'type' key before proceeding --}}
-                    @if (is_array($filter) && array_key_exists('type', $filter))
-                        @if ($filter['type'] === 'text')
-                            <div>
-                                <x-input-label for="{{ $filter['name'] }}"
-                                    :value="__($filter['label'])" />
-                                <x-text-input id="{{ $filter['name'] }}"
-                                    name="{{ $filter['name'] }}"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    :value="old($filter['name'], $filter['value'])"
-                                    placeholder="{{ $filter['placeholder'] ?? '' }}" />
-                            </div>
-                        @elseif ($filter['type'] === 'select')
-                            <div>
-                                <x-input-label for="{{ $filter['name'] }}"
-                                    :value="__($filter['label'])" />
-                                <select id="{{ $filter['name'] }}"
-                                    name="{{ $filter['name'] }}"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                                    @php
-                                        // Safely access defaultOptionText, providing a default if it's not an array or doesn't exist
-                                        $defaultOptionText = is_array($filter['defaultOptionText'] ?? null)
-                                            ? $filter['defaultOptionText']['text'] ?? 'All'
-                                            : $filter['defaultOptionText'] ?? 'All';
-                                    @endphp
-                                    <option value="">{{ $defaultOptionText }}</option>
-                                    @foreach ($filter['options'] as $option)
-                                        @php
-                                            // Safely access option value and text
-                                            $optionValue = is_array($option) ? $option['value'] ?? $option : $option;
-                                            $optionText = is_array($option)
-                                                ? $option['text'] ?? ucfirst($option)
-                                                : ucfirst($option);
-                                        @endphp
-                                        <option value="{{ $optionValue }}"
-                                            {{ (string) old($filter['name'], $filter['selectedValue'] ?? null) === (string) $optionValue ? 'selected' : '' }}>
-                                            {{ $optionText }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @if (isset($filter['errorMessages']))
-                                    <x-input-error class="mt-2"
-                                        :messages="$filter['errorMessages']" />
-                                @endif
-                            </div>
-                        @endif
-                    @endif
-                    {{-- Add more filter types here (radio, checkbox) if needed in the future --}}
-                @endforeach
+        <div class="mt-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <a href="{{ $action }}"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    {{ __('Reset Filters') }}
+                </a>
 
-                <!-- Actions -->
-                <div class="md:col-span-3 flex items-end space-x-2">
-                    <x-primary-button type="submit">
-                        {{ __('Filter') }}
-                    </x-primary-button>
-                    <a href="{{ $action }}"
-                        class="px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-900 uppercase tracking-widest hover:bg-gray-400 dark:hover:bg-gray-400 focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        {{ __('Reset') }}
-                    </a>
-                </div>
-                @if ($uri && $button && is_string($uri) && $uri !== '')
-                    <div class="md:col-span-1 flex justify-end">
-                        <a href="{{ route($uri) }}"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            {{ __($button) }}
-                        </a>
-                    </div>
-                @endif
+                <x-primary-button>
+                    {{ __('Filter Results') }}
+                </x-primary-button>
             </div>
-        </form>
-    </div>
+
+            @if ($uri && $createBtn)
+                <a href="{{ route($uri) }}"
+                    class="ml-2 inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    {{ $createBtn }}
+                </a>
+            @endif
+        </div>
+    </form>
 </div>

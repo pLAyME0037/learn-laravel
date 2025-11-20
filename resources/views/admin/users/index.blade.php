@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('User Management') }}
             </h2>
-            @can('create.users')
+            @can('create', App\Models\User::class)
                 <a href="{{ route('admin.users.create') }}"
                     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
                     {{ __('Add New User') }}
@@ -16,25 +16,18 @@
     <div class="py-9">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @php
-                $roleOptions = collect($roles)
-                    ->map(function ($roleItem) {
-                        return [
-                            'value' => $roleItem->name,
-                            'text' => ucfirst($roleItem->name),
-                        ];
-                    })
-                    ->prepend([
-                        'value' => 'no_roles',
-                        'text' => 'No Roles',
-                    ])
+                // Prepare filter definitions directly in the view for clarity
+                $roleOptions = $roles
+                    ->map(fn($name) => ['value' => $name, 'text' => ucfirst($name)])
+                    ->prepend(['value' => 'no_roles', 'text' => 'No Roles'])
                     ->toArray();
 
-                $filters = [
+                $filterDefinitions = [
                     [
                         'type' => 'text',
                         'name' => 'search',
                         'label' => 'Search',
-                        'value' => $search,
+                        'value' => $filters['search'] ?? '',
                         'placeholder' => 'Search by name, email, or username',
                     ],
                     [
@@ -42,9 +35,8 @@
                         'name' => 'role',
                         'label' => 'Role',
                         'options' => $roleOptions,
-                        'selectedValue' => $selectedRole,
+                        'selectedValue' => $filters['role'] ?? '',
                         'defaultOptionText' => 'All Roles',
-                        'errorMessages' => $errors->get('role'),
                     ],
                     [
                         'type' => 'select',
@@ -55,7 +47,7 @@
                             ['value' => 'inactive', 'text' => 'Inactive'],
                             ['value' => 'trashed', 'text' => 'Trashed'],
                         ],
-                        'selectedValue' => $status,
+                        'selectedValue' => $filters['status'] ?? '',
                         'defaultOptionText' => 'All Status',
                     ],
                     [
@@ -63,260 +55,173 @@
                         'name' => 'orderby',
                         'label' => 'Order By',
                         'options' => [
+                            ['value' => 'a_to_z', 'text' => 'a-z'],
+                            ['value' => 'z_to_a', 'text' => 'z-a'],
                             ['value' => 'newest', 'text' => 'Newest'],
                             ['value' => 'oldest', 'text' => 'Oldest'],
                         ],
-                        'selectedValue' => $orderby,
-                        'defaultOptionText' => ['value' => 'default', 'text' => 'Default'],
+                        'selectedValue' => $filters['orderby'] ?? 'newest',
                     ],
                 ];
             @endphp
 
             <x-filter-box :action="route('admin.users.index')"
-                :filters="$filters"
-                uri='{{ "admin.users.create" }}'
-                button='{{ "Add New User" }}' />
+                :filters="$filterDefinitions"
+                createBtn="Add New User"
+                uri="admin.users.create" />
 
-            <!-- Users Table -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-4">
-                    @if ($users->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="w-full table-auto">
-                                <thead>
-                                    <tr class="bg-gray-50 dark:bg-gray-700">
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            User
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Role
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Email Verified
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Last Login
-                                        </th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                                    @foreach ($users as $user)
-                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <!-- User Info -->
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
-                                                        <x-profile-image class="border-blue-700"
-                                                            src="{{ $user->profile_picture_url }}"
-                                                            alt="{{ $user->name }}" />
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                            {{ $user->name }}
-                                                        </div>
-                                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                            {{ '@' }}{{ $user->username }}
-                                                        </div>
-                                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                            {{ $user->email }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
+            <x-table :headers="$headers"
+                :data="$users"
+                class="mt-6">
 
-                                            <!-- Roles -->
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                @forelse ($user->roles as $role)
-                                                    @php
-                                                        $roleColorClass = match ($role->name) {
-                                                            'Super Administrator'
-                                                                => 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100',
-                                                            'admin'
-                                                                => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100',
-                                                            'hod'
-                                                                => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-                                                            'register'
-                                                                => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
-                                                            'staff'
-                                                                => 'bg-teal-100 text-teal-800 dark:bg-teal-800 dark:text-teal-100',
-                                                            'professor'
-                                                                => 'bg-orange-100 text-blue-800 dark:bg-orange-800 dark:text-blue-100',
-                                                            'student'
-                                                                => 'bg-blue-100 text-gray-800 dark:bg-blue-700 dark:text-gray-300',
-                                                            default
-                                                                => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', // Default color
-                                                        };
-                                                    @endphp
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $roleColorClass }}">
-                                                        {{ ucfirst(str_replace('_', ' ', $role->name)) }}
-                                                    </span>
-                                                @empty
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                                        No Roles
-                                                    </span>
-                                                @endforelse
-                                            </td>
+                <x-slot name="bodyContent">
+                    @forelse ($users as $user)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            {{-- Users --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <x-table.cell.user-info :user="$user" />
+                            </td>
+                            {{-- Roles --}}
+                            <td class="px-6 py-4 whitespace-nowrap space-y-1">
+                                @forelse ($user->roles as $role)
+                                    <x-table.cell.role-badge :role="$role" :user="$user" />
+                                @empty
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 -bottom-1 -right-1 hover:bg-gray-200 hover:ring-2 hover:ring-gray-500 shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                        <a href="{{ route('admin.users.edit-access', $user->id) }}">
+                                            No Roles
+                                        </a>
+                                    </span>
+                                @endforelse
+                            </td>
+                            {{-- Status --}}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <x-table.cell.status-badge :user="$user" />
+                            </td>
+                            {{-- Email Verified --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                @if ($user->email_verified_at)
+                                    <span class="text-green-600 dark:text-green-400">
+                                        Yes
+                                    </span>
+                                    <div class="text-xs">
+                                        {{ $user->email_verified_at->format('M j, Y') }}
+                                    </div>
+                                @else
+                                    <span class="text-red-600 dark:text-red-400">
+                                        No
+                                    </span>
+                                @endif
+                            </td>
+                            {{-- User Status --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <x-table.cell.user-state :user="$user"/>
+                            </td>
+                            {{-- Action --}}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    @if ($user->trashed())
+                                        @can('restore', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'post-button',
+                                                'label' => 'Restore',
+                                                'route' => 'admin.users.restore',
+                                                'params' => ['user' => 'id'],
+                                                'class' => 'text-green-600',
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                        @can('forceDelete', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'delete',
+                                                'label' => 'Delete',
+                                                'route' => 'admin.users.force-delete',
+                                                'params' => ['user' => 'id'],
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                    @else
+                                        @can('view', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'link',
+                                                'label' => 'Show',
+                                                'route' => 'admin.users.show',
+                                                'params' => ['user' => 'id'],
+                                                'class' => 'text-gray-500',
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                        @can('changePassword', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'link',
+                                                'label' => 'Edit',
+                                                'route' => 'admin.users.edit',
+                                                'params' => ['user' => 'id'],
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                        @can('updateStatus', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'link',
+                                                'label' => 'Accessibility',
+                                                'route' => 'admin.users.edit-access',
+                                                'params' => ['user' => 'id'],
+                                                'class' => 'text-yellow-600',
+                                            ]"
+                                                :row="$user" />
+                                            <x-table.action :action="[
+                                                'type' => 'post-button',
+                                                'label' => $user->is_active ? 'Disactivate' : 'Activate',
+                                                'route' => 'admin.users.status',
+                                                'params' => ['user' => 'id'],
+                                                'class' => $user->is_active ? 'text-yellow-600 hover:text-yellow-500' : 'text-green-600 hover:text-green-500',
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                        @can('delete', $user)
+                                            <x-table.action :action="[
+                                                'type' => 'delete',
+                                                'label' => 'Trash',
+                                                'route' => 'admin.users.destroy',
+                                                'params' => ['user' => 'id'],
+                                            ]"
+                                                :row="$user" />
+                                        @endcan
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($headers) }}"
+                                class="px-6 py-4 text-center">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    No users found.
+                                </p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </x-slot>
 
-                                            <!-- Status -->
-                                            <td class="px-4 py-4 whitespace-nowrap">
-                                                @if ($user->trashed())
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">
-                                                        Deleted
-                                                    </span>
-                                                @else
-                                                    <span
-                                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                        {{ $user->is_active ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' }}">
-                                                        {{ $user->is_active ? 'Active' : 'Inactive' }}
-                                                    </span>
-                                                @endif
-                                            </td>
+                <x-slot name="pagination">
+                    {{ $users->links() }}
+                </x-slot>
 
-                                            <!-- Email Verified -->
-                                            <td
-                                                class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                @if ($user->email_verified_at)
-                                                    <span class="text-green-600 dark:text-green-400">Yes</span>
-                                                    <div class="text-xs">
-                                                        {{ $user->email_verified_at->format('M j, Y') }}</div>
-                                                @else
-                                                    <span class="text-red-600 dark:text-red-400">No</span>
-                                                @endif
-                                            </td>
-
-                                            <!-- Last Login -->
-                                            <td
-                                                class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never' }}
-                                            </td>
-
-                                            <!-- Actions -->
-                                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                                                <div class="flex space-x-2">
-                                                    @if ($user->trashed())
-                                                        <!-- Restore -->
-                                                        <form action="{{ route('admin.users.restore', $user->id) }}"
-                                                            method="POST"
-                                                            class="inline">
-                                                            @csrf
-                                                            @method('POST')
-                                                            <button type="submit"
-                                                                class="text-green-600 hover:text-green-900 dark:hover:text-green-400"
-                                                                onclick="return confirm('Are you sure you want to restore this user?')">
-                                                                Restore
-                                                            </button>
-                                                        </form>
-
-                                                        <!-- Permanent Delete -->
-                                                        <form
-                                                            action="{{ route('admin.users.force-delete', $user->id) }}"
-                                                            method="POST"
-                                                            class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="text-red-600 hover:text-red-900 dark:hover:text-red-400"
-                                                                onclick="return confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')">
-                                                                Delete Permanently
-                                                            </button>
-                                                        </form>
-                                                    @else
-                                                        <!-- Show -->
-                                                        <a href="{{ route('admin.users.show', $user) }}"
-                                                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                                            Show
-                                                        </a>
-                                                        <!-- Edit User Details -->
-                                                        <a href="{{ route('admin.users.edit', $user) }}"
-                                                            class="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400">
-                                                            Edit
-                                                        </a>
-                                                        <!-- Edit Roles/Permissions -->
-                                                        <a href="{{ route('admin.users.edit-access', $user) }}"
-                                                            class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400">
-                                                            Edit Access
-                                                        </a>
-                                                        <!-- Status Toggle -->
-                                                        @if ($user->id !== auth()->id())
-                                                            <form action="{{ route('admin.users.status', $user) }}"
-                                                                method="POST"
-                                                                class="inline">
-                                                                @csrf
-                                                                @method('POST')
-                                                                <button type="submit"
-                                                                    class="{{ $user->is_active ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900' }} dark:hover:text-yellow-400">
-                                                                    {{ $user->is_active ? 'Deactivate' : 'Activate' }}
-                                                                </button>
-                                                            </form>
-                                                        @endif
-
-                                                        <!-- Soft Delete -->
-                                                        @if ($user->id !== auth()->id())
-                                                            <form action="{{ route('admin.users.destroy', $user) }}"
-                                                                method="POST"
-                                                                class="inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="text-red-600 hover:text-red-900 dark:hover:text-red-400"
-                                                                    onclick="return confirm('Are you sure you want to delete this user?')">
-                                                                    Delete
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination -->
-                        <div class="mt-6">
-                            {{ $users->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $search || $selectedRole || $status ? 'Try adjusting your search filters.' : 'Get started by creating a new user.' }}
-                            </p>
-                            <div class="mt-6">
-                                <a href="{{ route('admin.users.create') }}"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    Add New User
-                                </a>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            </div>
+                <x-slot name="empty">
+                    <div class="text-center py-8">
+                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                            No users found
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            @if (array_filter($filters))
+                                Try adjusting your search filters.
+                            @else
+                                Get started by creating a new user.
+                            @endif
+                        </p>
+                    </div>
+                </x-slot>
+            </x-table>
         </div>
     </div>
 </x-app-layout>

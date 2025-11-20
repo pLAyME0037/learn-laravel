@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,7 @@ class Student extends Model
         'user_id',
         'department_id',
         'program_id',
+        'year_level',
         // Student Identification
         'student_id',
         'registration_number',
@@ -136,11 +138,24 @@ class Student extends Model
     {
         return $this->hasMany(CreditScore::class);
     }
-
+    /**
+     * Return to index
+     */
+    protected function academicStatusClasses(): Attribute
+    {
+        return Attribute::get(function () {
+            return match ($this->academic_status) {
+                'active'    => 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
+                'graduated' => 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
+                'suspended' => 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
+                default     => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+            };
+        });
+    }
     // Accessors
     public function getFullNameAttribute(): string
     {
-        return $this->user->name;
+        return $this->user->name ?? 'Unknown';
     }
     public function getEmailAttribute(): string
     {
@@ -231,6 +246,17 @@ class Student extends Model
         ";
     }
 
+    public function getYearLevelNameAttribute(): string
+    {
+        return match ($this->year_level) {
+            1       => 'Freshman',
+            2       => 'Sophomore',
+            3       => 'Junior',
+            4       => 'Senior',
+            default => 'N/A',
+        };
+    }
+
     // Scopes
     public function scopeActive(Builder $query): void
     {
@@ -244,18 +270,53 @@ class Student extends Model
     {
         $query->where('program_id', $programId);
     }
-    public function scopeSearch(Builder $query, string $search): void
+    public function scopeApplyFilters(Builder $query, array $filters): Builder
     {
-        $query->where(function ($q) use ($search) {
-            $q->where('student_id', 'like', "%{$search}%")
-                ->orWhere('registration_number', 'like', "%{$search}%")
-                ->orWhereHas('user', function ($userQuery) use ($search) {
-                    $userQuery->where('name', 'like', "%{$search}%")
-                        ->where('email', 'like', "%{$search}%")
-                        ->where('username', 'like', "%{$search}%");
-                });
+        // 1. Handle Soft Deletes Global Logic first
+        // If the requested status is 'trashed', we strictly look at trash.
+        // Otherwise, we strictly exclude trash (default Laravel behavior, but good to be explicit).
+        if (($filters['academic_status'] ?? null) === 'trashed') {
+            $query->onlyTrashed();
+        } else {
+            $query->withoutTrashed();
+        }
+
+        // 2. Filter by Academic Status (Active, Graduated, etc.)
+        $query->when($filters['academic_status'] ?? null, function ($q, $status) {
+            if ($status !== 'trashed') { $q->where('academic_status', $status); }
+            else { $q->withTrashed(); }
         });
+
+        // 3. Filter by Enrollment Status
+        $query->when($filters['enrollment_status'] ?? null, function ($q, $status) {
+            $q->where('enrollment_status', $status);
+        });
+
+        // 4. Filter by Department
+        $query->when($filters['department_id'] ?? null, function ($q, $departmentId) {
+            $q->where('department_id', $departmentId);
+        });
+
+        // 5. Filter by Program
+        $query->when($filters['program_id'] ?? null, function ($q, $programId) {
+            $q->where('program_id', $programId);
+        });
+
+        // 6. Search (Student ID or User Details)
+        $query->when($filters['search'] ?? null, function ($q, $search) {
+            $q->where(function ($subQuery) use ($search) {
+                $subQuery->where('student_id', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('username', 'like', "%{$search}%");
+                    });
+            });
+        });
+
+        return $query;
     }
+
     public function scopeWithAcadamicStatus(Builder $query, string $status): void
     {
         $query->where('academic_status', $status);
@@ -283,9 +344,9 @@ class Student extends Model
     public function scopeByAcademicStanding(Builder $query, string $standing): void
     {
         $query->where('academic_status', $standing); // Reusing academic_status for simplicity
-        // This scope would require a more complex implementation if academic standing is not a direct column.
-        // For now, it assumes 'academic_standing' is a column or can be derived easily.
-        // A more robust solution might involve calculating it on the fly or having a dedicated column.
+                                                     // This scope would require a more complex implementation if academic standing is not a direct column.
+                                                     // For now, it assumes 'academic_standing' is a column or can be derived easily.
+                                                     // A more robust solution might involve calculating it on the fly or having a dedicated column.
     }
 
     // Helper Methods
@@ -418,6 +479,9 @@ class Student extends Model
         static::creating(function ($student) {
             if (empty($student->student_id)) {
                 $student->student_id = (new static())->generateStudentId();
+            }
+            if (empty($student->year_level)) {
+                $student->year_level = 1; // Default to Freshman
             }
         });
     }

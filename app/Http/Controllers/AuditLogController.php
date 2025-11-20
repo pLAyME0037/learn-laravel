@@ -45,6 +45,7 @@ class AuditLogController extends Controller
     {
         $auditLog->delete();
 
-        return redirect()->route('admin.audit_logs.index')->with('success', 'Audit log deleted successfully.');
+        return redirect()->route('admin.audit-logs.index')
+        ->with('success', 'Audit log deleted successfully.');
     }
 }

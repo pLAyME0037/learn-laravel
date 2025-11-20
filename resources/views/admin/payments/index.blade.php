@@ -34,6 +34,7 @@
 
                         $data = $payments->map(function ($payment) {
                             return [
+                                'id' => $payment->id, // Add the payment ID
                                 'student_name' => $payment->student->user->name,
                                 'amount' => $payment->formatted_amount,
                                 'payment_date' => $payment->formatted_payment_date,

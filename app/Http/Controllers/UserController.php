@@ -7,24 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Permission;
 
 class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:view.users')
-            ->only('index', 'show');
-        $this->middleware('permission:create.users')
-            ->only('create', 'store');
-        $this->middleware('permission:edit.users')
-            ->only('edit', 'update');
-        $this->middleware('permission:delete.users')
-            ->only('destroy');
-        $this->middleware('has_permission:delete.users')
-            ->only('restore', 'forceDelete');
-        $this->middleware('has_permission:edit.users')
-            ->only('updateStatus');
+        $this->authorizeResource(User::class, 'user');
     }
 
     /**
@@ -32,60 +23,29 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $search       = $request->get('search');
-        $selectedRole = $request->get('role');
-        $status       = $request->get('status');
-        $orderby      = $request->get('orderby', 'default');
+        $headers = ['User', 'Role', 'Status', 'Email Verified', 'User Status', 'Actions'];
 
-        $users = User::withTrashed()
-            ->when($search, function ($query, $search) {
-                return $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('username', 'like', "%{$search}%");
-                });
-            })
-            ->when($selectedRole !== null && $selectedRole !== '', function ($query) use ($selectedRole) {
-                if ($selectedRole === 'no_roles') {
-                    // Filter for users with no roles
-                    return $query->doesntHave('roles');
-                } else {
-                    // Filter for users with a specific role
-                    return $query->whereHas('roles', function ($q) use ($selectedRole) {
-                        $q->where('name', $selectedRole);
-                    });
-                }
-            })
-            ->when($status === 'active', function ($query) {
-                return $query->where('is_active', true);
-            })
-            ->when($status === 'inactive', function ($query) {
-                return $query->where('is_active', false);
-            })
-            ->when($status === 'trashed', function ($query) {
-                return $query->onlyTrashed();
-            })
-            ->when($orderby !== null && $orderby !== '', function ($query) use ($orderby) {
-                switch ($orderby) {
-                    case 'newest':return $query->orderBy('id', 'desc');
-                    case 'oldest':return $query->orderBy('id', 'asc');
-                    case 'default':return $query->orderBy('id', 'desc');
-                    default: return;
-                }
-            })
-            ->with('roles') // Eager load Spatie roles
+        // Validate filters
+        $filters = $request->validate([
+            'search'  => 'nullable|string|max:100',
+            'role'    => 'nullable|string|max:50',
+            'status'  => 'nullable|string|in:active,inactive,trashed',
+            'orderby' => 'nullable|string|in:newest,oldest,a_to_z,z_to_a',
+        ]);
+
+        $users = User::with('roles')
+            ->applyFilters($filters)
             ->paginate(10)
-            ->withQueryString()
-        ;
-        $roles = Role::orderBy('name', 'asc')->get();
-        return view('admin.users.index', compact(
-            'users',
-            'roles',
-            'search',
-            'selectedRole',
-            'status',
-            'orderby'
-        ));
+            ->withQueryString();
+
+        $roles = Role::orderBy('name')->pluck('name', 'name');
+
+        return view('admin.users.index', [
+            'headers' => $headers,
+            'users'   => $users,
+            'roles'   => $roles,
+            'filters' => $filters,
+        ]);
     }
 
     public function editAccess(User $user)
@@ -93,7 +53,7 @@ class UserController extends Controller
         $allRoles  = Role::orderBy('name', 'asc')->get();
         $userRoles = $user->roles->pluck('id')->toArray();
 
-        $allPermissions  = Permission::orderBy('name', 'asc')->get()->groupBy('group'); // Sort permissions alphabetically
+        $allPermissions  = Permission::orderBy('name', 'asc')->get()->groupBy('group');
         $userPermissions = $user->getAllPermissions()->pluck('name')->toArray();
 
         return view(
@@ -116,9 +76,9 @@ class UserController extends Controller
             'permissions.*' => 'exists:permissions,name',
         ]);
 
-        $roles = Role::whereIn('id', $request->roles)->get();
+        $roles = $request->roles ? Role::whereIn('id', $request->roles)->get() : collect();
         $user->syncRoles($roles);
-        $user->syncPermissions($request->permissions);
+        $user->syncPermissions($request->permissions ?? []);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User roles and permissions updated successfully.');
@@ -176,20 +136,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles         = Role::all();
-        $userRoleNames = $user->getRoleNames()->toArray(); // Get Spatie role names
-
-        $authUser = Auth::user();
-        $authUser->load('roles'); // Ensure roles are loaded for the authenticated user
-        $canChangePassword = false;
-
-        if ($authUser->hasAnyRole(['admin', 'Super Administrator'])) {
-            $canChangePassword = true;
-        } elseif ($authUser->hasRole('hod') && ! $user->hasAnyRole(['admin', 'Super Administrator'])) {
-            $canChangePassword = true;
-        }
-
-        return view('admin.users.edit', compact('user', 'roles', 'userRoleNames', 'canChangePassword'));
+        $roles = Role::orderBy('name')->pluck('name', 'name');
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -200,62 +148,35 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
-            $rules = [
+            $this->authorize('changePassword', $user);
+
+            $validated = $request->validate([
                 'name'      => 'required|string|max:255',
-                'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->getKey(),
-                'email'     => 'required|string|email|max:255|unique:users,email,' . $user->getKey(),
+                'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->id,
+                'email'     => 'required|string|email|max:255|unique:users,email,' . $user->id,
                 'bio'       => 'nullable|string|max:500',
                 'is_active' => 'sometimes|boolean',
-            ];
+                'password'  => ['nullable', 'confirmed', Password::min(8)],
+            ]);
 
-            $authUser          = Auth::user();
-            $canChangePassword = false;
+            DB::transaction(function () use ($user, $validated) {
+                $user->update([
+                    'name'      => $validated['name'],
+                    'username'  => $validated['username'],
+                    'email'     => $validated['email'],
+                    'bio'       => $validated['bio'],
+                    'is_active' => $validated['is_active'] ?? $user->is_active,
+                ]);
 
-            if ($authUser->hasAnyRole(['admin', 'Super Administrator'])) {
-                $canChangePassword = true;
-            } elseif (
-                $authUser->hasRole('hod')
-                && ! $user->hasAnyRole(['admin', 'Super Administrator'])
-            ) {
-                $canChangePassword = true;
-            }
-
-            // If password fields are present and user has permission, add password validation rules
-            if ($request->filled('password') && $canChangePassword) {
-                $rules['password'] = 'required|string|min:8|confirmed';
-            } elseif ($request->filled('password') && ! $canChangePassword) {
-                // If password fields are present but user does not have permission
-                return redirect()->back()
-                    ->with(
-                        'error',
-                        'You do not have permission to change this user\'s password.'
-                    );
-            }
-
-            $validated = $request->validate($rules);
-
-            // Prepare data for user update from validated fields
-            $updateData = [
-                'name'      => $validated['name'],
-                'username'  => $validated['username'],
-                'email'     => $validated['email'],
-                'bio'       => $validated['bio'] ?? null,
-                'is_active' => $request->has('is_active')
-                    ? (bool) $request->input('is_active')
-                    : $user->is_active,
-            ];
-
-            // Conditionally update password if provided and authorized
-            if (isset($validated['password']) && $canChangePassword) {
-                $updateData['password'] = $validated['password']; // Let the model's 'hashed' cast handle it
-            }
-
-            $user->update($updateData);
+                if (! empty($validated['password'])) {
+                    $user->update(['password' => Hash::make($validated['password'])]);
+                }
+            });
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('User update failed: ' . $e->getMessage(), ['user_id' => $user->id]);
+            Log::error('User update failed: ' . $e->getMessage(), ['user_id' => $user->id]);
             return redirect()->back()
                 ->with('error', 'Failed to update user: ' . $e->getMessage())
                 ->withInput();
@@ -291,18 +212,18 @@ class UserController extends Controller
             ->with('success', 'User deleted successfully.');
     }
 
-    public function restore($userId)
+    public function restore(User $user)
     {
-        $user = User::withTrashed()->findOrFail($userId);
+        $this->authorize('restore', $user);
         $user->restore();
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User restore successfully.');
     }
 
-    public function forceDelete($userId)
+    public function forceDelete(User $user)
     {
-        $user = User::withTrashed()->findOrFail($userId);
+        $this->authorize('forceDelete', $user);
         $this->checkSelfModification(
             $user,
             'error',
@@ -321,9 +242,8 @@ class UserController extends Controller
             'You cannot deactivate your own account.'
         );
 
-        $user->update([
-            'is_active' => ! $user->is_active,
-        ]);
+        $this->authorize('updateStatus', $user);
+        $user->update(['is_active' => ! $user->is_active]);
 
         $status = $user->is_active ? 'activated' : 'deactivated';
 

@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace App\Http\Controllers;
 
 use App\Models\Faculty;
+use App\Models\Instructor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,8 +37,8 @@ class FacultyController extends Controller
      */
     public function create(): View
     {
-        $users = \App\Models\User::all();
-        return view('admin.faculties.create', compact('users'));
+        $instructors = Instructor::with('user')->get();
+        return view('admin.faculties.create', compact('instructors'));
     }
 
     /**
@@ -69,8 +70,8 @@ class FacultyController extends Controller
      */
     public function edit(Faculty $faculty): View
     {
-        $users = \App\Models\User::all();
-        return view('admin.faculties.edit', compact('faculty', 'users'));
+        $instructors = Instructor::with('user')->get();
+        return view('admin.faculties.edit', compact('faculty', 'instructors'));
     }
 
     /**

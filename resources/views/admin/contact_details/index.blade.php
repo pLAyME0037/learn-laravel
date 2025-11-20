@@ -51,19 +51,19 @@
 
                         $actions = [
                             'show' => [
-                                'route' => 'admin.contact_details.show',
+                                'route' => 'admin.contact-details.show',
                                 'label' => 'View',
                                 'params' => ['contact_detail' => 'id'],
                                 'class' => 'text-blue-600 hover:text-blue-900',
                             ],
                             'edit' => [
-                                'route' => 'admin.contact_details.edit',
+                                'route' => 'admin.contact-details.edit',
                                 'label' => 'Edit',
                                 'params' => ['contact_detail' => 'id'],
                                 'class' => 'text-indigo-600 hover:text-indigo-900',
                             ],
                             'delete' => [
-                                'route' => 'admin.contact_details.destroy',
+                                'route' => 'admin.contact-details.destroy',
                                 'label' => 'Delete',
                                 'params' => ['contact_detail' => 'id'],
                                 'class' => 'text-red-600 hover:text-red-900',

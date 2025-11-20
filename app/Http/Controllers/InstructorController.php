@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Instructor;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -38,7 +39,11 @@ class InstructorController extends Controller
     public function create(): View
     {
         $departments = Department::all();
-        return view('admin.instructors.create', compact('departments'));
+        $users       = User::all()->filter(
+            fn($user) => $user->roles->isNotEmpty()
+            && ! $user->hasAnyRole(['admin', 'staff', 'student'])
+        );
+        return view('admin.instructors.create', compact('departments', 'users'));
     }
 
     /**
@@ -74,7 +79,19 @@ class InstructorController extends Controller
     public function edit(Instructor $instructor): View
     {
         $departments = Department::all();
-        return view('admin.instructors.edit', compact('instructor', 'departments'));
+        $users       = User::all()->filter(
+            fn($user) => $user->roles->isNotEmpty()
+            && ! $user->hasAnyRole(['admin', 'staff', 'student'])
+        );
+
+        return view(
+            'admin.instructors.edit',
+            compact(
+                'instructor',
+                'departments',
+                'users'
+            )
+        );
     }
 
     /**
