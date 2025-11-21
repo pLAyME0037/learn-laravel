@@ -35,7 +35,8 @@
 
                         $data = $attendances->map(function ($attendance) {
                             return [
-                                'student_name' => $attendance->user->name,
+                                'id' => $attendance->attendance_id,
+                                'student_name' => $attendance->user?->name,
                                 'course_name' => $attendance->classSchedule->course->name,
                                 'date' => $attendance->date->format('Y-m-d'),
                                 'status' => $attendance->attendance_status,

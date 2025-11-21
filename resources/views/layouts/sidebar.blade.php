@@ -1,22 +1,34 @@
 @props(['collapsed' => false])
 
-<div x-data="{ collapsed: {{ $collapsed ? 'true' : 'false' }} }"
-    id="sidebar"
-    class="bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 overflow-y-auto overflow-x-hidden"
-    :class="collapsed ? 'w-14' : 'w-64'">
-    <!-- Logo and Hamburger -->
-    <div class="border-b dark:border-gray-700 flex items-center"
-        :class="collapsed ? 'p-4 justify-center' : 'p-6 justify-between'">
-        <x-application-logo x-show="!collapsed"
-            class="w-10" />
-        <h1 x-show="!collapsed"
-            class="text-2xl font-bold text-gray-800 dark:text-white">
-            Schul SYS
-        </h1>
-        <button @click="collapsed = !collapsed; window.sidebarToggle()"
-            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-            <svg class="text-gray-600 dark:text-gray-300"
-                :class="collapsed ? 'w-6 h-6' : 'w-5 h-5'"
+{{-- Custom CSS to hide scrollbar but keep functionality --}}
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<div x-data="{
+    collapsed: {{ $collapsed ? 'true' : 'false' }},
+    sidebarToggle() {
+        this.collapsed = !this.collapsed;
+        // Dispatch event for main content to adjust
+        window.dispatchEvent(new CustomEvent('sidebar-toggle', { detail: this.collapsed }));
+    }
+}"
+    class="h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 z-30"
+    :class="collapsed ? 'w-16' : 'w-64'">
+
+    {{-- 1. LOGO AREA --}}
+    <div class="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+        
+        <button @click="sidebarToggle()"
+            class="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors">
+            <svg class="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24">
@@ -27,28 +39,27 @@
             </svg>
         </button>
     </div>
-    {{-- @php
-        dd(Auth::user()->profile_picture_url);
-    @endphp --}}
-    {{-- Profile Icon --}}
-    <div class="flex items-center space-x-3 px-6 py-3 text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 border-r-4 border-blue-500"
-        x-show="!collapsed">
-        <x-profile-image src="{{ Auth::user()->profile_picture_url }}"
-            alt="{{ Auth::user()->username }}"
-            size="md" />
-        <div class="text-left">
-            <div class="font-semibold text-gray-900 dark:text-white">
-                {{ Auth::user()->name }}
+
+    {{-- 2. USER PROFILE (Compact) --}}
+    <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 shrink-0">
+        <div class="flex items-center p-3"
+            :class="collapsed ? 'justify-center' : 'gap-3'">
+            <div class="relative shrink-0">
+                <img src="{{ Auth::user()->profile_picture_url ?? asset('images/default-avatar.png') }}"
+                    class="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-gray-700"
+                    alt="Avatar">
+                <span
+                    class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
             </div>
-            <div class="text-xs text-gray-500">
-                {{ \Illuminate\Support\Str::limit(
-                    '@' . Auth::user()->username . ' #' . Auth::user()->roles->pluck('name')->join(', '),
-                    20,
-                    '...',
-                ) }}
-            </div>
-            <div class="font-mono text-xs text-gray-900 dark:text-white">
-                {{ \Illuminate\Support\Str::limit(Auth::user()->email, 20, '...') }}
+
+            <div x-show="!collapsed"
+                class="overflow-hidden transition-opacity duration-200">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {{ Auth::user()->name }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {{ Auth::user()->email }}
+                </p>
             </div>
         </div>
     </div>
@@ -105,7 +116,7 @@
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422A12.083 12.083 0 0118 20.5a2 2 0 01-2 1.5H8a2 2 0 01-2-1.5c0-3.98 1.98-7.98 1.84-9.922L12 14z" />',
                 'route' => 'admin.academic-years.index',
-                'can' => 'view.academic_years',
+                'can' => 'view.academic-years',
             ],
             // Attendent
             [
@@ -127,7 +138,7 @@
                                 stroke-width="2" 
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />',
                 'route' => 'admin.audit-logs.index',
-                'can' => ['view.audit_logs'],
+                'can' => ['view.audit-logs'],
             ],
             // B
             // C
@@ -182,45 +193,6 @@
                             />',
                 'route' => 'admin.contact-details.index',
                 'can' => ['view.contact-details'],
-            ],
-            // Courses
-            [
-                'type' => 'dropdown',
-                'label' => 'Courses',
-                'icon' => '<path 
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
-                            />',
-                'can' => ['view.courses'],
-                'children' => [
-                    [
-                        'type' => 'link',
-                        'label' => 'Courses',
-                        'icon' => '<path 
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
-                            />',
-                        'route' => 'admin.courses.index',
-                        'can' => ['view.courses'],
-                    ],
-                    // Course Prerequisite
-                    [
-                        'type' => 'link',
-                        'label' => 'Course Prerequisite',
-                        'icon' => '<path 
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
-                            />',
-                        'route' => 'admin.course-prerequisites.index',
-                        'can' => ['view.course-prerequisites'],
-                    ],
-                ],
             ],
             // Cridit Score
             [
@@ -318,28 +290,6 @@
                                         'route' => 'admin.majors.create',
                                         'can' => 'create.majors',
                                     ],
-                                    // Program
-                                    [
-                                        'type' => 'dropdown',
-                                        'label' => 'Programs',
-                                        'icon' =>
-                                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
-                                        'can' => ['view.programs', 'create.programs'],
-                                        'children' => [
-                                            [
-                                                'type' => 'link',
-                                                'label' => 'All Programs',
-                                                'route' => 'admin.programs.index',
-                                                'can' => 'view.programs',
-                                            ],
-                                            [
-                                                'type' => 'link',
-                                                'label' => 'Add Program',
-                                                'route' => 'admin.programs.create',
-                                                'can' => 'create.programs',
-                                            ],
-                                        ],
-                                    ],
                                 ],
                             ],
                         ],
@@ -383,6 +333,68 @@
                 'route' => 'admin.payments.index',
                 'can' => ['view.payments', 'create.payments'],
             ],
+            // Program
+            [
+                'type' => 'dropdown',
+                'label' => 'Programs',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                'can' => ['view.programs', 'create.programs'],
+                'children' => [
+                    [
+                        'type' => 'link',
+                        'label' => 'All Programs',
+                        'route' => 'admin.programs.index',
+                        'can' => 'view.programs',
+                    ],
+                    [
+                        'type' => 'link',
+                        'label' => 'Add Program',
+                        'route' => 'admin.programs.create',
+                        'can' => 'create.programs',
+                    ],
+                    // Courses
+                    [
+                        'type' => 'dropdown',
+                        'label' => 'Courses',
+                        'icon' => '<path 
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                        />',
+                        'can' => ['view.courses'],
+                        'children' => [
+                            [
+                                'type' => 'link',
+                                'label' => 'Courses',
+                                'icon' => '<path 
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                                />',
+                                'route' => 'admin.courses.index',
+                                'can' => ['view.courses'],
+                            ],
+                            // Course Prerequisite
+                            [
+                                'type' => 'link',
+                                'label' => 'Course Prerequisite',
+                                'icon' => '<path 
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" 
+                                />',
+                                'route' => 'admin.course-prerequisites.index',
+                                'can' => ['view.course-prerequisites'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+
             // Q
             // R
             // Roles
@@ -416,7 +428,7 @@
                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
                         />',
                         'route' => 'admin.permissions.index',
-                        'can' => 'view.permissions',
+                        'can' => 'manage.permissions',
                     ],
                 ],
             ],
@@ -510,12 +522,39 @@
         ];
     @endphp
 
-    <nav class="mt-0">
-        <ul>
-            @foreach ($menuItems as $item)
-                <x-sidebar-menu-item :item="$item"
-                    :collapsed="$collapsed" />
-            @endforeach
-        </ul>
+    {{-- 3. NAVIGATION MENU --}}
+    <nav class="flex-1 overflow-y-auto no-scrollbar py-4 px-3 space-y-1">
+        @foreach ($menuItems as $item)
+            <x-sidebar-menu-item :item="$item"
+                :collapsed="$collapsed" />
+        @endforeach
     </nav>
+
+    {{-- 4. FOOTER (Logout, Settings, etc) --}}
+    <div class="p-3 border-t border-gray-200 dark:border-gray-700 shrink-0">
+        <form method="POST"
+            action="{{ route('logout') }}">
+            @csrf
+            <button type="submit"
+                class="flex items-center w-full p-2 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 transition-colors group">
+                <svg class="w-5 h-5 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span x-show="!collapsed"
+                    class="ml-3 text-sm font-medium whitespace-nowrap">Log Out</span>
+
+                {{-- Tooltip for collapsed state --}}
+                <div x-show="collapsed"
+                    class="absolute left-14 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap pointer-events-none">
+                    Log Out
+                </div>
+            </button>
+        </form>
+    </div>
 </div>

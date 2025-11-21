@@ -13,9 +13,11 @@
         </div>
     </x-slot>
 
-    <div class="py-9">
+    <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @php
+                $headers = ['User', 'Role', 'Status', 'Email Verified', 'User Status', 'Actions'];
+
                 // Prepare filter definitions directly in the view for clarity
                 $roleOptions = $roles
                     ->map(fn($name) => ['value' => $name, 'text' => ucfirst($name)])
@@ -28,7 +30,7 @@
                         'name' => 'search',
                         'label' => 'Search',
                         'value' => $filters['search'] ?? '',
-                        'placeholder' => 'Search by name, email, or username',
+                        'placeholder' => 'Name, email, or username',
                     ],
                     [
                         'type' => 'select',
@@ -70,9 +72,10 @@
                 createBtn="Add New User"
                 uri="admin.users.create" />
 
+
             <x-table :headers="$headers"
                 :data="$users"
-                class="mt-6">
+                :options="['wrapperClass' => 'mt-6']">
 
                 <x-slot name="bodyContent">
                     @forelse ($users as $user)
@@ -84,7 +87,8 @@
                             {{-- Roles --}}
                             <td class="px-6 py-4 whitespace-nowrap space-y-1">
                                 @forelse ($user->roles as $role)
-                                    <x-table.cell.role-badge :role="$role" :user="$user" />
+                                    <x-table.cell.role-badge :role="$role"
+                                        :user="$user" />
                                 @empty
                                     <span
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 -bottom-1 -right-1 hover:bg-gray-200 hover:ring-2 hover:ring-gray-500 shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
@@ -115,7 +119,7 @@
                             </td>
                             {{-- User Status --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <x-table.cell.user-state :user="$user"/>
+                                <x-table.cell.user-state :user="$user" />
                             </td>
                             {{-- Action --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -174,7 +178,9 @@
                                                 'label' => $user->is_active ? 'Disactivate' : 'Activate',
                                                 'route' => 'admin.users.status',
                                                 'params' => ['user' => 'id'],
-                                                'class' => $user->is_active ? 'text-yellow-600 hover:text-yellow-500' : 'text-green-600 hover:text-green-500',
+                                                'class' => $user->is_active
+                                                    ? 'text-yellow-600 hover:text-yellow-500'
+                                                    : 'text-green-600 hover:text-green-500',
                                             ]"
                                                 :row="$user" />
                                         @endcan

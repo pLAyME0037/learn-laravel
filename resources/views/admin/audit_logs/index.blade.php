@@ -7,10 +7,10 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                             Manage Audit Logs
                         </h3>
                     </div>
@@ -31,7 +31,7 @@
                         $data = $auditLogs->map(function ($auditLog) {
                             return [
                                 'id' => $auditLog->id, // Add the audit log ID
-                                'user' => $auditLog->user->name,
+                                'user' => $auditLog->user?->name ?? 'Unknown User',
                                 'action' => $auditLog->action,
                                 'description' => $auditLog->description,
                             ];

@@ -4,10 +4,13 @@ declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicYear;
 use App\Models\ClassSchedule;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Semester;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -40,10 +43,28 @@ class EnrollmentController extends Controller
      */
     public function create(): View
     {
-        $students       = Student::all();
-        $courses        = Course::all();
-        $classSchedules = ClassSchedule::all();
-        return view('admin.enrollments.create', compact('students', 'courses', 'classSchedules'));
+        // Plan to use AJAX(Livewire in future)
+        $students = Student::join('users', 'students.user_id', '=', 'users.id')
+            ->select('students.id', 'users.name')
+            ->orderBy('users.name')
+            ->get();
+        $semesters     = Semester::select('id', 'name')->orderBy('name')->get();
+        $courses       = Course::select('id', 'name')->orderBy('name')->get();
+        $academicYears = AcademicYear::select('id', 'name')
+            ->orderByDesc('name')
+            ->get();
+        $classSchedules = ClassSchedule::join('courses', 'class_schedules.course_id', '=', 'courses.id')
+            ->select('class_schedules.id', 'courses.name as course_name', 'class_schedules.day_of_week', 'class_schedules.start_time')
+            ->orderBy('courses.name')
+            ->get();
+
+        return view('admin.enrollments.create', compact(
+            'students',
+            'semesters',
+            'academicYears',
+            'courses',
+            'classSchedules'
+        ));
     }
 
     /**
@@ -53,6 +74,7 @@ class EnrollmentController extends Controller
     {
         $validated = $request->validate([
             'student_id'        => 'required|exists:students,id',
+            'academic_year_id'  => 'required|exists:academic_years,id',
             'course_id'         => 'required|exists:courses,id',
             'enrollment_date'   => 'required|date',
             'status'            => 'required|string|max:255', // e.g., Enrolled, Completed, Dropped
@@ -61,7 +83,8 @@ class EnrollmentController extends Controller
 
         Enrollment::create($validated);
 
-        return redirect()->route('admin.enrollments.index')->with('success', 'Enrollment created successfully.');
+        return redirect()->route('admin.enrollments.index')
+            ->with('success', 'Enrollment created successfully.');
     }
 
     /**
@@ -74,14 +97,49 @@ class EnrollmentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * show form for editing
      */
     public function edit(Enrollment $enrollment): View
     {
-        $students       = Student::all();
-        $courses        = Course::all();
-        $classSchedules = ClassSchedule::all();
-        return view('admin.enrollments.edit', compact('enrollment', 'students', 'courses', 'classSchedules'));
+        // Plan to use AJAX(Livewire in future)
+        $students = Student::join('users', 'students.user_id', '=', 'users.id')
+            ->select('students.id', 'users.name')
+            ->orderBy('users.name')
+            ->get();
+        $semesters     = Semester::select('id', 'name')->orderBy('name')->get();
+        $courses       = Course::select('id', 'name')->orderBy('name')->get();
+        $academicYears = AcademicYear::select('id', 'name')
+            ->orderByDesc('name')
+            ->get();
+        $classSchedules = ClassSchedule::join('courses', 'class_schedules.course_id', '=', 'courses.id')
+            ->select(
+                'class_schedules.id',
+                'class_schedules.day_of_week',
+                'class_schedules.start_time',
+                'courses.name as course_name',
+                'courses.code as code',
+            )
+            ->orderBy('class_schedules.day_of_week')
+            ->orderBy('class_schedules.start_time')
+            ->get()
+            ->map(function ($schedule) {
+                $time = Carbon::parse($schedule->start_time)
+                    ->format('d-M-Y h:i A');
+                $schedule->formatted_time = $time;
+                // CRITICAL: Create the "Main Label" for the trigger box here
+                // This keeps the JS component generic. It just looks for 'display_label'
+                $schedule->display_label = "Code: {$schedule->code} | {$schedule->course_name} | {$schedule->day_of_week} | {$time}";
+                return $schedule;
+            });
+
+        return view('admin.enrollments.edit', compact(
+            'enrollment',
+            'students',
+            'semesters',
+            'courses',
+            'academicYears',
+            'classSchedules'
+        ));
     }
 
     /**
@@ -91,6 +149,7 @@ class EnrollmentController extends Controller
     {
         $validated = $request->validate([
             'student_id'        => 'required|exists:students,id',
+            'academic_year_id'  => 'required|exists:academic_years,id',
             'course_id'         => 'required|exists:courses,id',
             'enrollment_date'   => 'required|date',
             'status'            => 'required|string|max:255',
@@ -102,9 +161,9 @@ class EnrollmentController extends Controller
         return redirect()->route('admin.enrollments.show', $enrollment)->with('success', 'Enrollment updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+/**
+ * Remove the specified resource from storage.
+ */
     public function destroy(Enrollment $enrollment): RedirectResponse
     {
         $enrollment->delete();

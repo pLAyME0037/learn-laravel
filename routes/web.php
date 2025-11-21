@@ -104,7 +104,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('/students/{student}/show', [
             StudentController::class, 'show',
         ])->name('students.show');
-        Route::get('/students/{student}/restore', [
+        Route::put('/students/{student}/restore', [
             StudentController::class, 'restore',
         ])->name('students.restore');
         Route::delete('/students/{student}/force-delete', [

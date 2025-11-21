@@ -8,7 +8,9 @@
         content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token"
         content="{{ csrf_token() }}">
+    @php $title = request()->route()?->getName(); @endphp
     <title>{{ $title ?? 'Dashboard' }} - School Manage</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <script>
@@ -43,14 +45,16 @@
     <div class="flex h-screen">
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <x-header :title="$pageTitle ?? 'Dashboard'" />
+            @include('layouts.navigation')
             <!-- Page Content -->
             <div class="flex flex-1 overflow-hidden">
                 <div class="flex flex-shrink-0 overflow-y-auto">
-                    @include('layouts/sidebar');
+                    @include('layouts.sidebar');
                 </div>
-                <main class="flex-1 overflow-y-auto p-3">
-                    {{ $slot }}
+                <main class="flex-1 overflow-y-auto p-0">
+                    <div class="py-6">
+                        {{ $slot }}
+                    </div>
                 </main>
             </div>
         </div>

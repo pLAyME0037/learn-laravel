@@ -58,35 +58,49 @@
                                                 $routeParams = [];
                                                 if (isset($action['params']) && is_array($action['params'])) {
                                                     foreach ($action['params'] as $paramKey => $dataKey) {
-                                                        $routeParams[$paramKey] = data_get($row, $dataKey);
+                                                        $routeParams[$paramKey] = (int) data_get($row, $dataKey);
                                                     }
                                                 }
                                             @endphp
-                                            <a href="{{ route($action['route'], $routeParams) }}"
-                                                class="{{ $action['class'] ?? 'text-indigo-600 hover:text-indigo-900' }}">
-                                                {{ $action['label'] }}
-                                            </a>
+                                            {{-- Only generate the link if the required parameter for the route is present and not empty --}}
+                                            @if (!empty($routeParams[$paramKey])) {{-- Changed from 'payment' to $paramKey --}}
+                                                <a href="{{ route($action['route'], $routeParams) }}"
+                                                    class="{{ $action['class'] ?? 'text-indigo-600 hover:text-indigo-900' }}">
+                                                    {{ $action['label'] }}
+                                                </a>
+                                            @else
+                                                <span class="{{ $action['class'] ?? 'text-gray-400' }}">
+                                                    {{ $action['label'] }}
+                                                </span>
+                                            @endif
                                             {{-- If the action is a delete form --}}
                                         @elseif (isset($action['method']) && $action['method'] === 'DELETE')
                                             @php
                                                 $routeParams = [];
                                                 if (isset($action['params']) && is_array($action['params'])) {
                                                     foreach ($action['params'] as $paramKey => $dataKey) {
-                                                        $routeParams[$paramKey] = data_get($row, $dataKey);
+                                                        $routeParams[$paramKey] = (int) data_get($row, $dataKey);
                                                     }
                                                 }
                                             @endphp
-                                            <form action="{{ route($action['route'], $routeParams) }}"
-                                                method="POST"
-                                                class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="{{ $action['class'] ?? 'text-red-600 hover:text-red-900' }}"
-                                                    onclick="return confirm('Are you sure you want to delete this item?');">
+                                            {{-- Only generate the form if the required parameter for the route is present and not empty --}}
+                                            @if (!empty($routeParams[$paramKey])) {{-- Changed from 'payment' to $paramKey --}}
+                                                <form action="{{ route($action['route'], $routeParams) }}"
+                                                    method="POST"
+                                                    class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="{{ $action['class'] ?? 'text-red-600 hover:text-red-900' }}"
+                                                        onclick="return confirm('Are you sure you want to delete this item?');">
+                                                        {{ $action['label'] }}
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="{{ $action['class'] ?? 'text-gray-400' }}">
                                                     {{ $action['label'] }}
-                                                </button>
-                                            </form>
+                                                </span>
+                                            @endif
                                         @else
                                             {{-- Fallback for actions without a route or delete method --}}
                                             <span class="{{ $action['class'] ?? '' }}">

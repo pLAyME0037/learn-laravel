@@ -8,6 +8,7 @@ use App\Models\AcademicYear;
 use App\Models\Payment;
 use App\Models\Semester;
 use App\Models\Student;
+use function PHPSTORM_META\map;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,19 +17,12 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:view.payments')
-            ->only('index', 'show');
-        $this->middleware('permission:create.payments')
-            ->only('create', 'store');
-        $this->middleware('permission:edit.payments')
-            ->only('edit', 'update');
-        $this->middleware('permission:delete.payments')
-            ->only('destroy');
-        $this->middleware([
-            'has_permission:manage.fees',
-            'has_permission:manage.fees',
-            'has_permission:manage.scholarships',
-        ])->only('manage');
+        $this->middleware('permission:view.payments')->only('index', 'show');
+        $this->middleware('permission:create.payments')->only('create', 'store');
+        $this->middleware('permission:edit.payments')->only('edit', 'update');
+        $this->middleware('permission:delete.payments')->only('destroy');
+        $this->middleware('has_permission:manage.fees')->only('edit', 'update');
+        $this->middleware('has_permission:manage.scholarships')->only('edit', 'update');
     }
     /**
      * Display a listing of the resource.
@@ -36,8 +30,7 @@ class PaymentController extends Controller
     public function index(): View
     {
         $payments = Payment::with(['student', 'academicYear', 'semester'])->paginate(10);
-        $headers  = ['ID', 'Student', 'Academic Year', 'Semester', 'Amount', 'Payment Date', 'Method', 'Status', 'Created At', 'Updated At']; // Define your headers
-        return view('admin.payments.index', compact('payments', 'headers'));
+        return view('admin.payments.index', compact('payments'));
     }
 
     /**
@@ -45,10 +38,29 @@ class PaymentController extends Controller
      */
     public function create(): View
     {
-        $students      = Student::all();
-        $academicYears = AcademicYear::all();
-        $semesters     = Semester::all();
-        return view('admin.payments.create', compact('students', 'academicYears', 'semesters'));
+        // Plan to use AJAX(Livewire in future)
+        $students = Student::join('users', 'students.user_id', '=', 'users.id')
+            ->select(
+                'students.id',
+                'users.name',
+                'students.student_id as id_card'
+            )
+            ->orderBy('users.name')
+            ->get()
+            ->map(function ($s) {
+                $s->display_label = "{$s->name} ({$s->id_card})";
+                return $s;
+            });
+        $semesters     = Semester::select('id', 'name')->orderBy('name')->get();
+        $academicYears = AcademicYear::select('id', 'name')
+            ->orderByDesc('name')
+            ->get();
+
+        return view('admin.payments.create', compact(
+            'students',
+            'semesters',
+            'academicYears',
+        ));
     }
 
     /**
@@ -69,7 +81,7 @@ class PaymentController extends Controller
 
         Payment::create($validated);
 
-        return redirect()->route('payments.index')->with('success', 'Payment created successfully.');
+        return redirect()->route('admin.payments.index')->with('success', 'Payment created successfully.');
     }
 
     /**
@@ -86,10 +98,28 @@ class PaymentController extends Controller
      */
     public function edit(Payment $payment): View
     {
-        $students      = Student::all();
-        $academicYears = AcademicYear::all();
-        $semesters     = Semester::all();
-        return view('admin.payments.edit', compact('payment', 'students', 'academicYears', 'semesters'));
+        $students = Student::join('users', 'students.user_id', '=', 'users.id')
+            ->select(
+                'students.id',
+                'users.name',
+                'students.student_id as id_card'
+            )
+            ->orderBy('users.name')
+            ->get()
+            ->map(function ($s) {
+                $s->display_label = "{$s->name} ({$s->id_card})";
+                return $s;
+            });
+        $semesters     = Semester::select('id', 'name')->orderBy('name')->get();
+        $academicYears = AcademicYear::select('id', 'name')
+            ->orderByDesc('name')
+            ->get();
+
+        return view('admin.payments.create', compact(
+            'students',
+            'semesters',
+            'academicYears',
+        ));
     }
 
     /**
@@ -110,7 +140,7 @@ class PaymentController extends Controller
 
         $payment->update($validated);
 
-        return redirect()->route('payments.show', $payment)->with('success', 'Payment updated successfully.');
+        return redirect()->route('admin.payments.show', $payment)->with('success', 'Payment updated successfully.');
     }
 
     /**
@@ -120,6 +150,6 @@ class PaymentController extends Controller
     {
         $payment->delete();
 
-        return redirect()->route('payments.index')->with('success', 'Payment deleted successfully.');
+        return redirect()->route('admin.payments.index')->with('success', 'Payment deleted successfully.');
     }
 }

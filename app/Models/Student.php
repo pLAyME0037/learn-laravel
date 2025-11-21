@@ -46,7 +46,7 @@ class Student extends Model
         // Academic Information
         'admission_date',
         'expected_graduation',
-        'current_semester',
+        'semester',
         'cgpa',
         'total_credits_earned',
         // Academic Status
@@ -272,46 +272,46 @@ class Student extends Model
     }
     public function scopeApplyFilters(Builder $query, array $filters): Builder
     {
-        // 1. Handle Soft Deletes Global Logic first
-        // If the requested status is 'trashed', we strictly look at trash.
-        // Otherwise, we strictly exclude trash (default Laravel behavior, but good to be explicit).
-        if (($filters['academic_status'] ?? null) === 'trashed') {
-            $query->onlyTrashed();
-        } else {
-            $query->withoutTrashed();
-        }
+        // 1. Handle conditional eager loading of user relationship
+        $query->when(
+            ($filters['academic_status'] ?? null) === 'trashed',
+            fn($q) => $q->with('user', fn($userQuery) => $userQuery->withTrashed()),
+            fn($q) => $q->with('user')
+        );
 
         // 2. Filter by Academic Status (Active, Graduated, etc.)
-        $query->when($filters['academic_status'] ?? null, function ($q, $status) {
-            if ($status !== 'trashed') { $q->where('academic_status', $status); }
-            else { $q->withTrashed(); }
-        });
+        $query->when(
+            $filters['academic_status'] ?? null,
+            fn($q, $status) => ($status !== 'trashed')
+                ? $q->where('academic_status', $status)
+                : $q->onlyTrashed()
+        );
 
         // 3. Filter by Enrollment Status
-        $query->when($filters['enrollment_status'] ?? null, function ($q, $status) {
-            $q->where('enrollment_status', $status);
-        });
+        $query->when($filters['enrollment_status'] ?? null,
+            fn($q, $status) => $q->where('enrollment_status', $status)
+        );
 
         // 4. Filter by Department
-        $query->when($filters['department_id'] ?? null, function ($q, $departmentId) {
-            $q->where('department_id', $departmentId);
-        });
+        $query->when($filters['department_id'] ?? null,
+            fn($q, $departmentId) => $q->where('department_id', $departmentId)
+        );
 
         // 5. Filter by Program
-        $query->when($filters['program_id'] ?? null, function ($q, $programId) {
-            $q->where('program_id', $programId);
-        });
+        $query->when($filters['program_id'] ?? null,
+            fn($q, $programId) => $q->where('program_id', $programId)
+        );
 
         // 6. Search (Student ID or User Details)
         $query->when($filters['search'] ?? null, function ($q, $search) {
-            $q->where(function ($subQuery) use ($search) {
+            $q->where(fn($subQuery) => 
                 $subQuery->where('student_id', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
                             ->orWhere('username', 'like', "%{$search}%");
-                    });
-            });
+                    })
+            );
         });
 
         return $query;
@@ -343,10 +343,7 @@ class Student extends Model
      */
     public function scopeByAcademicStanding(Builder $query, string $standing): void
     {
-        $query->where('academic_status', $standing); // Reusing academic_status for simplicity
-                                                     // This scope would require a more complex implementation if academic standing is not a direct column.
-                                                     // For now, it assumes 'academic_standing' is a column or can be derived easily.
-                                                     // A more robust solution might involve calculating it on the fly or having a dedicated column.
+        $query->where('academic_status', $standing); 
     }
 
     // Helper Methods

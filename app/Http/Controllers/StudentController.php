@@ -30,11 +30,11 @@ class StudentController extends Controller
             'search'            => 'nullable|string|max:100',
             'department_id'     => 'nullable|integer|exists:departments,id',
             'program_id'        => 'nullable|integer|exists:programs,id',
-            'academic_status'    => 'nullable|string|in:active,probation,suspended,graduated,withdrawn,transfered,trashed',
+            'academic_status'   => 'nullable|string|in:active,probation,suspended,graduated,withdrawn,transfered,trashed',
             'enrollment_status' => 'nullable|string|in:full_time,part_time,exchange,study_abroad',
         ]);
 
-        $students = Student::with('department', 'program', 'user')
+        $students = Student::with(['department', 'program'])
             ->applyFilters($filters)
             ->latest()
             ->paginate(10)
@@ -157,13 +157,13 @@ class StudentController extends Controller
             }
 
             return redirect()
-            ->back()
-            ->with(
-                'error',
-                'Failed to create student. Please check the form data and try again.'
-                . ' If the problem persists, contact support.'
-            )
-            ->withInput();
+                ->back()
+                ->with(
+                    'error',
+                    'Failed to create student. Please check the form data and try again.'
+                    . ' If the problem persists, contact support.'
+                )
+                ->withInput();
         }
     }
 

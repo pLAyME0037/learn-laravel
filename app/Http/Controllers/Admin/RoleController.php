@@ -52,10 +52,16 @@ class RoleController extends Controller
 
     public function edit(Role $role)
     {
-        $permissions = DB::table('permissions')->get()->groupBy('group_name');
+        $allPermissions = DB::table('permissions')->get(); // Get all permissions as a flat collection
+        $permissions = $allPermissions->groupBy('group_name'); // Group them by group_name for display
         $rolePermissions = $role->permissions->pluck('name')->toArray();
 
-        return view('admin.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        return view('admin.roles.edit', compact(
+            'role', 
+            'permissions', 
+            'rolePermissions', 
+            'allPermissions'
+        ));
     }
 
     public function update(Request $request, Role $role)

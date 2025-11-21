@@ -20,7 +20,7 @@ class Payment extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'payment_id';
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.

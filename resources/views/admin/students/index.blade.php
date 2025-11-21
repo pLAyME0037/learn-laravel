@@ -112,24 +112,20 @@
             <x-slot name='bodyContent'>
                 @forelse ($students as $student)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-4 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4 whitespace-nowrap flex items-center">
                             {{-- Student Identity --}}
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <x-profile-image class="md"
-                                        src="{{ $student->user?->profile_picture_url ?? asset('images/default-profile.png') }}"
-                                        alt="{{ $student->user?->name ?? 'N/A' }}" />
+                            <x-profile-image class="md"
+                                src="{{ $student->user?->profile_picture_url }}"
+                                alt="{{ $student->user?->name ?? 'N/A' }}" />
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{'ID: '. $student->student_id }}
                                 </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        ID:{{ $student->student_id }}
-                                    </div>
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        Name:{{ $student->user?->name ?? 'N/A' }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        <span>{{ $student->user?->email ?? 'N/A' }}</span>
-                                    </div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{'Name: '. $student->user?->name ?? 'N/A' }}
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <span>{{ $student->user?->email ?? 'N/A' }}</span>
                                 </div>
                             </div>
                         </td>
@@ -167,6 +163,7 @@
                                             'label' => 'Restore',
                                             'route' => 'admin.students.restore',
                                             'params' => ['student' => 'id'],
+                                            '_method' => 'PUT',
                                             'class' => 'text-green-600',
                                         ]"
                                             :row="$student" />

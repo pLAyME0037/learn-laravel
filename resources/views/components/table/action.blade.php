@@ -1,6 +1,6 @@
 @props(['action', 'row'])
 
-{{-- Early return if the action condition is not met (Kernel Rule: Early Return) --}}
+{{-- Early return if the action condition is not met --}}
 @if (isset($action['condition']) && !$action['condition']($row))
     @return
 @endif
@@ -47,9 +47,12 @@
     {{-- Case for a form-based POST button --}}
     @case('post-button')
         <form action="{{ route($action['route'], $routeParams) }}"
-            method="POST"
+            method="POST" 
             class="inline">
             @csrf
+            @if (isset($action['_method']))
+                @method($action['_method'])
+            @endif
             <button type="submit"
                 @class([
                     $action['class'] ?? 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300',
@@ -66,34 +69,3 @@
             {{ $action['label'] }}
         </span>
 @endswitch
-
-{{-- 
-// Example usage in a controller or Livewire component
-
-$headers = [
-    'name' => 'Name',
-    'email' => 'Email',
-    'created_at' => 'Joined Date'
-];
-
-$data = User::all();
-
-$actions = [
-    [
-        'type' => 'link', // <-- New declarative type
-        'label' => 'Edit',
-        'route' => 'users.edit',
-        'params' => ['user' => 'id'], // 'paramKey' => 'dataKey'
-    ],
-    [
-        'type' => 'delete', // <-- New declarative type
-        'label' => 'Delete',
-        'route' => 'users.destroy',
-        'params' => ['user' => 'id'],
-        'condition' => fn($user) => $user->id !== auth()->id(), // Example condition
-    ],
-];
-
-// In your view:
-// <x-table :headers="$headers" :data="$data" :actions="$actions" />
---}}

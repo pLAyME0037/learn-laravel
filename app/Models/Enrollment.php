@@ -1,16 +1,17 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class Enrollment extends Model
 {
@@ -29,8 +30,8 @@ class Enrollment extends Model
     protected function enrollmentDate(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => new Carbon($value),
-            set: fn (Carbon $value) => $value,
+            get: fn(string $value) => new Carbon($value),
+            set: fn(Carbon $value) => $value,
         );
     }
 
@@ -56,10 +57,10 @@ class Enrollment extends Model
     public function course(): HasOneThrough
     {
         return $this->hasOneThrough(Course::class, ClassSchedule::class,
-            'id', // Foreign key on ClassSchedule table
-            'id', // Foreign key on Course table
+            'id',                // Foreign key on ClassSchedule table
+            'id',                // Foreign key on Course table
             'class_schedule_id', // Local key on Enrollment table
-            'course_id' // Local key on ClassSchedule table
+            'course_id'          // Local key on ClassSchedule table
         );
     }
 
@@ -69,10 +70,10 @@ class Enrollment extends Model
     public function getEnrollmentStatusAttribute(): string
     {
         return match (strtolower($this->status)) {
-            'enrolled' => 'Enrolled',
-            'dropped' => 'Dropped',
+            'enrolled'  => 'Enrolled',
+            'dropped'   => 'Dropped',
             'completed' => 'Completed',
-            default => 'Unknown',
+            default     => 'Unknown',
         };
     }
 

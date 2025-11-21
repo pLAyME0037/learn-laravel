@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\TransactionLedger;
 use App\Models\User;
 use App\Models\Payment; // Import Payment model
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
@@ -18,11 +17,14 @@ class TransactionLedgerSeeder extends Seeder
     {
         // Get IDs for users and payments
         $userIds = User::pluck('id')->toArray();
-        $paymentIds = Payment::pluck('payment_id')->toArray();
+        $paymentIds = Payment::pluck('id')->toArray();
 
         // Ensure necessary related data exists
         if (empty($userIds) || empty($paymentIds)) {
-            $this->command->warn('Some prerequisite data (Users or Payments) not found. Please seed them first.');
+            $this->command->warn('' 
+            . 'Some prerequisite data (Users or Payments) not found.'
+            . ' Please seed them first.'
+        );
             return;
         }
 
@@ -34,7 +36,10 @@ class TransactionLedgerSeeder extends Seeder
         foreach ($paymentIds as $paymentId) {
             $payment = Payment::find($paymentId);
             if (!$payment) {
-                $this->command->warn("Payment with ID {$paymentId} not found. Skipping transaction ledger entry.");
+                $this->command->warn('' 
+                . "Payment with ID {$paymentId} not found.'
+                . ' Skipping transaction ledger entry."
+            );
                 continue;
             }
 
@@ -45,7 +50,10 @@ class TransactionLedgerSeeder extends Seeder
             // Get the user_id associated with the student who made the payment
             $student = $payment->student;
             if (! $student || ! $student->user_id) {
-                $this->command->warn("Student or User not found for payment ID {$paymentId}. Skipping credit transaction.");
+                $this->command->warn('' 
+                . "Student or User not found for payment ID {$paymentId}.'
+                . ' Skipping credit transaction."
+            );
                 continue;
             }
 
@@ -71,7 +79,7 @@ class TransactionLedgerSeeder extends Seeder
                     'transaction_type' => 'debit',
                     'credit' => 0.00,
                     'debit' => fake()->randomFloat(2, 50, 1000),
-                    'created_at' => Carbon::now()->subDays(rand(1, 30)), // Transaction within the last month
+                    'created_at' => Carbon::now()->subDays(rand(1, 30)),
                 ]);
             }
         }

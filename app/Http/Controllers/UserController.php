@@ -23,8 +23,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $headers = ['User', 'Role', 'Status', 'Email Verified', 'User Status', 'Actions'];
-
         // Validate filters
         $filters = $request->validate([
             'search'  => 'nullable|string|max:100',
@@ -41,7 +39,6 @@ class UserController extends Controller
         $roles = Role::orderBy('name')->pluck('name', 'name');
 
         return view('admin.users.index', [
-            'headers' => $headers,
             'users'   => $users,
             'roles'   => $roles,
             'filters' => $filters,
@@ -137,7 +134,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::orderBy('name')->pluck('name', 'name');
-        return view('admin.users.edit', compact('user', 'roles'));
+        $canChangePassword = Auth::user()->can('changePassword', $user);
+        return view('admin.users.edit', compact('user', 'roles', 'canChangePassword'));
     }
 
     /**

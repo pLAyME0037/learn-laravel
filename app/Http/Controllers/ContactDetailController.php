@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace App\Http\Controllers;
 
 use App\Models\ContactDetail;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -81,7 +82,8 @@ class ContactDetailController extends Controller
      */
     public function edit(ContactDetail $contactDetail): View
     {
-        return view('admin.contact_details.edit', compact('contactDetail'));
+        $users = User::select('id', 'name')->get();
+        return view('admin.contact_details.edit', compact('contactDetail', 'users'));
     }
 
     /**

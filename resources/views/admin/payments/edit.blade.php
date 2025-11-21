@@ -9,7 +9,7 @@
 
         <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg p-6">
             <form method="POST"
-                action="{{ route('payments.update', $payment->id) }}">
+                action="{{ route('admin.payments.update', $payment->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -24,7 +24,7 @@
                         @foreach ($students as $student)
                             <option value="{{ $student->id }}"
                                 {{ old('student_id', $payment->student_id) == $student->id ? 'selected' : '' }}>
-                                {{ $student->user->name ?? $student->id }}
+                                {{ $student->display_label }}
                             </option>
                         @endforeach
                     </select>
@@ -43,7 +43,7 @@
                         @foreach ($academicYears as $academicYear)
                             <option value="{{ $academicYear->id }}"
                                 {{ old('academic_year_id', $payment->academic_year_id) == $academicYear->id ? 'selected' : '' }}>
-                                {{ $academicYear->year }}</option>
+                                {{ $academicYear->name }}</option>
                         @endforeach
                     </select>
                     <x-input-error :messages="$errors->get('academic_year_id')"
@@ -152,7 +152,7 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-secondary-button href="{{ route('payments.show', $payment->id) }}"
+                    <x-secondary-button href="{{ route('admin.payments.show', $payment->id) }}"
                         class="ml-4">
                         {{ __('Cancel') }}
                     </x-secondary-button>
