@@ -7,28 +7,28 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
                         Degree Details
                     </h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-input-label :value="__('Name')" />
-                            <p class="mt-1 text-sm text-gray-600">{{ $degree->name }}</p>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $degree->name }}</p>
                         </div>
                         <div>
                             <x-input-label :value="__('Level')" />
-                            <p class="mt-1 text-sm text-gray-600">{{ $degree->level }}</p>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $degree->level }}</p>
                         </div>
                         <div>
                             <x-input-label :value="__('Created At')" />
-                            <p class="mt-1 text-sm text-gray-600">{{ $degree->created_at->format('d M Y, H:i') }}</p>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $degree->created_at->format('d M Y, H:i') }}</p>
                         </div>
                         <div>
                             <x-input-label :value="__('Updated At')" />
-                            <p class="mt-1 text-sm text-gray-600">{{ $degree->updated_at->format('d M Y, H:i') }}</p>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ $degree->updated_at->format('d M Y, H:i') }}</p>
                         </div>
                     </div>
 

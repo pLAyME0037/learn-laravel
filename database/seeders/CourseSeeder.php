@@ -22,9 +22,9 @@ class CourseSeeder extends Seeder
 
         // Ensure necessary related data exists
         if (empty($programIds) || empty($facultyIds) || empty($semesterIds)) {
-            $this->command->warn('
-                Some prerequisite data (Programs, Faculties, or Semesters) not found. Please seed them first.
-            ');
+            $this->command->warn(''
+                . 'Some prerequisite data (Programs, Faculties, or Semesters) not found. Please seed them first.'
+        );
         }
 
         // Define sample courses

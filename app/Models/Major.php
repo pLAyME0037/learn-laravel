@@ -22,10 +22,10 @@ class Major extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'major_name',
+        'name',
         'department_id',
         'degree_id',
-        'major_cost',
+        'cost',
         'payment_frequency',
     ];
 
@@ -35,7 +35,7 @@ class Major extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'major_cost' => 'decimal:2',
+        'cost' => 'decimal:2',
     ];
 
     public function department(): BelongsTo
@@ -69,7 +69,7 @@ class Major extends Model
      */
     public function getFormattedMajorCostAttribute(): string
     {
-        return '$' . number_format($this->major_cost, 2);
+        return '$' . number_format((float) $this->cost, 2);
     }
 
     /**
@@ -101,7 +101,7 @@ class Major extends Model
      */
     public function scopeCostGreaterThan(Builder $query, float $amount): void
     {
-        $query->where('major_cost', '>', $amount);
+        $query->where('cost', '>', $amount);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Faculty;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -29,6 +30,7 @@ class DepartmentFactory extends Factory
             'budget' => $this->faker->randomFloat(2, 10000, 100000),
             'is_active' => true,
             'metadata' => ['info' => 'some extra info'],
+            'faculty_id' => Faculty::factory(),
         ];
     }
 }

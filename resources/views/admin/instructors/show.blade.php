@@ -16,7 +16,8 @@
                     <div>
                         <x-input-label :value="__('User')" />
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $instructor->user->name ?? 'N/A' }} </p>
+                            {{ $instructor->user->name ?? 'N/A' }} 
+                        </p>
                     </div>
                     <div>
                         <x-input-label :value="__('Department')" />
@@ -30,11 +31,6 @@
                             {{ $instructor->hire_date }}
                         </p>
                     </div>
-                    <div>
-                        <x-input-label :value="__('Rank')" />
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $instructor->rank }}
-                        </p>
                     </div>
                     <div>
                         <x-input-label :value="__('Create At')" />

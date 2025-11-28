@@ -1,54 +1,65 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\Payment;
 use App\Models\Student;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class PaymentSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Get student IDs (the integer primary key)
+        // 1. Clean Slate
+        Schema::disableForeignKeyConstraints();
+        Payment::truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // 2. Fetch IDs
         $studentIds = Student::pluck('id')->toArray();
 
-        // Ensure students exist
         if (empty($studentIds)) {
-            $this->command->warn('No students found. Please seed students first.');
+            $this->command->warn('No students found. Run StudentSeeder first.');
             return;
         }
 
-        // Define payment statuses and periods
-        $statuses = ['completed', 'pending', 'failed'];
-        $periods  = ['Tuition Fee - Fall 2025', 'Lab Fees - Fall 2025', 'Library Fees - Fall 2025'];
+        $paymentsToInsert = [];
+        $now = now();
+        $periods = [
+            'Tuition' => ['min' => 10000, 'max' => 20000],
+            'Lab'     => ['min' => 50, 'max' => 500],
+            'Library' => ['min' => 10, 'max' => 100],
+        ];
+        $statuses = ['completed', 'completed', 'completed', 'pending', 'failed'];
 
-        // Generate sample payments for students
+        // 3. Generate Data
         foreach ($studentIds as $studentId) {
-            // Create a few payments per student
-            for ($i = 0; $i < rand(1, 3); $i++) {
-                $paymentDate = Carbon::now()->subMonths(rand(0, 6)); // Payment within the last 6 months
-                $status      = $statuses[array_rand($statuses)];
-                $period      = $periods[array_rand($periods)];
+            // Create 1-3 payments per student
+            $count = rand(1, 3);
 
-                // Ensure amount is reasonable for the period
-                $amount = match ($period) {
-                    'Tuition Fee - Fall 2025'  => fake()->randomFloat(2, 10000, 20000),
-                    'Lab Fees - Fall 2025'     => fake()->randomFloat(2, 50, 500),
-                    'Library Fees - Fall 2025' => fake()->randomFloat(2, 10, 100),
-                    default                    => fake()->randomFloat(2, 10, 20000),
-                };
-
-                Payment::create([
-                    'student_id'                 => $studentId,
-                    'amount'                     => $amount,
-                    'payment_date'               => $paymentDate,
-                    'payment_period_description' => $period,
-                ]);
+            for ($i = 0; $i < $count; $i++) {
+                // Pick a random type (Tuition, Lab, etc.)
+                $typeKey = array_rand($periods);
+                $config = $periods[$typeKey];
+                
+                // Generate amount
+                $amount = rand($config['min'] * 100, $config['max'] * 100) / 100;
+                
+                $paymentsToInsert[] = [
+                    'student_id' => $studentId,
+                    'amount' => $amount,
+                    'payment_date' => $now->copy()->subDays(rand(1, 180)),
+                    'payment_period_description' => "$typeKey Fees - Fall 2025",
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+        }
+
+        // 4. Bulk Insert (Chunked for safety)
+        foreach (array_chunk($paymentsToInsert, 1000) as $chunk) {
+            Payment::insert($chunk);
         }
     }
 }

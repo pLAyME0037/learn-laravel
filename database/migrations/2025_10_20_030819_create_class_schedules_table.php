@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('class_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
-            $table->foreignId('professor_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('classroom_id')->constrained('classrooms')->onDelete('cascade');
+            $table->foreignId('course_id')->nullable()->constrained('courses')->onDelete('cascade');
+            $table->foreignId('instructor_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('classroom_id')->nullable()->constrained('classrooms')->onDelete('cascade');
+            $table->foreignId('semester_id')->constrained('semesters')->onDelete('cascade');
             $table->integer('capacity');
             $table->string('day_of_week')->nullable();
             $table->date('schedule_date')->nullable();
@@ -32,6 +33,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('class_schedules', function (Blueprint $table) {
+            $table->dropForeign(['semester_id']);
+            $table->dropColumn('semester_id');
+        });
         Schema::dropIfExists('class_schedules');
     }
 };

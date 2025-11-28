@@ -19,8 +19,8 @@ class StudentController extends Controller
         $this->middleware('permission:view.students')->only('index', 'show');
         $this->middleware('permission:create.students')->only('create', 'store');
         $this->middleware('permission:edit.students')->only('edit', 'update');
-        $this->middleware('permission:delete.students')->only('destroy');
-        $this->middleware('has_permission:delete.students')->only('restore', 'forceDelete');
+        $this->middleware('permission:delete.students')->only('destroy', 'restore');
+        $this->middleware('has_permission:delete.students')->only('forceDelete');
         $this->middleware('has_permission:edit.students')->only('updateStatus');
     }
 
@@ -44,9 +44,14 @@ class StudentController extends Controller
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
-        $programs = Program::active()
-            ->select('id', 'name', 'department_id')
-            ->orderBy('name')
+        $programs = Program::join('majors', 'programs.major_id', '=', 'majors.id')
+        ->active()
+            ->select(
+                'programs.id', 
+                'programs.name',
+                'majors.department_id',
+            )
+            ->orderBy('programs.name')
             ->get();
 
         return view('admin.students.index', compact(
@@ -98,8 +103,9 @@ class StudentController extends Controller
             'current_address'            => 'required|string',
             'permanent_address'          => 'required|string',
             'city'                       => 'required|string|max:100',
-            'state'                      => 'required|string|max:100',
-            'country'                    => 'required|string|max:100',
+            'district'                   => 'required|string|max:100',
+            'commune'                    => 'required|string|max:100',
+            'village'                    => 'required|string|max:100',
             'postal_code'                => 'required|string|max:20',
             'admission_date'             => 'required|date',
             'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
@@ -169,7 +175,14 @@ class StudentController extends Controller
 
     public function show(Student $student): View
     {
-        $student->load(['user', 'department', 'program', 'enrollments', 'academicRecords']);
+        $student->load([
+            'user', 
+            'department', 
+            'program',
+            'gender',
+            'enrollments.course',
+            'academicRecords',
+        ]);
 
         return view('admin.students.show', compact('student'));
     }
@@ -219,8 +232,9 @@ class StudentController extends Controller
                 'current_address'            => 'required|string',
                 'permanent_address'          => 'required|string',
                 'city'                       => 'required|string|max:100',
-                'state'                      => 'required|string|max:100',
-                'country'                    => 'required|string|max:100',
+                'district'                   => 'required|string|max:100',
+                'commune'                    => 'required|string|max:100',
+                'village'                    => 'required|string|max:100',
                 'postal_code'                => 'required|string|max:20',
                 'admission_date'             => 'required|date',
                 'expected_graduation'        => 'nullable|date',

@@ -20,7 +20,7 @@ class Faculty extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'faculty_name',
+        'name',
     ];
 
     /**
@@ -44,7 +44,7 @@ class Faculty extends Model
      */
     public function scopeByName(Builder $query, string $name): void
     {
-        $query->where('faculty_name', 'like', '%' . $name . '%');
+        $query->where('name', 'like', '%' . $name . '%');
     }
 
     /**

@@ -26,17 +26,23 @@
                             'payscale' => 'Payscale',
                             'rank' => 'Rank',
                             'hire_date' => 'Hire Date',
+                            'programs' => 'Programs',
+                            'courses' => 'Courses Taught',
                             'actions' => 'Actions',
                         ];
 
                         $data = $instructors->map(function ($instructor) {
+                            $programs = $instructor->courses->pluck('program.name')->filter()->unique()->implode(', ');
+                            $courses = $instructor->courses->pluck('name')->filter()->implode(', ');
+
                             return [
                                 'id' => $instructor->id,
                                 'name' => $instructor->user->name,
                                 'department_name' => $instructor->department->name ?? 'N/A',
                                 'payscale' => $instructor->payscale,
-                                'rank' => $instructor->rank,
-                                'hire_date' => \Carbon\Carbon::parse($instructor->hire_date)->format('Y-m-d'),
+                                'hire_date' => \Carbon\Carbon::parse($instructor->created_at)->format('Y-m-d'),
+                                'programs' => $programs,
+                                'courses' => $courses,
                             ];
                         });
                     @endphp
@@ -50,8 +56,14 @@
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                     {{-- Render standard data columns dynamically --}}
                                     @foreach (array_keys($headers) as $key)
-                                        @if ($key !== 'actions')
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        @if ($key === 'programs' || $key === 'courses')
+                                            <td
+                                                class="px-6 py-4 whitespace-normal text-sm text-gray-900 dark:text-gray-100">
+                                                {{ data_get($row, $key) ?? '' }}
+                                            </td>
+                                        @elseif ($key !== 'actions')
+                                            <td
+                                                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 {{ data_get($row, $key) ?? '' }}
                                             </td>
                                         @endif
@@ -91,7 +103,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ count($headers) }}" class="px-6 py-4 text-center">
+                                    <td colspan="{{ count($headers) }}"
+                                        class="px-6 py-4 text-center">
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
                                             No instructors available.
                                         </p>

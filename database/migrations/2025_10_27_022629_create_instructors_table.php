@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('instructors', function (Blueprint $table) {
             $table->id();
-            $table->integer('payscale');
-            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('cascade'); // Added faculty_id
+            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('cascade');
+            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
+            $table->integer('payscale');
             $table->timestamps();
             $table->softDeletes();
         });

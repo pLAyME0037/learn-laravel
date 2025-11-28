@@ -26,7 +26,8 @@ class Department extends Model
         'established_year',
         'budget',
         'is_active',
-        'metadata'
+        'metadata',
+        'faculty_id'
     ];
 
     protected $casts = [
@@ -39,6 +40,11 @@ class Department extends Model
     public function hod(): BelongsTo
     {
         return $this->belongsTo(User::class, 'hod_id');
+    }
+
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class);
     }
 
     public function users(): HasMany

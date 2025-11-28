@@ -23,8 +23,8 @@ class Classroom extends Model
         'name',
         'capacity',
         'room_number',
+        'building_name',
         'type',
-        'location',
     ];
 
     /**
@@ -74,27 +74,12 @@ class Classroom extends Model
     {
         $dateTime = Carbon::parse("{$date} {$time}");
 
-        $query->whereDoesntHave('classSchedules', function (Builder $subQuery) use ($dateTime) {
+        $query->whereDoesntHave('classSchedules', fn(Builder $subQuery) =>
             $subQuery->whereDate('schedule_date', $dateTime->toDateString())
-                ->where(function ($q) use ($dateTime) {
+                ->where(fn($q) =>
                     $q->where('start_time', '<', $dateTime->format('H:i:s'))
-                        ->where('end_time', '>', $dateTime->format('H:i:s'));
-                });
-        });
-    }
-
-    /**
-     * Checks if the classroom is available at a specific date and time.
-     * Note: This is a basic check. A more robust implementation would involve detailed time slot checking.
-     */
-    public function isAvailable(string $date, string $time): bool
-    {
-        $dateTime = Carbon::parse("{$date} {$time}");
-
-        return ! $this->classSchedules()->whereDate('schedule_date', $dateTime->toDateString())
-            ->where(function ($query) use ($dateTime) {
-                $query->where('start_time', '<', $dateTime->format('H:i:s'))
-                    ->where('end_time', '>', $dateTime->format('H:i:s'));
-            })->exists();
+                        ->where('end_time', '>', $dateTime->format('H:i:s'))
+                )
+        );
     }
 }

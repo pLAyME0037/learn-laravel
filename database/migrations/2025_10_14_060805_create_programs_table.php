@@ -10,16 +10,9 @@ return new class extends Migration
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            $table->foreignId('degree_id')->constrained()->onDelete('cascade');
+            $table->foreignId('major_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('code')->unique();
-            $table->text('description')->nullable();
-            $table->enum('level', ['certificate', 'diploma', 'associate', 'bachelor', 'master', 'doctoral'])->default('bachelor');
-            $table->integer('duration_years')->default(4);
-            $table->integer('total_semesters')->default(8);
-            $table->integer('total_credits_required')->default(120);
-            $table->decimal('tuition_fee', 10, 2)->nullable();
-            $table->json('curriculum')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

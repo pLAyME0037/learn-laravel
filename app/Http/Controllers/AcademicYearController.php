@@ -22,17 +22,15 @@ class AcademicYearController extends Controller
             ->only('edit', 'update');
         $this->middleware('permission:delete.academic-years')
             ->only('destroy');
-        // $this->middleware('has_permission:delete.academic-records')
-        //     ->only('restore', 'forceDelete');
-        // $this->middleware('has_permission:edit.academic-records')
-        //     ->only('updateStatus');
     }
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $academicYears = AcademicYear::orderBy('is_current', 'desc')->orderBy('start_date', 'desc')->paginate(4);
+        $academicYears = AcademicYear::orderBy('is_current', 'desc')
+        ->orderBy('start_date', 'desc')
+        ->paginate(4);
         return view('admin.academic_years.index', compact('academicYears'));
     }
 

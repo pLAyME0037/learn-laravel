@@ -14,25 +14,25 @@
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Filters with alpine state wrapper -->
+
+        {{-- FILTER SECTION --}}
         <div x-data="{
             deptId: '{{ $filters['department_id'] ?? '' }}',
             progId: '{{ $filters['program_id'] ?? '' }}',
             allPrograms: {{ \Illuminate\Support\Js::from($programs) }},
-        
             get filteredPrograms() {
                 if (!this.deptId) return this.allPrograms;
                 return this.allPrograms.filter(p => p.department_id == this.deptId)
             }
         }">
             @php
-                $filters = [
+                $filtersConfig = [
                     [
                         'type' => 'text',
                         'name' => 'search',
                         'label' => 'Search',
                         'value' => $filters['search'] ?? '',
-                        'placeholder' => 'id, name, email, or username',
+                        'placeholder' => 'ID, Name, Email...',
                     ],
                     [
                         'type' => 'select',
@@ -44,8 +44,7 @@
                         'selectedValue' => $filters['department_id'] ?? '',
                         'defaultOptionText' => 'All Departments',
                         'alpine_model' => 'deptId',
-                        'onChange' => "progId = ''", // Reset when changed
-                        'errorMessages' => $errors->get('department_id'),
+                        'onChange' => "progId = ''",
                     ],
                     [
                         'type' => 'select',
@@ -53,109 +52,125 @@
                         'label' => 'Program',
                         'defaultOptionText' => 'All Programs',
                         'alpine_model' => 'progId',
-                        'alpine_options' => 'filteredPrograms', // Js getter name
-                        'option_value' => 'id', // key in JSON object
-                        'option_text' => 'name', // key in JSON object
-                        'errorMessages' => $errors->get('program_id'),
+                        'alpine_options' => 'filteredPrograms',
+                        'option_value' => 'id',
+                        'option_text' => 'name',
                     ],
                     [
                         'type' => 'select',
                         'name' => 'academic_status',
-                        'label' => 'Academic Status',
+                        'label' => 'Status',
                         'options' => [
                             ['value' => 'active', 'text' => 'Active'],
                             ['value' => 'probation', 'text' => 'Probation'],
                             ['value' => 'graduated', 'text' => 'Graduated'],
                             ['value' => 'suspended', 'text' => 'Suspended'],
-                            ['value' => 'withdrawn', 'text' => 'Withdrawn'],
-                            ['value' => 'transfered', 'text' => 'Transfered'],
                             ['value' => 'trashed', 'text' => 'Trashed'],
                         ],
                         'selectedValue' => $filters['academic_status'] ?? '',
                         'defaultOptionText' => 'All Status',
                     ],
-                    [
-                        'type' => 'select',
-                        'name' => 'enrollment_status',
-                        'label' => 'Enrollment Status',
-                        'options' => [
-                            ['value' => 'full_time', 'text' => 'Full Time'],
-                            ['value' => 'part_time', 'text' => 'Part Time'],
-                            ['value' => 'exchange', 'text' => 'Exchange'],
-                            ['value' => 'study_abroad', 'text' => 'Study Aboard'],
-                        ],
-                        'selectedValue' => $filters['enrollment_status'] ?? '',
-                        'defaultOptionText' => 'All Status',
-                    ],
+                ];
+
+                // TABLE COLUMNS CONFIGURATION
+                $columns = [
+                    ['key' => 'student_id', 'label' => 'Student Identity', 'align' => 'left'],
+                    ['key' => 'department', 'label' => 'Department / Program', 'align' => 'left', 'width' => 'w-1/4'],
+                    ['key' => 'address', 'label' => 'Address', 'align' => 'left', 'width' => 'w-1/4'],
+                    ['key' => 'status', 'label' => 'Status', 'align' => 'center'],
+                    ['key' => 'admission', 'label' => 'Admission', 'align' => 'left'],
+                    ['key' => 'year', 'label' => 'Year', 'align' => 'center'],
                 ];
             @endphp
+
             <x-filter-box :action="route('admin.students.index')"
-                :filters="$filters"
+                :filters="$filtersConfig"
                 uri="admin.students.create"
                 createBtn="Add New Student" />
         </div>
 
-        @php
-            $headers = [
-                'Student Indentity', // pocture, name, id, email
-                'Department & Program',
-                'Status',
-                'Admission Date',
-                'Year',
-                'Action',
-            ];
-        @endphp
-
-        <x-table :header="$headers"
-            :data="$students">
-
-            <x-slot name='bodyContent'>
+        {{-- DATA TABLE --}}
+        <x-data-table :rows="$students"
+            :columns="$columns"
+            :selectable="true"
+            :with-actions="true">
+            <x-slot name="body">
                 @forelse ($students as $student)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td class="px-4 py-4 whitespace-nowrap flex items-center">
-                            {{-- Student Identity --}}
-                            <x-profile-image class="md"
-                                src="{{ $student->user?->profile_picture_url }}"
-                                alt="{{ $student->user?->name ?? 'N/A' }}" />
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{'ID: '. $student->student_id }}
-                                </div>
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{'Name: '. $student->user?->name ?? 'N/A' }}
-                                </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    <span>{{ $student->user?->email ?? 'N/A' }}</span>
+                    <x-table.row wire:key="row-{{ $student->id }}"
+                        :item-id="$student->id">
+
+                        {{-- CHECKBOX --}}
+                        <x-table.cell class="w-4">
+                            <input type="checkbox"
+                                value="{{ $student->id }}"
+                                x-model="selected"
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600">
+                        </x-table.cell>
+
+                        {{-- 1. IDENTITY --}}
+                        <x-table.cell>
+                            <div class="flex items-center">
+                                <x-profile-image class="md"
+                                    src="{{ $student->user?->profile_picture_url }}"
+                                    alt="{{ $student->user?->name ?? 'N/A' }}" />
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        <span class="text-blue-200">ID:</span>
+                                        {{ $student->student_id }}
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        <span class="text-blue-200">Name:</span>
+                                        {{ $student->full_name }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ $student->email ?? 'N/A' }}
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                        {{-- Department & Program --}}
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            <div>{{ $student->department?->name ?? 'N/A' }} /</div>
-                            <div>{{ $student->program?->name ?? 'N/A' }}</div>
-                        </td>
-                        {{-- Status --}}
-                        <td class="px-4 py-4 whitespace-nowrap">
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $student->academic_status_classes }}">
-                                {{ ucfirst($student->academic_status ?? 'Unknown') }}
-                            </span>
-                            <span
-                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
-                                {{ Str::ucfirst(str_replace('_', ' ', $student->enrollment_status ?? 'Unknown')) }}
-                            </span>
-                        </td>
-                        {{-- Admission --}}
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        </x-table.cell>
+
+                        {{-- 2. DEPT / PROGRAM --}}
+                        <x-table.cell class="whitespace-normal">
+                            <div class="text-sm text-gray-900 dark:text-white font-medium">
+                                {{ $student->department?->name ?? '-' }}
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                {{ $student->program?->name ?? '-' }}
+                            </div>
+                        </x-table.cell>
+
+                        {{-- 3. ADDRESS --}}
+                        <x-table.cell class="whitespace-normal">
+                            <x-address-block :student="$student" />
+                        </x-table.cell>
+
+                        {{-- 4. STATUS --}}
+                        <x-table.cell class="text-center">
+                            <div class="flex flex-col gap-1 items-center">
+                                <span
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $student->academic_status_classes }}">
+                                    {{ ucfirst($student->academic_status) }}
+                                </span>
+                                <span
+                                    class="px-2 inline-flex text-[10px] leading-4 font-semibold rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    {{ Str::ucfirst(str_replace('_', ' ', $student->enrollment_status)) }}
+                                </span>
+                            </div>
+                        </x-table.cell>
+
+                        {{-- 5. ADMISSION --}}
+                        <x-table.cell>
                             {{ $student->admission_date?->format('M d, Y') ?? 'N/A' }}
-                        </td>
-                        {{-- Year --}}
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        </x-table.cell>
+
+                        {{-- 6. YEAR --}}
+                        <x-table.cell class="text-center">
                             {{ $student->year_level_name ?? 'N/A' }}
-                        </td>
-                        {{-- Action --}}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center space-x-2">
+                        </x-table.cell>
+
+                        {{-- ACTIONS --}}
+                        <x-table.cell class="text-right">
+                            <div class="flex items-center justify-end space-x-2">
                                 @if ($student->trashed())
                                     @can('restore.students')
                                         <x-table.action :action="[
@@ -208,23 +223,30 @@
                                     @endcan
                                 @endif
                             </div>
-                        </td>
-                    </tr>
+                        </x-table.cell>
+
+                    </x-table.row>
                 @empty
                     <tr>
-                        <td colspan="{{ count($headers) }}"
-                            class="px-6 py-4 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                No Students found.
-                            </p>
+                        <td colspan="{{ count($columns) + 2 }}"
+                            class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-300 mb-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                    </path>
+                                </svg>
+                                <span class="text-lg font-medium">No students found</span>
+                            </div>
                         </td>
                     </tr>
                 @endforelse
             </x-slot>
-
-            <x-slot name='pagination'>
-                {{ $students->links() }}
-            </x-slot>
-        </x-table>
+        </x-data-table>
     </div>
 </x-app-layout>

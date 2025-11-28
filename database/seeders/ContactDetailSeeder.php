@@ -16,6 +16,8 @@ class ContactDetailSeeder extends Seeder
     {
         // Get IDs for users
         $userIds = User::pluck('id')->toArray();
+        $data = [];
+        $now = now();
 
         // Ensure necessary related data exists
         if (empty($userIds)) {
@@ -25,12 +27,18 @@ class ContactDetailSeeder extends Seeder
 
         // Seed contact details for Users
         foreach ($userIds as $userId) {
-            ContactDetail::create([
+            $data[] = [
                 'person_id'    => $userId, // Use person_id as per migration
                 'email'        => fake()->unique()->safeEmail(),
                 'phone_number' => fake()->phoneNumber(),
                 'address'      => fake()->address(),
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        foreach (array_chunk($data, 500) as $chunk) {
+            ContactDetail::insert($chunk);
         }
     }
 }

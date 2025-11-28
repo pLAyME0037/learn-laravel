@@ -1,13 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+// Add this import
 
 class ClassSchedule extends Model
 {
@@ -15,18 +18,17 @@ class ClassSchedule extends Model
 
     protected $fillable = [
         'course_id',
-        'professor_id',
+        'instructor_id',
         'classroom_id',
-        'capacity',
-        'schedule_date',
+        'semester_id',
+        'day_of_week',
         'start_time',
         'end_time',
     ];
 
     protected $casts = [
-        'schedule_date' => 'date',
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+        'start_time' => 'datetime:H:i',
+        'end_time'   => 'datetime:H:i',
     ];
 
     public function course()
@@ -34,14 +36,82 @@ class ClassSchedule extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function professor()
+    public function instructor() // Renamed from professor to instructor
     {
-        return $this->belongsTo(User::class, 'professor_id');
+        return $this->belongsTo(Instructor::class); // Changed to Instructor::class
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class);
     }
 
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    /**
+     * Get the classroom associated with the class schedule.
+     */
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class, 'classroom_id');
+    }
+
+    /**
+     * Logic to prevent Double Booking for ClassSchedule.
+     * 1. Room Conflict: Same Room + Same Time
+     * 2. Instructor Conflict: Same Teacher + Same Time (Different Room)
+     */
+    public static function checkForConflicts(
+        $roomId,
+        $instructorId,
+        $day,
+        $start,
+        $end,
+        $semesterId,
+        $ignoreId = null
+    ): void {
+        $query = static::where('semester_id', $semesterId)
+            ->where('day_of_week', $day)
+            ->where(function ($q) use ($roomId, $instructorId) {
+                // Check if Room is busy OR Instructor is busy
+                $q->where('classroom_id', $roomId)
+                    ->orWhere('instructor_id', $instructorId);
+            })
+        // Time Intersection Formula: (StartA < EndB) and (EndA > StartB)
+            ->where(function ($q) use ($start, $end) {
+                $q->where('start_time', '<', $end)
+                    ->where('end_time', '>', $start);
+            });
+
+        // If updating, exclude the current record from the check
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        if ($query->exists()) {
+            throw ValidationException::withMessages([
+                'start_time' => 'Time conflict detected! The Room or Instructor is already booked for this time slot.',
+            ]);
+        }
+    }
+
+    /**
+     * Reusable Validation Rules for ClassSchedule.
+     */
+    public static function validateSchedule(Request $request): array
+    {
+        return $request->validate([
+            'course_id'     => 'required|exists:courses,id',
+            'instructor_id' => 'required|exists:instructors,id',
+            'classroom_id'  => 'required|exists:classrooms,id',
+            'semester_id'   => 'required|exists:semesters,id',
+            'day_of_week'   => 'required|string|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time'    => 'required|date_format:H:i',
+            'end_time'      => 'required|date_format:H:i|after:start_time',
+        ]);
     }
 
     /**
@@ -71,14 +141,6 @@ class ClassSchedule extends Model
     }
 
     /**
-     * Get the classroom associated with the class schedule.
-     */
-    public function classroom()
-    {
-        return $this->belongsTo(Classroom::class, 'classroom_id'); // Updated to use classroom_id
-    }
-
-    /**
      * Get a boolean indicating if the class schedule has reached its capacity.
      */
     public function getIsFullAttribute(): bool
@@ -99,9 +161,8 @@ class ClassSchedule extends Model
      */
     public function scopeByProfessor(Builder $query, int $professorId): void
     {
-        $query->where('professor_id', $professorId);
+        $query->where('instructure_id', $professorId);
     }
-
 
     /**
      * Scope a query to filter for schedules that still have available capacity.
@@ -110,8 +171,8 @@ class ClassSchedule extends Model
     {
         $query->whereColumn('capacity', '>', function ($subQuery) {
             $subQuery->selectRaw('count(*)')
-                     ->from('enrollments')
-                     ->whereColumn('class_schedule_id', 'class_schedules.id');
+                ->from('enrollments')
+                ->whereColumn('class_schedule_id', 'class_schedules.id');
         });
     }
 

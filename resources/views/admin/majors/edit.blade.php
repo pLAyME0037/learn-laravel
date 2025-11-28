@@ -9,7 +9,7 @@
 
         <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg p-6">
             <form method="POST"
-                action="{{ route('majors.update', $major->id) }}">
+                action="{{ route('admin.majors.update', $major->id) }}">
                 @csrf
                 @method('PUT')
 
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="flex items-center justify-end mt-4">
-                    <x-secondary-button href="{{ route('majors.show', $major->id) }}"
+                    <x-secondary-button href="{{ route('admin.majors.show', $major->id) }}"
                         class="ml-4">
                         {{ __('Cancel') }}
                     </x-secondary-button>

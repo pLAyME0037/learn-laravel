@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('payment_period_description', 50);
             $table->timestamps();
             $table->softDeletes();
-            // The foreign key is now defined using foreignId, so explicit references are not needed unless custom column names are used.
-            // $table->foreign('student_id')->references('id')->on('students'); // This is implicitly handled by foreignId
+            $table->foreignId('academic_year_id')->nullable()->constrained('academic_years')->onDelete('set null');
             $table->index(['student_id']);
             $table->index(['payment_date']);
         });

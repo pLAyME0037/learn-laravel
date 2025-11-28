@@ -13,221 +13,260 @@
         </div>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @php
-                $headers = ['User', 'Role', 'Status', 'Email Verified', 'User Status', 'Actions'];
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        @php
+            // 1. FILTERS
+            $roleOptions = $roles
+                ->map(fn($name) => ['value' => $name, 'text' => ucfirst($name)])
+                ->prepend(['value' => 'no_roles', 'text' => 'No Roles'])
+                ->toArray();
 
-                // Prepare filter definitions directly in the view for clarity
-                $roleOptions = $roles
-                    ->map(fn($name) => ['value' => $name, 'text' => ucfirst($name)])
-                    ->prepend(['value' => 'no_roles', 'text' => 'No Roles'])
-                    ->toArray();
-
-                $filterDefinitions = [
-                    [
-                        'type' => 'text',
-                        'name' => 'search',
-                        'label' => 'Search',
-                        'value' => $filters['search'] ?? '',
-                        'placeholder' => 'Name, email, or username',
+            $filterDefinitions = [
+                [
+                    'type' => 'text',
+                    'name' => 'search',
+                    'label' => 'Search',
+                    'value' => $filters['search'] ?? '',
+                    'placeholder' => 'Name, email, or username',
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'role',
+                    'label' => 'Role',
+                    'options' => $roleOptions,
+                    'selectedValue' => $filters['role'] ?? '',
+                    'defaultOptionText' => 'All Roles',
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'status',
+                    'label' => 'Status',
+                    'options' => [
+                        ['value' => 'active', 'text' => 'Active'],
+                        ['value' => 'inactive', 'text' => 'Inactive'],
+                        ['value' => 'trashed', 'text' => 'Trashed'],
                     ],
-                    [
-                        'type' => 'select',
-                        'name' => 'role',
-                        'label' => 'Role',
-                        'options' => $roleOptions,
-                        'selectedValue' => $filters['role'] ?? '',
-                        'defaultOptionText' => 'All Roles',
+                    'selectedValue' => $filters['status'] ?? '',
+                    'defaultOptionText' => 'All Status',
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'orderby',
+                    'label' => 'Order By',
+                    'options' => [
+                        ['value' => 'a_to_z', 'text' => 'A-Z'],
+                        ['value' => 'z_to_a', 'text' => 'Z-A'],
+                        ['value' => 'newest', 'text' => 'Newest'],
+                        ['value' => 'oldest', 'text' => 'Oldest'],
                     ],
-                    [
-                        'type' => 'select',
-                        'name' => 'status',
-                        'label' => 'Status',
-                        'options' => [
-                            ['value' => 'active', 'text' => 'Active'],
-                            ['value' => 'inactive', 'text' => 'Inactive'],
-                            ['value' => 'trashed', 'text' => 'Trashed'],
-                        ],
-                        'selectedValue' => $filters['status'] ?? '',
-                        'defaultOptionText' => 'All Status',
-                    ],
-                    [
-                        'type' => 'select',
-                        'name' => 'orderby',
-                        'label' => 'Order By',
-                        'options' => [
-                            ['value' => 'a_to_z', 'text' => 'a-z'],
-                            ['value' => 'z_to_a', 'text' => 'z-a'],
-                            ['value' => 'newest', 'text' => 'Newest'],
-                            ['value' => 'oldest', 'text' => 'Oldest'],
-                        ],
-                        'selectedValue' => $filters['orderby'] ?? 'newest',
-                    ],
-                ];
-            @endphp
+                    'selectedValue' => $filters['orderby'] ?? 'newest',
+                ],
+            ];
 
-            <x-filter-box :action="route('admin.users.index')"
-                :filters="$filterDefinitions"
-                createBtn="Add New User"
-                uri="admin.users.create" />
+            // 2. COLUMNS
+            $columns = [
+                [
+                    'key' => 'user_info',
+                    'label' => 'User',
+                    'align' => 'left',
+                ],
+                [
+                    'key' => 'roles',
+                    'label' => 'Role',
+                    'align' => 'left',
+                ],
+                [
+                    'key' => 'status',
+                    'label' => 'Status',
+                    'align' => 'left',
+                ],
+                [
+                    'key' => 'email_verified_at',
+                    'label' => 'Email Verified',
+                    'align' => 'left',
+                ],
+                [
+                    'key' => 'user_status',
+                    'label' => 'User Status',
+                    'align' => 'left',
+                ],
+            ];
+        @endphp
 
+        <x-filter-box :action="route('admin.users.index')"
+            :filters="$filterDefinitions"
+            uri="admin.users.create"
+            createBtn="Add New User" />
 
-            <x-table :headers="$headers"
-                :data="$users"
-                :options="['wrapperClass' => 'mt-6']">
+        {{-- HYBRID DATA TABLE --}}
+        <x-data-table :rows="$users"
+            :columns="$columns"
+            :selectable="true"
+            :with-actions="true"
+            :sort-col="request('orderby')"
+            :sort-dir="request('direction', 'asc')">
 
-                <x-slot name="bodyContent">
-                    @forelse ($users as $user)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            {{-- Users --}}
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <x-table.cell.user-info :user="$user" />
-                            </td>
-                            {{-- Roles --}}
-                            <td class="px-6 py-4 whitespace-nowrap space-y-1">
+            <x-slot name="body">
+                @forelse ($users as $user)
+                    <x-table.row wire:key="row-{{ $user->id }}"
+                        :item-id="$user->id">
+
+                        {{-- CHECKBOX --}}
+                        <x-table.cell class="w-4">
+                            <input type="checkbox"
+                                value="{{ $user->id }}"
+                                x-model="selected"
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600">
+                        </x-table.cell>
+
+                        {{-- USER INFO --}}
+                        <x-table.cell>
+                            <x-table.cell.user-info :user="$user" />
+                        </x-table.cell>
+
+                        {{-- ROLES --}}
+                        <x-table.cell>
+                            <div class="space-y-1">
                                 @forelse ($user->roles as $role)
                                     <x-table.cell.role-badge :role="$role"
                                         :user="$user" />
                                 @empty
                                     <span
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 -bottom-1 -right-1 hover:bg-gray-200 hover:ring-2 hover:ring-gray-500 shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                                         <a href="{{ route('admin.users.edit-access', $user->id) }}">
                                             No Roles
                                         </a>
                                     </span>
                                 @endforelse
-                            </td>
-                            {{-- Status --}}
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <x-table.cell.status-badge :user="$user" />
-                            </td>
-                            {{-- Email Verified --}}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                @if ($user->email_verified_at)
-                                    <span class="text-green-600 dark:text-green-400">
-                                        Yes
+                            </div>
+                        </x-table.cell>
+
+                        {{-- STATUS --}}
+                        <x-table.cell>
+                            <x-table.cell.status-badge :user="$user" />
+                        </x-table.cell>
+
+                        {{-- VERIFIED --}}
+                        <x-table.cell>
+                            @if ($user->email_verified_at)
+                                <div class="flex flex-col">
+                                    <span class="text-green-600 dark:text-green-400 font-bold text-xs">
+                                        Verified
                                     </span>
-                                    <div class="text-xs">
+                                    <span class="text-[10px] text-gray-500">
                                         {{ $user->email_verified_at->format('M j, Y') }}
-                                    </div>
-                                @else
-                                    <span class="text-red-600 dark:text-red-400">
-                                        No
                                     </span>
-                                @endif
-                            </td>
-                            {{-- User Status --}}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <x-table.cell.user-state :user="$user" />
-                            </td>
-                            {{-- Action --}}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    @if ($user->trashed())
-                                        @can('restore', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'post-button',
-                                                'label' => 'Restore',
-                                                'route' => 'admin.users.restore',
-                                                'params' => ['user' => 'id'],
-                                                'class' => 'text-green-600',
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                        @can('forceDelete', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'delete',
-                                                'label' => 'Delete',
-                                                'route' => 'admin.users.force-delete',
-                                                'params' => ['user' => 'id'],
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                    @else
-                                        @can('view', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'link',
-                                                'label' => 'Show',
-                                                'route' => 'admin.users.show',
-                                                'params' => ['user' => 'id'],
-                                                'class' => 'text-gray-500',
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                        @can('changePassword', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'link',
-                                                'label' => 'Edit',
-                                                'route' => 'admin.users.edit',
-                                                'params' => ['user' => 'id'],
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                        @can('updateStatus', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'link',
-                                                'label' => 'Accessibility',
-                                                'route' => 'admin.users.edit-access',
-                                                'params' => ['user' => 'id'],
-                                                'class' => 'text-yellow-600',
-                                            ]"
-                                                :row="$user" />
-                                            <x-table.action :action="[
-                                                'type' => 'post-button',
-                                                'label' => $user->is_active ? 'Disactivate' : 'Activate',
-                                                'route' => 'admin.users.status',
-                                                'params' => ['user' => 'id'],
-                                                'class' => $user->is_active
-                                                    ? 'text-yellow-600 hover:text-yellow-500'
-                                                    : 'text-green-600 hover:text-green-500',
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                        @can('delete', $user)
-                                            <x-table.action :action="[
-                                                'type' => 'delete',
-                                                'label' => 'Trash',
-                                                'route' => 'admin.users.destroy',
-                                                'params' => ['user' => 'id'],
-                                            ]"
-                                                :row="$user" />
-                                        @endcan
-                                    @endif
                                 </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="{{ count($headers) }}"
-                                class="px-6 py-4 text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    No users found.
-                                </p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </x-slot>
-
-                <x-slot name="pagination">
-                    {{ $users->links() }}
-                </x-slot>
-
-                <x-slot name="empty">
-                    <div class="text-center py-8">
-                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
-                            No users found
-                        </h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            @if (array_filter($filters))
-                                Try adjusting your search filters.
                             @else
-                                Get started by creating a new user.
+                                <span class="text-red-600 dark:text-red-400 font-bold text-xs">
+                                    Unverified
+                                </span>
                             @endif
-                        </p>
-                    </div>
-                </x-slot>
-            </x-table>
-        </div>
+                        </x-table.cell>
+
+                        {{-- USER STATE --}}
+                        <x-table.cell>
+                            <x-table.cell.user-state :user="$user" />
+                        </x-table.cell>
+
+                        {{-- ACTIONS --}}
+                        <x-table.cell class="text-right">
+                            <div class="flex items-center justify-end space-x-2">
+                                @if ($user->trashed())
+                                    @can('restore', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'post-button',
+                                            'label' => 'Restore',
+                                            'route' => 'admin.users.restore',
+                                            'params' => ['user' => 'id'],
+                                            'class' => 'text-green-600',
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                    @can('forceDelete', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'delete',
+                                            'label' => 'Delete',
+                                            'route' => 'admin.users.force-delete',
+                                            'params' => ['user' => 'id'],
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                @else
+                                    @can('view', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'link',
+                                            'label' => 'Show',
+                                            'route' => 'admin.users.show',
+                                            'params' => ['user' => 'id'],
+                                            'class' => 'text-gray-500',
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                    @can('changePassword', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'link',
+                                            'label' => 'Edit',
+                                            'route' => 'admin.users.edit',
+                                            'params' => ['user' => 'id'],
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                    @can('updateStatus', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'link',
+                                            'label' => 'Access',
+                                            'route' => 'admin.users.edit-access',
+                                            'params' => ['user' => 'id'],
+                                            'class' => 'text-amber-600',
+                                        ]"
+                                            :row="$user" />
+                                        <x-table.action :action="[
+                                            'type' => 'post-button',
+                                            'label' => $user->is_active ? 'Deactivate' : 'Activate',
+                                            'route' => 'admin.users.status',
+                                            'params' => ['user' => 'id'],
+                                            'class' => $user->is_active ? 'text-amber-600' : 'text-green-600',
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                    @can('delete', $user)
+                                        <x-table.action :action="[
+                                            'type' => 'delete',
+                                            'label' => 'Trash',
+                                            'route' => 'admin.users.destroy',
+                                            'params' => ['user' => 'id'],
+                                        ]"
+                                            :row="$user" />
+                                    @endcan
+                                @endif
+                            </div>
+                        </x-table.cell>
+
+                    </x-table.row>
+                @empty
+                    <tr>
+                        <td colspan="{{ count($columns) + 2 }}"
+                            class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-300 mb-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                    </path>
+                                </svg>
+                                <span class="text-lg font-medium">
+                                    No users found
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </x-slot>
+        </x-data-table>
     </div>
 </x-app-layout>

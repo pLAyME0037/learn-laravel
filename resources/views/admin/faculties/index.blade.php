@@ -23,12 +23,14 @@
                         $headers = [
                             'id' => 'Faculty ID',
                             'faculty_name' => 'Faculty Name',
+                            'dept_name' => 'Department',
                         ];
 
                         $data = $faculties->map(function ($faculty) {
                             return [
                                 'id'=> $faculty->id,
                                 'faculty_name' => $faculty->name,
+                                'dept_name' => $faculty->departments->pluck('name')->implode('<br>'),
                             ];
                         });
 

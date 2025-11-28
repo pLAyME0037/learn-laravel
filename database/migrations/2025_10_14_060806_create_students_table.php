@@ -35,8 +35,9 @@ return new class extends Migration
             $table->text('current_address')->nullable();
             $table->text('permanent_address')->nullable();
             $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('country')->nullable();
+            $table->string('district')->nullable();
+            $table->string('commune')->nullable();
+            $table->string('village')->nullable();
             $table->string('postal_code')->nullable();
             
             // Academic Information
@@ -49,7 +50,9 @@ return new class extends Migration
             // Academic Status
             $table->enum('academic_status', ['active', 'probation', 'suspended', 'graduated', 'withdrawn', 'transfered'])->default('active');
             $table->enum('enrollment_status', ['full_time', 'part_time', 'exchange', 'study_abroad'])->default('full_time');
-            
+            $table->integer('year_level')->default(1)->after('user_id');
+            $table->enum('semester', ['semester_one', 'semester_two']);
+
             // Financial Information
             $table->enum('fee_category', ['regular', 'scholarship', 'financial_aid', 'self_financed'])->default('regular');
             $table->boolean('has_outstanding_balance')->default(false);

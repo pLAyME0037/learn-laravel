@@ -2,86 +2,82 @@
 
 namespace Database\Seeders;
 
+use App\Models\Payment;
 use App\Models\TransactionLedger;
 use App\Models\User;
-use App\Models\Payment; // Import Payment model
 use Illuminate\Database\Seeder;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class TransactionLedgerSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Get IDs for users and payments
-        $userIds = User::pluck('id')->toArray();
-        $paymentIds = Payment::pluck('id')->toArray();
+        // 1. Fetch Payments with linked User ID efficiently
+        // Only get payments where the student actually has a user account
+        $payments = Payment::with('student:id,user_id')
+            ->whereHas('student')
+            ->get();
 
-        // Ensure necessary related data exists
-        if (empty($userIds) || empty($paymentIds)) {
-            $this->command->warn('' 
-            . 'Some prerequisite data (Users or Payments) not found.'
-            . ' Please seed them first.'
-        );
+        if ($payments->isEmpty()) {
+            $this->command->warn('No payments found. Run PaymentSeeder first.');
             return;
         }
 
-        // Define transaction types
-        $transactionTypes = ['debit', 'credit'];
+        $ledgersToInsert = [];
+        $now = now();
 
-        // Generate sample transaction ledger entries
-        // We'll link transactions to payments and users
-        foreach ($paymentIds as $paymentId) {
-            $payment = Payment::find($paymentId);
-            if (!$payment) {
-                $this->command->warn('' 
-                . "Payment with ID {$paymentId} not found.'
-                . ' Skipping transaction ledger entry."
-            );
-                continue;
-            }
+        // 2. Generate Credit Entries (From Payments)
+        foreach ($payments as $payment) {
+            $userId = $payment->student->user_id ?? null;
+            if (!$userId) continue;
 
-            // For each payment, create a corresponding ledger entry (e.g., a credit for the payment)
-            // We'll also create some sample debits for users not directly tied to payments for demonstration.
-
-            // Credit entry for the payment
-            // Get the user_id associated with the student who made the payment
-            $student = $payment->student;
-            if (! $student || ! $student->user_id) {
-                $this->command->warn('' 
-                . "Student or User not found for payment ID {$paymentId}.'
-                . ' Skipping credit transaction."
-            );
-                continue;
-            }
-
-            TransactionLedger::create([
-                'user_id' => $student->user_id,
+            $ledgersToInsert[] = [
+                'user_id' => $userId,
                 'transaction_type' => 'credit',
-                'credit' => $payment->amount,
-                'debit' => 0.00,
-                'created_at' => $payment->payment_date,
-            ]);
+                'amount' => $payment->amount, // Assuming amount is stored positively
+                'reference_id' => $payment->id, // Link to payment (optional but good)
+                'description' => 'Tuition Payment',
+                'created_at' => $payment->payment_date ?? $now,
+                'updated_at' => $now,
+            ];
+        }
 
-            // Add some sample debit entries for users (e.g., for fees, expenses)
-            // We'll pick a few random users for these debits
-            $sampleUserIds = array_slice($userIds, 0, 3); // Take first 3 users as examples for debits
-            foreach ($sampleUserIds as $userId) {
-                // Avoid creating debits for the same user who just made a payment, if possible
-                if ($userId === $payment->student_id) {
-                    continue;
-                }
+        // 3. Generate Random Debit Entries (Fees)
+        // Pick 50 random users to apply fees to
+        $randomUserIds = User::inRandomOrder()->take(50)->pluck('id');
 
-                TransactionLedger::create([
-                    'user_id' => $userId,
-                    'transaction_type' => 'debit',
-                    'credit' => 0.00,
-                    'debit' => fake()->randomFloat(2, 50, 1000),
-                    'created_at' => Carbon::now()->subDays(rand(1, 30)),
-                ]);
-            }
+        foreach ($randomUserIds as $userId) {
+            $ledgersToInsert[] = [
+                'user_id' => $userId,
+                'transaction_type' => 'debit',
+                'amount' => -rand(50, 500), // Negative for debit? Or positive with type 'debit'?
+                // Adjust based on your Ledger logic. Standard is usually:
+                // Credit = +Amount, Debit = -Amount (or separate columns 'credit'/'debit')
+                'reference_id' => null,
+                'description' => 'Library Fee / Lab Fee',
+                'created_at' => $now->subDays(rand(1, 30)),
+                'updated_at' => $now,
+            ];
+        }
+
+        // 4. Bulk Insert
+        // Adjust columns to match your schema (credit/debit columns vs single amount column)
+        // Based on your previous code, you used specific 'credit' and 'debit' columns.
+        
+        $finalData = array_map(function ($item) {
+            $isCredit = $item['transaction_type'] === 'credit';
+            return [
+                'user_id' => $item['user_id'],
+                'transaction_type' => $item['transaction_type'],
+                'credit' => $isCredit ? abs($item['amount']) : 0,
+                'debit' => !$isCredit ? abs($item['amount']) : 0,
+                'created_at' => $item['created_at'],
+                'updated_at' => $item['updated_at'],
+            ];
+        }, $ledgersToInsert);
+
+        foreach (array_chunk($finalData, 500) as $chunk) {
+            TransactionLedger::insert($chunk);
         }
     }
 }

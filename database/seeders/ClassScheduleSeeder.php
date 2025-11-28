@@ -5,6 +5,7 @@ use App\Models\Classroom;
 use App\Models\ClassSchedule;
 use App\Models\Course;
 use App\Models\Instructor;
+use App\Models\Semester; // Added Semester model
 use Faker\Generator as Faker; // Import Carbon
 use Illuminate\Database\Seeder;
 
@@ -28,6 +29,7 @@ class ClassScheduleSeeder extends Seeder
         $instructorIdToUserIdMap = Instructor::pluck('user_id', 'id');
         $allClassroomIds         = Classroom::pluck('id')->all();
         $allInstructorUserIds    = $instructorIdToUserIdMap->values()->all(); // Get all available instructor user_ids
+        $firstSemesterId         = Semester::first()->id ?? null; // Get the ID of the first semester
 
         // 2. GUARD CLAUSES (EARLY RETURN)
         // Ensure that the foundational data exists before proceeding.
@@ -43,6 +45,10 @@ class ClassScheduleSeeder extends Seeder
             $this->command->warn('No classrooms found. Please seed them first.');
             return;
         }
+        if (is_null($firstSemesterId)) {
+            $this->command->warn('No semesters found. Please seed them first.');
+            return;
+        }
 
         // Define sample class schedules data
         $schedulesData     = $this->getSchedulesData();
@@ -56,7 +62,8 @@ class ClassScheduleSeeder extends Seeder
             // Validate that the course code from our array exists in the database map.
             if (! $courseCodeToIdMap->has($scheduleData['course_code'])) {
                 $this->command->warn(''
-                    . "Course with code '{$scheduleData['course_code']}' not found. Skipping schedule."
+                    . "Course with code '{$scheduleData['course_code']}' "
+                    . "not found. Skipping schedule."
                 );
                 continue; // Skip this iteration
             }
@@ -74,15 +81,17 @@ class ClassScheduleSeeder extends Seeder
             // Here, we'll assign a random one to ensure data is seeded.
             if (! $instructorUserId) {
                 $this->command->warn(''
-                    . "Instructor '{$scheduleData['instructor_code']}' not found. Assigning a random one."
+                    . "Instructor '{$scheduleData['instructor_code']}' "
+                    . "not found. Assigning a random one."
                 );
                 $instructorUserId = $allInstructorUserIds[array_rand($allInstructorUserIds)];
             }
 
             $schedulesToCreate[] = [
                 'course_id'     => $courseId,
-                'professor_id'  => $instructorUserId,
+                'instructor_id'  => $instructorUserId,
                 'classroom_id'  => $classroomId,
+                'semester_id'   => $firstSemesterId, // Assign the first semester ID
                 'capacity'      => $scheduleData['capacity'],
                 'day_of_week'   => $scheduleData['day_of_week'],
                 'schedule_date' => $faker->dateTimeBetween('now', '+1 year')->format('Y-m-d'),

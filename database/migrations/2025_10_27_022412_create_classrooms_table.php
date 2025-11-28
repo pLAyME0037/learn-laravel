@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('classrooms', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('room_number', 10)->unique();
+            $table->string('type', 50)->nullable();
+            $table->string('building_name', 50)->nullable();
             $table->integer('capacity');
             $table->timestamps();
             $table->softDeletes();

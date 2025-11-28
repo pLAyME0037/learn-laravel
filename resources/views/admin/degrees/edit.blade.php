@@ -7,8 +7,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="POST"
                         action="{{ route('admin.degrees.update', $degree->id) }}">
                         @csrf
@@ -49,7 +49,7 @@
                                 :value="__('Faculty')" />
                             <select id="faculty_id"
                                 name="faculty_id"
-                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                 <option value="">Select Faculty</option>
                                 @foreach ($faculties as $faculty)
                                     <option value="{{ $faculty->id }}"

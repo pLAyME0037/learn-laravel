@@ -27,22 +27,16 @@
                 @php
                     $headers = [
                         'name' => 'Name',
-                        'code' => 'Code',
-                        'department_name' => 'Department',
                         'degree_name' => 'Degree',
-                        'duration_years' => 'Duration (Years)',
-                        'is_active' => 'Status',
+                        'major_name' => 'Major',
                     ];
 
                     $data = $programs->map(function ($program) {
                         return [
                             'id' => $program->id,
                             'name' => $program->name,
-                            'code' => $program->code,
-                            'department_name' => $program->department->name ?? 'N/A',
                             'degree_name' => $program->degree->name ?? 'N/A',
-                            'duration_years' => $program->duration_years,
-                            'is_active' => $program->is_active ? 'Active' : 'Inactive',
+                            'major_name' => $program->major->name ?? 'N/A',
                         ];
                     });
 

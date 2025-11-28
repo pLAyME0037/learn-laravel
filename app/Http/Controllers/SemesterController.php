@@ -56,7 +56,8 @@ class SemesterController extends Controller
 
         Semester::create($validated);
 
-        return redirect()->route('semesters.index')->with('success', 'Semester created successfully.');
+        return redirect()->route('admin.semesters.index')
+        ->with('success', 'Semester created successfully.');
     }
 
     /**
@@ -92,7 +93,8 @@ class SemesterController extends Controller
 
         $semester->update($validated);
 
-        return redirect()->route('semesters.show', $semester)->with('success', 'Semester updated successfully.');
+        return redirect()->route('admin.semesters.show', $semester)
+        ->with('success', 'Semester updated successfully.');
     }
 
     /**
@@ -101,6 +103,7 @@ class SemesterController extends Controller
     public function destroy(Semester $semester): RedirectResponse
     {
         $semester->delete();
-        return redirect()->route('semesters.index')->with('success', 'Semester deleted successfully.');
+        return redirect()->route('admin.semesters.index')
+        ->with('success', 'Semester deleted successfully.');
     }
 }

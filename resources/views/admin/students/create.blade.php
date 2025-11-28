@@ -113,7 +113,8 @@
 
                             <!-- Academic Information Section -->
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Academic Information
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                    Academic Information
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Department -->
@@ -351,7 +352,8 @@
 
                             <!-- Address Information Section -->
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Address Information
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                    Address Information
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Current Address -->
@@ -394,32 +396,46 @@
                                             :messages="$errors->get('city')" />
                                     </div>
 
-                                    <!-- State -->
+                                    <!-- District -->
                                     <div>
-                                        <x-input-label for="state"
-                                            :value="__('State')" />
-                                        <x-text-input id="state"
-                                            name="state"
+                                        <x-input-label for="district"
+                                            :value="__('District')" />
+                                        <x-text-input id="district"
+                                            name="district"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('state')"
+                                            :value="old('district')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('state')" />
+                                            :messages="$errors->get('district')" />
                                     </div>
 
-                                    <!-- Country -->
+                                    <!-- Commune -->
                                     <div>
-                                        <x-input-label for="country"
-                                            :value="__('Country')" />
-                                        <x-text-input id="country"
-                                            name="country"
+                                        <x-input-label for="commune"
+                                            :value="__('Commune')" />
+                                        <x-text-input id="commune"
+                                            name="commune"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('country')"
+                                            :value="old('commune')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('country')" />
+                                            :messages="$errors->get('commune')" />
+                                    </div>
+
+                                    <!-- Village -->
+                                    <div>
+                                        <x-input-label for="village"
+                                            :value="__('Village')" />
+                                        <x-text-input id="village"
+                                            name="village"
+                                            type="text"
+                                            class="mt-1 block w-full"
+                                            :value="old('village')"
+                                            required />
+                                        <x-input-error class="mt-2"
+                                            :messages="$errors->get('village')" />
                                     </div>
 
                                     <!-- Postal Code -->

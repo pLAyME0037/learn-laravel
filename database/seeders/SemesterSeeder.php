@@ -32,7 +32,7 @@ class SemesterSeeder extends Seeder
             [
                 'start_date' => '2025-09-01',
                 'end_date'   => '2025-12-15',
-                'is_current' => true,
+                'is_active' => true,
             ]
         );
 
@@ -44,7 +44,7 @@ class SemesterSeeder extends Seeder
             [
                 'start_date' => '2026-01-15',
                 'end_date'   => '2026-05-15',
-                'is_current' => false,
+                'is_active' => false,
             ]
         );
 

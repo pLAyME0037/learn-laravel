@@ -40,8 +40,10 @@ class Student extends Model
         'current_address',
         'permanent_address',
         'city',
-        'state',
-        'country',
+        'province',
+        'district',
+        'commune',
+        'village',
         'postal_code',
         // Academic Information
         'admission_date',
@@ -187,19 +189,22 @@ class Student extends Model
             $addressParts[] = $this->current_address;
         }
         if ($this->city) {
-            $addressParts[] = $this->city;
+            $addressParts[] = 'City: ' . $this->city;
         }
-        if ($this->state) {
-            $addressParts[] = $this->state;
+        if ($this->district) {
+            $addressParts[] = 'Ddistrict: ' . $this->district;
         }
-        if ($this->country) {
-            $addressParts[] = $this->country;
+        if ($this->commune) {
+            $addressParts[] = 'Commune: ' . $this->commune;
+        }
+        if ($this->village) {
+            $addressParts[] = 'Village: ' . $this->village;
         }
         if ($this->postal_code) {
-            $addressParts[] = $this->postal_code;
+            $addressParts[] = 'Postal: ' . $this->postal_code;
         }
 
-        return implode(', ', $addressParts);
+        return implode('<br>', $addressParts);
     }
 
     /**

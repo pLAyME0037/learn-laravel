@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Enrollment extends Model
 {
@@ -23,17 +22,6 @@ class Enrollment extends Model
         'enrollment_date',
         'status',
     ];
-
-    /**
-     * Cast the enrollment_date attribute.
-     */
-    protected function enrollmentDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => new Carbon($value),
-            set: fn(Carbon $value) => $value,
-        );
-    }
 
     /**
      * Get the student that owns the Enrollment.
@@ -63,6 +51,10 @@ class Enrollment extends Model
             'course_id'          // Local key on ClassSchedule table
         );
     }
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class);
+    }
 
     /**
      * Get a human-readable enrollment status.
@@ -77,6 +69,16 @@ class Enrollment extends Model
         };
     }
 
+    /**
+     * Cast the enrollment_date attribute.
+     */
+    protected function enrollmentDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => new Carbon($value),
+            set: fn(Carbon $value) => $value,
+        );
+    }
     /**
      * Get a formatted enrollment date.
      */

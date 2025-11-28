@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Instructor extends Model
 {
@@ -24,8 +23,10 @@ class Instructor extends Model
      */
     protected $fillable = [
         'payscale',
+        'faculty_id',
         'department_id',
         'user_id',
+        'info',
     ];
 
     /**
@@ -42,6 +43,11 @@ class Instructor extends Model
         return $this->belongsTo(Department::class);
     }
 
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -54,7 +60,7 @@ class Instructor extends Model
 
     public function classSchedules(): HasMany
     {
-        return $this->hasMany(ClassSchedule::class, 'professor_id');
+        return $this->hasMany(ClassSchedule::class, 'instructor_id');
     }
 
     /**

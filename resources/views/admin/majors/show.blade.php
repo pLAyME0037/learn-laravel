@@ -15,7 +15,7 @@
 
                 <div class="border-t border-gray-200 dark:border-gray-700">
                     <dl>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 ID
                             </dt>
@@ -23,7 +23,7 @@
                                 {{ $major->id }}
                             </dd>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Name
                             </dt>
@@ -31,7 +31,7 @@
                                 {{ $major->name }}
                             </dd>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Code
                             </dt>
@@ -39,7 +39,7 @@
                                 {{ $major->code }}
                             </dd>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Department
                             </dt>
@@ -47,7 +47,7 @@
                                 {{ $major->department->name ?? 'N/A' }}
                             </dd>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Degree
                             </dt>
@@ -55,7 +55,7 @@
                                 {{ $major->degree->name ?? 'N/A' }}
                             </dd>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Description
                             </dt>
@@ -63,7 +63,7 @@
                                 {{ $major->description ?? 'N/A' }}
                             </dd>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Created At
                             </dt>
@@ -71,7 +71,7 @@
                                 {{ $major->created_at }}
                             </dd>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Updated At
                             </dt>
@@ -83,11 +83,11 @@
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-4">
-                    <a href="{{ route('majors.edit', $major->id) }}"
+                    <a href="{{ route('admin.majors.edit', $major->id) }}"
                         class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                         Edit
                     </a>
-                    <a href="{{ route('majors.index') }}"
+                    <a href="{{ route('admin.majors.index') }}"
                         class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-200 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-25 transition ease-in-out duration-150">
                         Back to List
                     </a>

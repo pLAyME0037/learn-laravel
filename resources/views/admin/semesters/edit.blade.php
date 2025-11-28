@@ -7,8 +7,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-900">
                     <form method="POST"
                         action="{{ route('admin.semesters.update', $semester) }}">
                         @csrf
@@ -72,13 +72,13 @@
                             <x-input-label for="academic_year_id"
                                 :value="__('Academic Year')" />
                             <x-select-input id="academic_year_id"
-                                class="block mt-1 w-full"
+                                class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 block mt-1 w-full"
                                 name="academic_year_id"
                                 required>
                                 @foreach ($academicYears as $academicYear)
                                     <option value="{{ $academicYear->id }}"
-                                        @selected(old('academic_year_id', $semester->academic_year_id) == $academicYear->id)>{{ $academicYear->year }}
-                                       </option>
+                                        @selected(old('academic_year_id', $semester->academic_year_id) == $academicYear->id)>{{ $academicYear->year_range }}
+                                    </option>
                                 @endforeach
                             </x-select-input>
                             <x-input-error :messages="$errors->get('academic_year_id')"

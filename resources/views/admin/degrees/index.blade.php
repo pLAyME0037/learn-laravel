@@ -7,19 +7,21 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Manage Degrees</h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            Manage Degrees
+                        </h3>
                         <a href="{{ route('admin.degrees.create') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            class="inline-flex items-center px-4 py-2 bg-blue-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Add New Degree') }}
                         </a>
                     </div>
 
                     <div class="mb-4">
                         <input type="text"
-                            placeholder="Search degrees..."
+                            placeholder="Dummy Search degrees..."
                             class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
                     </div>
 
@@ -31,6 +33,7 @@
 
                         $data = $degrees->map(function ($degree) {
                             return [
+                                'id' => $degree->id,
                                 'name' => $degree->name,
                                 'level' => $degree->level,
                             ];

@@ -1,122 +1,139 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Department;
+use App\Models\Gender;
 use App\Models\Program;
 use App\Models\Role;
-use App\Models\User;
 use App\Models\Student;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
-use App\Models\Gender;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class StudentManagementSeeder extends Seeder
 {
     public function run(): void
     {
-        $role = Role::where('name', 'student')->first();
-        // Fetch departments after they have been seeded
-        $csDepartment = Department::where('code', 'CS')->first();
-        $eeDepartment = Department::where('code', 'EE')->first();
-        // Fetch programs after they have been seeded
-        $bscCs = Program::where('name', 'Bachelor of Science in Computer Science')->first();
-        $bscEe = Program::where('name', 'Bachelor of Science in Electrical Engineering')->first();
+        $faker        = Faker::create();
+        $now          = now();
+        $password     = Hash::make('password'); // Hash once, use everywhere
+        $studentCount = 50;
 
-        // Ensure departments and programs are available
-        if (! $csDepartment) {
-            $this->command->error('Computer Science department not found. Please ensure DepartmentSeeder ran successfully.');
-            return;
-        }
-        if (! $eeDepartment) {
-            $this->command->error('Electrical Engineering department not found. Please ensure DepartmentSeeder ran successfully.');
-            return;
-        }
-        if (! $bscCs) {
-            $this->command->error('Bachelor of Science in Computer Science program not found. Please ensure ProgramSeeder ran successfully.');
-            return;
-        }
-        if (! $bscEe) {
-            $this->command->error('Bachelor of Science in Electrical Engineering program not found. Please ensure ProgramSeeder ran successfully.');
+                                                    // 1. Fetch Maps (ID Lookups)
+        $genders  = Gender::pluck('id')->toArray(); // Just IDs: [1, 2]
+        $programs = Program::with('major.department')
+            ->whereHas('major.department')
+            ->get();
+
+        if ($programs->isEmpty() || empty($genders)) {
+            $this->command->error('Missing Programs or Genders.');
             return;
         }
 
-        $student1 = User::create([
-            'name' => 'John Smith',
-            'username' => 'johnsmith',
-            'email' => 'john.smith@student.edu',
-            'password' => Hash::make('password'),
-            'department_id' => $csDepartment->id,
-            'is_active' => true,
-        ]);
+        // 2. Fetch Role ID for "student" (for pivot table insert)
+        $studentRoleId = Role::where('name', 'student')->value('id');
 
-        Student::create([
-            'user_id' => $student1->id,
-            'student_id' => 'STU-2024-ABC123',
-            'department_id' => $eeDepartment->id,
-            'program_id' => $bscCs->id,
-            'date_of_birth' => '2000-05-15',
-            'gender_id' => Gender::where('name', 'male')->first()->id,
-            'nationality' => 'American',
-            'phone' => '+1234567890',
-            'emergency_contact_name' => 'Jane Smith',
-            'emergency_contact_phone' => '+1234567891',
-            'emergency_contact_relation' => 'Mother',
-            'current_address' => '123 Main St, City, State',
-            'permanent_address' => '123 Main St, City, State',
-            'city' => 'New York',
-            'state' => 'NY',
-            'country' => 'USA',
-            'postal_code' => '10001',
-            'admission_date' => '2023-09-01',
-            'expected_graduation' => '2027-06-01',
-            'semester' => 'semester_two',
-            'academic_status' => 'active',
-            'enrollment_status' => 'full_time',
-            'fee_category' => 'regular',
-            'has_outstanding_balance' => false,
-            'previous_education' => 'High School Diploma',
-            'blood_group' => 'A+',
-            'has_disability' => false,
-        ]);
+        // --- PHASE A: Bulk Create Users ---
+        $usersData = [];
+        $userIds   = []; // Placeholder logic won't give us IDs back easily with insert(), so we must manage this carefully.
 
-        $student2 = User::create([
-            'name' => 'Sarah Johnson',
-            'username' => 'sarahj',
-            'email' => 'sarah.johnson@student.edu',
-            'password' => Hash::make('password'),
-            'department_id' => $csDepartment->id,
-            'is_active' => true,
-        ]);
+        // Strategy: Insert Users -> Get Last ID -> Calculate Range
+        // This is tricky with bulk inserts.
+        // FASTEST SAFE WAY: Use 'create' for User (to get ID) but keep it light?
+        // OR: Insert chunk, then query back?
+        // ACTUALLY: 21s is mostly 'Hash::make'. Since we cached hash, loops are faster now.
+        // Let's stick to a loop for Users to get IDs safely, but optimize the Student insert.
 
-        Student::create([
-            'user_id' => $student2->id,
-            'student_id' => 'STU-2024-DEF456',
-            'department_id' => $csDepartment->id,
-            'program_id' => $bscEe->id,
-            'date_of_birth' => '2001-08-22',
-            'gender_id' => Gender::where('name', 'female')->first()->id,
-            'nationality' => 'Canadian',
-            'phone' => '+1987654321',
-            'emergency_contact_name' => 'Robert Johnson',
-            'emergency_contact_phone' => '+1987654322',
-            'emergency_contact_relation' => 'Father',
-            'current_address' => '456 Oak St, City, State',
-            'permanent_address' => '456 Oak St, City, State',
-            'city' => 'Toronto',
-            'state' => 'ON',
-            'country' => 'Canada',
-            'postal_code' => 'M5V 2T6',
-            'admission_date' => '2023-09-01',
-            'expected_graduation' => '2027-06-01',
-            'semester' => 'semester_two',
-            'academic_status' => 'active',
-            'enrollment_status' => 'full_time',
-            'fee_category' => 'scholarship',
-            'has_outstanding_balance' => false,
-            'previous_education' => 'High School Diploma',
-            'blood_group' => 'O+',
-            'has_disability' => false,
-        ]);
+        $studentsData      = [];
+        $modelHasRolesData = []; // For manual pivot insert
+
+        // Pre-calculate random choices to save CPU cycles
+        $bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+        $feeCats     = ['regular', 'scholarship', 'international'];
+
+        DB::beginTransaction(); // Speed up transaction
+
+        for ($i = 0; $i < $studentCount; $i++) {
+            // Pick Program
+            $program      = $programs->random();
+            $departmentId = $program->major->department->id;
+
+            // User Data
+            $firstName = $faker->firstName;
+            $lastName  = $faker->lastName;
+            $username  = strtolower($firstName . '.' . $lastName . rand(100, 999));
+
+            // Creating User individually is necessary to get the ID for the Student record
+            // But since we pre-hashed the password, this is much faster.
+            $userId = DB::table('users')->insertGetId([
+                'name'              => "$firstName $lastName",
+                'username'          => $username,
+                'email'             => "$username@student.edu",
+                'password'          => $password,
+                'is_active'         => true,
+                'email_verified_at' => $now,
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ]);
+
+            // Prepare Role Data (Manual Pivot Insert)
+            if ($studentRoleId) {
+                $modelHasRolesData[] = [
+                    'role_id'    => $studentRoleId,
+                    'model_type' => 'App\Models\User',
+                    'model_id'   => $userId,
+                ];
+            }
+
+            // Prepare Student Data (Bulk Array)
+            $studentsData[] = [
+                'user_id'                    => $userId,
+                'student_id'                 => 'STU-' . $now->year . '-' . str_pad((string) rand(1, 99999), 5, '0', STR_PAD_LEFT),
+                'department_id'              => $departmentId,
+                'program_id'                 => $program->id,
+                'date_of_birth'              => $faker->dateTimeBetween('-25 years', '-18 years'),
+                'gender_id'                  => $genders[array_rand($genders)],
+                'nationality'                => 'United States', // Static is faster than faker->country
+                'phone'                      => '123-456-7890',  // Static/Simple is faster
+                'id_card_number'             => rand(100000000, 999999999),
+                'emergency_contact_name'     => "Parent of $firstName",
+                'emergency_contact_phone'    => '987-654-3210',
+                'emergency_contact_relation' => 'Parent',
+                'current_address'            => '123 Campus Dr',
+                'permanent_address'          => '123 Campus Dr',
+                'city'                       => 'Cityville',
+                'district'                   => 'Central',
+                'commune'                    => 'Sector 1',
+                'village'                    => 'Village A',
+                'postal_code'                => '12345',
+                'semester'                   => 'Semester ' . rand(1, 8),
+                'admission_date'             => $now,
+                'expected_graduation'        => $now->copy()->addYears(4),
+                'current_semester'           => rand(1, 8),
+                'academic_status'            => 'active',
+                'enrollment_status'          => 'full_time',
+                'fee_category'               => $feeCats[array_rand($feeCats)],
+                'blood_group'                => $bloodGroups[array_rand($bloodGroups)],
+                'has_disability'             => 0,
+                'has_outstanding_balance'    => rand(0, 1),
+                'created_at'                 => $now,
+                'updated_at'                 => $now,
+            ];
+        }
+
+        // Bulk Insert Students
+        foreach (array_chunk($studentsData, 100) as $chunk) {
+            foreach ($chunk as $studentData) {
+                Student::create($studentData);
+            }
+        }
+
+        // Bulk Insert Roles
+        if (! empty($modelHasRolesData)) {
+            DB::table('model_has_roles')->insert($modelHasRolesData);
+        }
+
+        DB::commit();
     }
 }

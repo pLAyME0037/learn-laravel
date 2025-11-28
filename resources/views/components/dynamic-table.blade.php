@@ -38,8 +38,11 @@
                         {{-- Loop through headers again to display data for each column in the current row --}}
                         @foreach ($headers as $key => $label)
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
-                                {{-- Display the data for the current key, or an empty string if not found --}}
-                                {{ $row[$key] ?? '' }}
+                                @if ($key === 'dept_name')
+                                    {!! $row[$key] ?? '' !!}
+                                @else
+                                    {{ $row[$key] ?? '' }}
+                                @endif
                             </td>
                         @endforeach
                         {{-- If actions are defined, render them in the last column --}}

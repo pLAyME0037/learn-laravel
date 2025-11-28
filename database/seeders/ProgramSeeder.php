@@ -1,10 +1,11 @@
 <?php
-
 namespace Database\Seeders;
 
+use App\Models\Degree;
 use App\Models\Department;
+use App\Models\Faculty;
+use App\Models\Major;
 use App\Models\Program;
-use App\Models\Faculty; // Import Faculty model
 use Illuminate\Database\Seeder;
 
 class ProgramSeeder extends Seeder
@@ -23,113 +24,72 @@ class ProgramSeeder extends Seeder
             return;
         }
 
-        // Define programs with their associated department codes and other details
+        // Fetch degree and major IDs for easier assignment
+        $bachelorDegreeId = Degree::where('name', 'Bachelor')->value('id');
+        $masterDegreeId = Degree::where('name', 'Master')->value('id');
+
+        $softwareEngineeringMajorId = Major::where('name', 'Software Engineering')->value('id');
+        $artificialIntelligenceMajorId = Major::where('name', 'Artificial Intelligence')->value('id');
+        $powerSystemsMajorId = Major::where('name', 'Power Systems')->value('id');
+        $marketingManagementMajorId = Major::where('name', 'Marketing Management')->value('id');
+        $corporateFinanceMajorId = Major::where('name', 'Corporate Finance')->value('id');
+        $adultHealthNursingMajorId = Major::where('name', 'Adult Health Nursing')->value('id');
+        $englishLiteratureMajorId = Major::where('name', 'English Literature')->value('id');
+
+        // Define programs with only the fillable attributes: degree_id, major_id, name
         $programsData = [
-            'Faculty of Science' => [
-                [
-                    'department_code' => 'CS', // Use department code for lookup
-                    'name' => 'Bachelor of Science in Computer Science',
-                    'code' => 'BSCS',
-                    'level' => 'bachelor',
-                    'duration_years' => 4,
-                    'total_semesters' => 8,
-                    'total_credits_required' => 120,
-                    'tuition_fee' => 15000.00,
-                    'description' => 'A comprehensive program covering core Computer Science principles.',
-                    'is_active' => true,
-                ],
-                [
-                    'department_code' => 'CS', // Use department code for lookup
-                    'name' => 'Master of Science in Computer Science',
-                    'code' => 'MSCS',
-                    'level' => 'master',
-                    'duration_years' => 2,
-                    'total_semesters' => 4,
-                    'total_credits_required' => 60,
-                    'tuition_fee' => 20000.00,
-                    'description' => 'Advanced studies in Computer Science for graduate students.',
-                    'is_active' => true,
-                ],
-                [
-                    'department_code' => 'MATH', // Use department code for lookup
-                    'name' => 'Bachelor of Science in Mathematics',
-                    'code' => 'BSMATH',
-                    'level' => 'bachelor',
-                    'duration_years' => 4,
-                    'total_semesters' => 8,
-                    'total_credits_required' => 120,
-                    'tuition_fee' => 14000.00,
-                    'description' => 'Focuses on theoretical and applied mathematics.',
-                    'is_active' => true,
-                ],
+            [
+                'name' => 'Bachelor of Software Engineering',
+                'degree_id' => $bachelorDegreeId,
+                'major_id' => $softwareEngineeringMajorId,
             ],
-            'Faculty of Engineering' => [
-                [
-                    'department_code' => 'EE', // Use department code for lookup
-                    'name' => 'Bachelor of Science in Electrical Engineering',
-                    'code' => 'BSEE',
-                    'level' => 'bachelor',
-                    'duration_years' => 4,
-                    'total_semesters' => 8,
-                    'total_credits_required' => 120,
-                    'tuition_fee' => 16000.00,
-                    'description' => 'Covers the principles and applications of electrical systems.',
-                    'is_active' => true,
-                ],
-                [
-                    'department_code' => 'ME', // Use department code for lookup
-                    'name' => 'Bachelor of Science in Mechanical Engineering',
-                    'code' => 'BSME',
-                    'level' => 'bachelor',
-                    'duration_years' => 4,
-                    'total_semesters' => 8,
-                    'total_credits_required' => 120,
-                    'tuition_fee' => 16500.00,
-                    'description' => 'Focuses on the design, analysis, and manufacturing of mechanical systems.',
-                    'is_active' => true,
-                ],
+            [
+                'name' => 'Master of Artificial Intelligence',
+                'degree_id' => $masterDegreeId,
+                'major_id' => $artificialIntelligenceMajorId,
             ],
-            'Faculty of Business' => [
-                [
-                    'department_code' => 'BA', // Use department code for lookup
-                    'name' => 'Bachelor of Business Administration',
-                    'code' => 'BBA',
-                    'level' => 'bachelor',
-                    'duration_years' => 4,
-                    'total_semesters' => 8,
-                    'total_credits_required' => 120,
-                    'tuition_fee' => 13000.00,
-                    'description' => 'Provides a broad foundation in business principles.',
-                    'is_active' => true,
-                ],
+            [
+                'name' => 'Bachelor of Electrical Engineering',
+                'degree_id' => $bachelorDegreeId,
+                'major_id' => $powerSystemsMajorId,
+            ],
+            [
+                'name' => 'Bachelor of Business Admin',
+                'degree_id' => $bachelorDegreeId,
+                'major_id' => $marketingManagementMajorId,
+            ],
+            [
+                'name' => 'Master of Corporate Finance',
+                'degree_id' => $masterDegreeId,
+                'major_id' => $corporateFinanceMajorId,
+            ],
+            [
+                'name' => 'Bachelor of Nursing',
+                'degree_id' => $bachelorDegreeId,
+                'major_id' => $adultHealthNursingMajorId,
+            ],
+            [
+                'name' => 'Bachelor of Arts in English Literature',
+                'degree_id' => $bachelorDegreeId,
+                'major_id' => $englishLiteratureMajorId,
             ],
         ];
 
-        foreach ($programsData as $facultyName => $programs) {
-            $faculty = Faculty::where('name', $facultyName)->first();
-            
-            if ($faculty) {
-                foreach ($programs as $programData) {
-                    // Find the department using its code
-                    $departmentCode = $programData['department_code'];
-                    $department = Department::where('code', $departmentCode)->firstOrFail();
-
-                    // Remove department_code from programData as it's not a column in the programs table
-                    unset($programData['department_code']);
-
-                    // Create the program, linking it to the department and faculty
-                    Program::updateOrCreate(
-                        ['code' => $programData['code']],
-                        array_merge($programData, [
-                            'department_id' => $department->id,
-                            // Removed faculty_id as programs table does not have this column directly.
-                            // Faculty can be accessed via the department relationship.
-                        ])
-                    );
-                }
-            } else {
-                $this->command->warn("Faculty '{$facultyName}' not found. Skipping programs for this faculty.");
+        foreach ($programsData as $programData) {
+            // Check if required IDs are found before attempting to create
+            if (is_null($programData['degree_id'])) {
+                $this->command->warn("Degree ID for program '{$programData['name']}' not found. Skipping.");
+                continue;
             }
+            if (is_null($programData['major_id'])) {
+                $this->command->warn("Major ID for program '{$programData['name']}' not found. Skipping.");
+                continue;
+            }
+
+            Program::updateOrCreate(
+                ['name' => $programData['name']], // Use name as unique identifier for updateOrCreate
+                $programData
+            );
         }
     }
 }

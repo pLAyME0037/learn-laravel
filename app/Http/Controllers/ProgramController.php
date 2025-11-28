@@ -45,12 +45,9 @@ class ProgramController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name'           => 'required|string|max:255|unique:programs,name',
-            'code'           => 'required|string|max:10|unique:programs,code',
-            'department_id'  => 'required|exists:departments,id',
-            'degree_id'      => 'required|exists:degrees,id',
-            'description'    => 'nullable|string',
-            'duration_years' => 'required|integer|min:1',
+            'name'      => 'required|string|max:255|unique:programs,name,',
+            'major_id'  => 'required|exists:departments,id',
+            'degree_id' => 'required|exists:degrees,id',
         ]);
 
         Program::create($validated);
@@ -84,12 +81,9 @@ class ProgramController extends Controller
     public function update(Request $request, Program $program): RedirectResponse
     {
         $validated = $request->validate([
-            'name'           => 'required|string|max:255|unique:programs,name,' . $program->id,
-            'code'           => 'required|string|max:10|unique:programs,code,' . $program->id,
-            'department_id'  => 'required|exists:departments,id',
-            'degree_id'      => 'required|exists:degrees,id',
-            'description'    => 'nullable|string',
-            'duration_years' => 'required|integer|min:1',
+            'name'      => 'required|string|max:255|unique:programs,name,' . $program->id,
+            'major_id'  => 'required|exists:departments,id',
+            'degree_id' => 'required|exists:degrees,id',
         ]);
 
         $program->update($validated);

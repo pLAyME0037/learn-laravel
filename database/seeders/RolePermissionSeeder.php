@@ -181,6 +181,13 @@ class RolePermissionSeeder extends Seeder
                 'edit.classes'   => 'Edit existing classes',
                 'delete.classes' => 'Delete classes',
                 'manage.classes' => 'Manage class profiles',
+            ],              
+            'Classroom Management' => [
+                'view.classrooms'   => 'View classrooms',
+                'create.classrooms' => 'Create new classrooms',
+                'edit.classrooms'   => 'Edit existing classrooms',
+                'delete.classrooms' => 'Delete classrooms',
+                'manage.classrooms' => 'Manage class profiles',
             ],            
             'Attendance Management' => [
                 'view.attendances'   => 'View attendances',
@@ -208,9 +215,17 @@ class RolePermissionSeeder extends Seeder
                 'create.permissions' => 'Create new permissions',
                 'edit.permissions'   => 'Edit existing permissions',
                 'delete.permissions' => 'Delete permissions',
+                'manage.permissions' => 'Manage all permissions (create, edit, delete)',
             ],
             'Syllabus Management'   => [
                 'manage.syllabus' => 'Manage course syllabi',
+            ],
+            'Semester Management' => [
+                'view.semesters'   => 'View semesters',
+                'create.semesters' => 'Create new semesters',
+                'edit.semesters'   => 'Edit existing semesters',
+                'delete.semesters' => 'Delete semesters',
+                'manage.semesters' => 'Manage semester profiles',
             ],
             'Instructor Management' => [
                 'view.instructors'   => 'View instructors',
@@ -245,10 +260,10 @@ class RolePermissionSeeder extends Seeder
                 'delete.contact-details' => 'Delete contact-details',
             ],
             'Credit Score Management'    => [
-                'view.credit-score'   => 'View credit-score',
-                'create.credit-score' => 'Create new credit-score',
-                'edit.credit-score'   => 'Edit existing credit-score',
-                'delete.credit-score' => 'Delete credit-score',
+                'view.credit-scores'   => 'View credit scores',
+                'create.credit-scores' => 'Create new credit scores',
+                'edit.credit-scores'   => 'Edit existing credit scores',
+                'delete.credit-scores' => 'Delete credit scores',
             ],
             'Audit Log Management'    => [
                 'view.audit_logs'   => 'View audit_logs',
@@ -263,6 +278,12 @@ class RolePermissionSeeder extends Seeder
                 'edit.payments'       => 'Edit existing payment records',
                 'delete.payments'     => 'Delete payment records',
                 'manage.scholarships' => 'Manage scholarships',
+            ],
+            'Degree Management' => [
+                'view.degrees'   => 'View academic degrees',
+                'create.degrees' => 'Create new academic degrees',
+                'edit.degrees'   => 'Edit existing academic degrees',
+                'delete.degrees' => 'Delete academic degrees',
             ],
             'System & Security'    => [
                 'view.audit-logs'      => 'View audit logs',
@@ -305,40 +326,54 @@ class RolePermissionSeeder extends Seeder
                     'view.courses', 'create.courses', 'edit.courses', 'delete.courses',
                     'view.enrollments', 'create.enrollments', 'edit.enrollments',
                     'view.academic-records', 'create.academic-records', 'edit.academic-records',
-                    // ... other registrar permissions
+                    'view.faculties', 'view.majors', 'view.degrees',
+                    'view.class-schedules', 'view.classrooms', 'view.academic_years',
+                    'view.semesters', 'view.payments', 'edit.payments', 'manage.fees',
+                    'view.login-histories', 'view.audit-logs', 'view.system-configs',
                 ],
             ],
             'hod'                 => [
                 'description' => 'Head of Department',
                 'permissions' => [
-                    'view.departments', 'manage.departments', 'view.students',
-                    'manage_records.students', 'view.programs', 'view.courses',
-                    'view.instructors',
-                    // ... other HOD permissions
+                    'view.departments', 'manage.departments', 'edit.departments',
+                    'view.students', 'edit.students', 'manage_records.students',
+                    'view.programs', 'edit.programs', 'view.courses', 'edit.courses',
+                    'view.instructors', 'edit.instructors', 'manage.instructors',
+                    'view.academic-records', 'edit.academic-records',
+                    'view.attendances', 'edit.attendances', 'manage.attendances',
+                    'view.class-schedules', 'edit.class-schedules',
+                    'manage.syllabus', 'view.reports',
                 ],
             ],
             'professor'           => [
                 'description' => 'Teaching faculty',
                 'permissions' => [
-                    'view.students', 'view.courses', 'manage.syllabus', 'manage.classes',
+                    'view.students', 'view.courses', 'manage.syllabus', 'manage.classes', 'edit.classes',
                     'view.academic-records', 'create.academic-records', 'edit.academic-records',
                     'view.attendances', 'create.attendances', 'edit.attendances',
-                    // ... other professor permissions
+                    'view.class-schedules', 'create.class-schedules', 'edit.class-schedules',
+                    'view.contact-details',
                 ],
             ],
             'staff'               => [
                 'description' => 'Administrative staff',
                 'permissions' => [
-                    'view.students', 'view.payments', 'create.payments', 'view.reports',
-                    // ... other staff permissions (mostly view-only)
+                    'view.students', 'edit.students', 'view.payments', 'create.payments', 'edit.payments',
+                    'view.reports', 'create.reports', 'view.enrollments', 'edit.enrollments',
+                    'view.academic_years', 'view.semesters', 'view.faculties', 'view.departments',
+                    'view.programs', 'view.courses', 'view.instructors', 'view.classrooms',
+                    'manage.fees', 'manage.scholarships',
+                    'view.contact-details', 'view.audit-logs', 'view.login-histories',
                 ],
             ],
             'student'             => [
                 'description' => 'Student access',
                 'permissions' => [
                     'view.academic-records', 'view.attendances', 'view.courses',
-                    'view.enrollments', 'view.payments',
-                    // ... other student permissions
+                    'view.enrollments', 'view.payments', 'view.class-schedules',
+                    'view.credit-scores', 'view.contact-details', 'view.reports',
+                    'view.programs', 'view.departments', 'view.faculties', 'view.majors',
+                    'view.degrees',
                 ],
             ],
         ];

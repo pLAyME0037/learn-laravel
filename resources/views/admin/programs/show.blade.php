@@ -33,22 +33,6 @@
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Code
-                            </dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-                                {{ $program->code }}
-                            </dd>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Department
-                            </dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-                                {{ $program->department->name ?? 'N/A' }}
-                            </dd>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Degree
                             </dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
@@ -57,21 +41,13 @@
                         </div>
                         <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Description
+                                Major
                             </dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-                                {{ $program->description ?? 'N/A' }}
+                                {{ $program->major->name ?? 'N/A' }}
                             </dd>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Duration (Years)
-                            </dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-                                {{ $program->duration_years }}
-                            </dd>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Created At
                             </dt>
@@ -79,7 +55,7 @@
                                 {{ $program->created_at }}
                             </dd>
                         </div>
-                        <div class="bg-gray-50 dark:bg-gray-900 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div class="bg-white dark:bg-gray-800 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                 Updated At
                             </dt>

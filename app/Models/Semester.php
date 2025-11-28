@@ -1,38 +1,40 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Semester extends Model
 {
     protected $fillable = [
-        'academic_year_id', 
-        'name', 
-        'start_date', 
-        'end_date', 
-        'is_current'
+        'academic_year_id',
+        'name',
+        'start_date',
+        'end_date',
+        'is_current',
     ];
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date',
+        'end_date'   => 'date',
         'is_current' => 'boolean',
     ];
 
-    public function academicYear(): BelongsTo
-    {
+    public function academicYear(): BelongsTo {
         return $this->belongsTo(AcademicYear::class);
     }
 
-    public function courses(): HasMany
-    {
+    public function classSchedules(): HasMany {
+        return $this->hasMany(ClassSchedule::class);
+    }
+
+    public function courses(): HasMany {
         return $this->hasMany(Course::class);
     }
 
@@ -59,7 +61,6 @@ class Semester extends Model
     {
         $query->where('academic_year_id', $academicYearId);
     }
-
     /**
      * Scope a query to filter for semesters that are currently active.
      */
@@ -67,7 +68,7 @@ class Semester extends Model
     {
         $now = Carbon::now();
         $query->where('start_date', '<=', $now)
-              ->where('end_date', '>=', $now);
+            ->where('end_date', '>=', $now);
     }
 
     /**
