@@ -22,12 +22,13 @@ class DatabaseSeeder extends Seeder
             ProgramSeeder::class,
             StudentManagementSeeder::class,
             SemesterSeeder::class, // Creates AcademicYear and Semesters
-            AcademicYearDashboardSeeder::class, // Now fetches existing AcademicYear and Semesters
+            // AcademicYearDashboardSeeder::class, // Redundant, AcademicStructureSeeder handles AcademicYear and Semesters
             // MajorSeeder::class,
             ClassroomSeeder::class,
-            // CourseSeeder::class,
+            // CourseSeeder::class, // Moved specific course seeding to AcademicStructureSeeder
             CoursePrerequisiteSeeder::class,
             ClassScheduleSeeder::class,
+            EnrollmentSeeder::class, // Added to create enrollments
             AttendanceSeeder::class,
             ContactDetailSeeder::class,
             PaymentSeeder::class,

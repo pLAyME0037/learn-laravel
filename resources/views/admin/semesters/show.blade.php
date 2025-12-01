@@ -18,21 +18,27 @@
                     <div class="mb-4">
                         <x-input-label for="start_date"
                             :value="__('Start Date')" />
-                        <p>{{ $semester->start_date ? \Carbon\Carbon::parse($semester->start_date)->format('d-m-Y') : '' }}
+                        <p>
+                            {{ $semester->start_date 
+                            ? \Carbon\Carbon::parse($semester->start_date)->format('d-m-Y') 
+                            : '' }}
                         </p>
                     </div>
 
                     <div class="mb-4">
                         <x-input-label for="end_date"
                             :value="__('End Date')" />
-                        <p>{{ $semester->end_date ? \Carbon\Carbon::parse($semester->end_date)->format('d-m-Y') : '' }}
+                        <p>
+                            {{ $semester->end_date 
+                            ? \Carbon\Carbon::parse($semester->end_date)->format('d-m-Y') 
+                            : '' }}
                         </p>
                     </div>
 
                     <div class="mb-4">
                         <x-input-label for="academic_year"
                             :value="__('Academic Year')" />
-                        <p>{{ $semester->academicYear->year }}</p>
+                        <p>{{ $semester->academicYear->name }}</p>
                     </div>
 
                     <div class="flex items-center justify-end mt-4">

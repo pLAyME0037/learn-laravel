@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::dropIfExists('attendances'); // Drop the existing table
 
         Schema::create('attendances', function (Blueprint $table) {
-            $table->id('attendance_id'); // Use id() for auto-incrementing primary key
-            $table->foreignId('student_id')->constrained('users')->onDelete('cascade'); // Assuming student_id refers to users table
+            $table->id('attendance_id'); 
+            $table->foreignId('student_id')->constrained('users')->onDelete('cascade'); 
             $table->foreignId('class_schedule_id')->constrained('class_schedules')->onDelete('cascade');
             $table->date('date');
-            $table->enum('status', ['present', 'absent', 'late'])->default('present'); // Added 'late' status
+            $table->enum('status', ['present', 'absent', 'late'])->default('present'); 
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['student_id', 'class_schedule_id', 'date']); // Ensure unique attendance per student per class per day
+            $table->unique(['student_id', 'class_schedule_id', 'date']); 
         });
     }
 

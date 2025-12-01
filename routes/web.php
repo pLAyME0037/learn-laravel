@@ -96,7 +96,7 @@ Route::middleware(['auth', 'verified'])
         ])->name('users.force-delete');
 
         Route::get('user-management', UserManagement::class)
-        ->name('users.management');
+            ->name('users.management');
 
         // Student Management Routes
         Route::resource('students', StudentController::class)

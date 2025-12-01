@@ -18,8 +18,8 @@ class PermissionController extends Controller
                     ->orWhere('description', 'like', '%' . $search . '%');
             })
             ->with('roles')
-            ->orderBy('name', 'asc') // Sort permissions alphabetically
-            ->paginate(10);
+            ->orderBy('name', 'asc')
+            ->paginate(20);
 
         return view('admin.permissions.index', compact('permissions', 'search'));
     }
@@ -66,7 +66,7 @@ class PermissionController extends Controller
         return view('admin.permissions.edit', compact('permission', 'roles'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request, Permission $permission)
     {
         // Set default for 'group' if not provided
         if (! $request->has('group')) {
@@ -81,19 +81,21 @@ class PermissionController extends Controller
             'role_id'     => 'required|string|exists:roles,id',
         ]);
 
-        $permission = Permission::create($validate);
+        $permission->update($validate);
 
-        // Assign the role to the permission if role_id is present
+        // Sync the role to the permission if role_id is present
         if (isset($validate['role_id'])) {
             $role = Role::findById($validate['role_id']);
             if ($role) {
-                $permission->assignRole($role);
+                $permission->syncRoles([$role]);
             }
+        } else {
+            // If no role_id is provided, detach all roles
+            $permission->syncRoles([]);
         }
 
         return redirect()->route('admin.permissions.index')
             ->with('success', 'Permission updated successfully.');
-
     }
 
     public function destroy(Permission $permission)

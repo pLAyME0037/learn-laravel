@@ -101,14 +101,33 @@
                 ],
             ],
 
-            // Academic Year (Calendar)
             [
-                'type' => 'link',
-                'label' => 'Academic Years',
+                'type' => 'dropdown',
+                'label' => 'Academic Controller',
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
-                'route' => 'admin.academic-years.index',
                 'can' => 'view.academic-years',
+                'children' => [
+                    // Academic Year (Calendar)
+                    [
+                        'type' => 'link',
+                        'label' => 'Academic Years',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
+                        'route' => 'admin.academic-years.index',
+                        'can' => 'view.academic-years',
+                    ],
+
+                    // Semester (Calendar)
+                    [
+                        'type' => 'link',
+                        'label' => 'Semester',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
+                        'route' => 'admin.semesters.index',
+                        'can' => ['view.semesters'],
+                    ],
+                ],
             ],
 
             // Attendance (Clipboard Check)
@@ -336,16 +355,6 @@
                         'can' => 'manage.permissions',
                     ],
                 ],
-            ],
-
-            // Semester (Calendar)
-            [
-                'type' => 'link',
-                'label' => 'Semester',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />',
-                'route' => 'admin.semesters.index',
-                'can' => ['view.semesters'],
             ],
 
             // System Configs (Cog / Gear)

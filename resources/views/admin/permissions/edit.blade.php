@@ -93,7 +93,7 @@
                     </x-secondary-button>
 
                     <x-primary-button class="ml-4">
-                        {{ __('Create Permission') }}
+                        {{ __('Confirm Edit') }}
                     </x-primary-button>
                 </div>
             </form>

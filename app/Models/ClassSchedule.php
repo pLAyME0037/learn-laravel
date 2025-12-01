@@ -10,11 +10,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-// Add this import
 
 class ClassSchedule extends Model
 {
     use SoftDeletes;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function (ClassSchedule $classSchedule) {
+            // Soft delete related Enrollments
+            $classSchedule->enrollments()->each(fn (Enrollment $enrollment) => $enrollment->delete());
+            // Soft delete related Attendances
+            $classSchedule->attendances()->each(fn (Attendance $attendance) => $attendance->delete());
+        });
+    }
 
     protected $fillable = [
         'course_id',

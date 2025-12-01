@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code');
-            $table->foreignId('faculty_id')->nullable()->constrained('faculties')->onDelete('set null')->after('program_id');
             $table->foreignId('semester_id')->constrained('semesters')->onDelete('cascade');
             $table->unique(['code', 'semester_id']);
             $table->text('description')->nullable();

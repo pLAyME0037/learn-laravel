@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import standard Flatpickr styles */
+@import 'flatpickr/dist/flatpickr.min.css';
+
+/* Import Dark Mode theme (Optional, looks better in dark mode) */
+@import 'flatpickr/dist/themes/dark.css';

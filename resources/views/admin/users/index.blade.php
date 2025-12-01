@@ -242,7 +242,6 @@
                                 @endif
                             </div>
                         </x-table.cell>
-
                     </x-table.row>
                 @empty
                     <tr>

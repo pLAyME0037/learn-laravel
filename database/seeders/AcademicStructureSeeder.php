@@ -362,8 +362,8 @@ class AcademicStructureSeeder extends Seeder
                 'degree_id' => $degreeMap['Bachelor'],
                 'created_at' => $now, 'updated_at' => $now
             ];
-            // Master (30% chance)
-            if (rand(1, 100) <= 30) {
+            // Master (Always create Master for Software Engineering, 30% for others)
+            if ($majorName === 'Software Engineering' || rand(1, 100) <= 30) {
                 $programData[] = [
                     'name' => "Master of $majorName",
                     'major_id' => $majorId,
@@ -378,40 +378,155 @@ class AcademicStructureSeeder extends Seeder
         $programs = Program::select('id', 'major_id')->get();
 
         // ------------------------------------------------------------------
-        // PHASE 7: Courses
+        // PHASE 7: Courses (Specific Courses required by ClassScheduleSeeder)
         // ------------------------------------------------------------------
-        $courseData = [];
-        $majorToDeptMap = Major::pluck('department_id', 'id')->toArray();
-        $deptToFacMap = Department::pluck('faculty_id', 'id')->toArray();
+        $coursesToSeed = [
+            // Computer Science Courses
+            [
+                'program_name'  => 'Bachelor of Software Engineering', // Updated to full program name for exact match
+                'faculty_name'  => 'Faculty of Engineering & Technology',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Introduction to Computer Science',
+                'code'          => 'CS101',
+                'credits'       => 3,
+                'max_students'  => 50,
+                'start_date'    => $now->copy()->addDays(10),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            [
+                'program_name'  => 'Bachelor of Software Engineering',
+                'faculty_name'  => 'Faculty of Engineering & Technology',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Data Structures and Algorithms',
+                'code'          => 'CS201',
+                'credits'       => 4,
+                'max_students'  => 45,
+                'start_date'    => $now->copy()->addDays(10),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            [
+                'program_name'  => 'Master of Software Engineering', // Updated to full program name
+                'faculty_name'  => 'Faculty of Engineering & Technology',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Advanced Algorithms',
+                'code'          => 'CS501',
+                'credits'       => 3,
+                'max_students'  => 30,
+                'start_date'    => $now->copy()->addDays(15),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            // Mathematics Courses
+            [
+                'program_name'  => 'Bachelor of Applied Mathematics', // Updated to full program name
+                'faculty_name'  => 'Faculty of Science',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Calculus I',
+                'code'          => 'MATH101',
+                'credits'       => 4,
+                'max_students'  => 60,
+                'start_date'    => $now->copy()->addDays(10),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            [
+                'program_name'  => 'Bachelor of Applied Mathematics',
+                'faculty_name'  => 'Faculty of Science',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Linear Algebra',
+                'code'          => 'MATH201',
+                'credits'       => 3,
+                'max_students'  => 55,
+                'start_date'    => $now->copy()->addDays(15),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            // Electrical Engineering Courses
+            [
+                'program_name'  => 'Bachelor of Power Systems', // Updated to full program name
+                'faculty_name'  => 'Faculty of Engineering & Technology',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Circuit Theory',
+                'code'          => 'EE201',
+                'credits'       => 4,
+                'max_students'  => 40,
+                'start_date'    => $now->copy()->addDays(10),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            [
+                'program_name'  => 'Bachelor of Power Systems',
+                'faculty_name'  => 'Faculty of Engineering & Technology',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Electromagnetics',
+                'code'          => 'EE301',
+                'credits'       => 3,
+                'max_students'  => 35,
+                'start_date'    => $now->copy()->addDays(15),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+            // Business Administration Courses
+            [
+                'program_name'  => 'Bachelor of Marketing Management', // Updated to full program name
+                'faculty_name'  => 'Faculty of Business & Economics',
+                'semester_name' => 'Fall 2025',
+                'name'          => 'Principles of Management',
+                'code'          => 'MGMT101',
+                'credits'       => 3,
+                'max_students'  => 50,
+                'start_date'    => $now->copy()->addDays(10),
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => 'Active',
+            ],
+        ];
 
-        foreach ($programs as $program) {
-            $majorId = $program->major_id;
-            $deptId = $majorToDeptMap[$majorId] ?? null;
-            if (!$deptId) continue;
-            $facId = $deptToFacMap[$deptId] ?? null;
+        $courseDataForInsert = [];
+        $programNameToIdMap = Program::pluck('id', 'name')->toArray(); // Refresh map for full names
+        $facultyNameToIdMap = Faculty::pluck('id', 'name')->toArray();
+        $semesterNameToIdMap = Semester::pluck('id', 'name')->toArray();
+        $departmentNameToIdMap = Department::pluck('id', 'name')->toArray();
 
-            // Create 4 courses per program
-            for ($i = 1; $i <= 4; $i++) {
-                $level = $i * 100;
-                $courseData[] = [
-                    'name' => "Course Level $level for Program " . $program->id,
-                    'code' => "CRS-" . $program->id . "-$level",
-                    'credits' => rand(3, 4),
-                    'max_students' => 60,
-                    'start_date' => $now->copy()->addDays(10),
-                    'end_date' => $now->copy()->addMonths(4),
-                    'status' => 'active',
-                    'department_id' => $deptId,
-                    'faculty_id' => $facId,
-                    'program_id' => $program->id,
-                    'semester_id' => $semesterId,
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ];
+
+        foreach ($coursesToSeed as $course) {
+            $program = Program::where('name', $course['program_name'])->first(); // Exact match for program name
+            $faculty = Faculty::where('name', $course['faculty_name'])->first();
+            $semester = Semester::where('name', $course['semester_name'])->first();
+
+            if (!$program || !$faculty || !$semester) {
+                $this->command->warn("Skipping course '{$course['code']}' due to missing Program ('{$course['program_name']}'), Faculty ('{$course['faculty_name']}'), or Semester ('{$course['semester_name']}').");
+                continue;
             }
+
+            $department = Department::find($program->major->department_id ?? null); // Access through major relation
+
+            if (!$department) {
+                $this->command->warn("Skipping course '{$course['code']}' due to missing Department for program {$program->name}.");
+                continue;
+            }
+
+
+            $courseDataForInsert[] = [
+                'name'          => $course['name'],
+                'code'          => $course['code'],
+                'description'   => $course['description'] ?? null,
+                'credits'       => $course['credits'],
+                'department_id' => $department->id,
+                // 'faculty_id'    => $faculty->id, // Removed as per "course should access faculty through department"
+                'program_id'    => $program->id,
+                'semester_id'   => $semester->id,
+                'max_students'  => $course['max_students'],
+                'start_date'    => $course['start_date'],
+                'end_date'      => $now->copy()->addMonths(4),
+                'status'        => $course['status'],
+                'created_at'    => $now,
+                'updated_at'    => $now,
+            ];
         }
 
-        foreach (array_chunk($courseData, 200) as $chunk) {
+        foreach (array_chunk($courseDataForInsert, 200) as $chunk) {
             Course::insert($chunk);
         }
     }

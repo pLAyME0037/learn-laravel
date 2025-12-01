@@ -16,31 +16,31 @@
                     action="{{ route('admin.academic-years.store') }}">
                     @csrf
 
-                    <!-- Year -->
+                    <!-- Name -->
                     <div class="mb-4">
-                        <x-input-label for="year"
+                        <x-input-label for="name"
                             :value="__('Year')" />
-                        <x-text-input id="year"
+                        <x-text-input id="name"
                             class="block mt-1 w-full"
                             type="text"
-                            name="year"
-                            :value="old('year')"
+                            name="name"
+                            :value="old('name')"
                             required
                             autofocus />
-                        <x-input-error :messages="$errors->get('year')"
+                        <x-input-error :messages="$errors->get('name')"
                             class="mt-2" />
                     </div>
+
 
                     <!-- Start Date -->
                     <div class="mb-4">
                         <x-input-label for="start_date"
                             :value="__('Start Date')" />
-                        <x-text-input id="start_date"
-                            class="block mt-1 w-full"
-                            type="date"
+
+                        <x-date-picker id="start_date"
                             name="start_date"
-                            :value="old('start_date')"
-                            required />
+                            :value="old('start_date')" />
+
                         <x-input-error :messages="$errors->get('start_date')"
                             class="mt-2" />
                     </div>
@@ -49,12 +49,11 @@
                     <div class="mb-4">
                         <x-input-label for="end_date"
                             :value="__('End Date')" />
-                        <x-text-input id="end_date"
-                            class="block mt-1 w-full"
-                            type="date"
+
+                        <x-date-picker id="end_date"
                             name="end_date"
-                            :value="old('end_date')"
-                            required />
+                            :value="old('end_date')" />
+
                         <x-input-error :messages="$errors->get('end_date')"
                             class="mt-2" />
                     </div>
@@ -65,7 +64,7 @@
                             :value="__('Status')" />
                         <select id="status"
                             name="status"
-                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
+                            class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
                             required>
                             <option value="active"
                                 {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>

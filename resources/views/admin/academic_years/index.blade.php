@@ -8,72 +8,126 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900 dark:text-gray-400">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-200">
-                        Manage Academic Years
-                    </h3>
+                <div class="flex justify-end mb-4">
                     <a href="{{ route('admin.academic-years.create') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         {{ __('Add New Academic Year') }}
                     </a>
                 </div>
 
-                <div class="mb-4">
-                    <input type="text"
-                        placeholder="Search academic years..."
-                        class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
-                </div>
-
                 @php
                     $headers = [
-                        'name' => 'Acdemic',
-                        'start_date' => 'Start Date',
-                        'end_date' => 'End Date',
-                        'is_current' => 'Current',
-                    ];
-
-                    $data = $academicYears->map(function ($academicYear) {
-                        return [
-                            'id' => $academicYear->id,
-                            'name' => $academicYear->name,
-                            'start_date' => $academicYear->start_date,
-                            'end_date' => $academicYear->end_date,
-                            'is_current' => $academicYear->is_current ? 'Yes' : 'No',
-                        ];
-                    });
-
-                    $actions = [
-                        'view' => [
-                            'route' => 'admin.academic-years.show',
-                            'label' => 'View',
-                            'params' => ['academic_year' => 'id'],
-                            'class' => 'text-gray-400 hover:text-gray-500',
+                        [
+                            'label' => 'No',
+                            'align' => 'center',
                         ],
-                        'edit' => [
-                            'route' => 'admin.academic-years.edit',
-                            'label' => 'Edit',
-                            'params' => ['academic_year' => 'id'],
-                            'class' => 'text-indigo-600 hover:text-indigo-900',
+                        [
+                            'key' => 'name',
+                            'label' => 'Academic Year Name',
+                            'align' => 'center',
                         ],
-                        'delete' => [
-                            'route' => 'admin.academic-years.destroy',
-                            'label' => 'Delete',
-                            'params' => ['academic_year' => 'id'],
-                            'class' => 'text-red-600 hover:text-red-900',
-                            'method' => 'DELETE',
+                        [
+                            'key' => 'start_date',
+                            'label' => 'Start Date',
+                            'align' => 'center',
+                        ],
+                        [
+                            'key' => 'end_date',
+                            'label' => 'End Date',
+                            'align' => 'center',
+                        ],
+                        [
+                            'key' => 'is_current',
+                            'label' => 'Current',
+                            'align' => 'center',
                         ],
                     ];
                 @endphp
-                @if (session('success'))
-                    <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
-                        {{ session('success') }}
-                    </div>
-                @endif
 
-                <x-dynamic-table :headers="$headers"
-                    :data="$data"
-                    :actions="$actions"
-                    :options="['wrapperClass' => 'border border-gray-200']" />
+                <x-data-table :rows="$academicYears"
+                    :columns="$headers"
+                    :selectable="true"
+                    :with-actions="true"
+                    :sort-col="request('orderby')"
+                    :sort-dir="request('direction', 'asc')">
+
+                    <x-slot name="body">
+                        @forelse ($academicYears as $academicYear)
+                            <x-table.row wire:key="row-{{ $academicYear->id }}"
+                                :item-id="$academicYear->id">
+                                {{-- CHECKBOX --}}
+                                <x-table.cell class="w-4">
+                                    <input type="checkbox"
+                                        value="{{ $academicYear->id }}"
+                                        x-model="selected"
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600">
+                                </x-table.cell>
+                                <x-table.cell>
+                                    {{ $loop->iteration }}
+                                </x-table.cell>
+                                <x-table.cell>
+                                    {{ $academicYear->name }}
+                                </x-table.cell>
+                                <x-table.cell>
+                                    {{ $academicYear->start_date->format('d-M-Y') }}
+                                </x-table.cell>
+                                <x-table.cell>
+                                    {{ $academicYear->end_date->format('d-M-Y') }}
+                                </x-table.cell>
+                                <x-table.cell>
+                                    {{ $academicYear->is_current ? 'Yes' : 'No' }}
+                                </x-table.cell>
+                                <x-table.cell>
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <x-table.action :action="[
+                                            'type' => 'link',
+                                            'label' => 'View',
+                                            'route' => 'admin.academic-years.show',
+                                            'params' => ['academic_year' => 'id'],
+                                            'class' => 'text-green-600',
+                                        ]"
+                                            :row="$academicYear" />
+                                        <x-table.action :action="[
+                                            'type' => 'link',
+                                            'label' => 'Edit',
+                                            'route' => 'admin.academic-years.edit',
+                                            'params' => ['academic_year' => 'id'],
+                                        ]"
+                                            :row="$academicYear" />
+                                        <x-table.action :action="[
+                                            'type' => 'delete',
+                                            'label' => 'Delete',
+                                            'route' => 'admin.academic-years.destroy',
+                                            'params' => ['academic_year' => 'id'],
+                                        ]"
+                                            :row="$academicYear" />
+                                    </div>
+                                </x-table.cell>
+                            </x-table.row>
+                        @empty
+                            <tr>
+                                <td colspan="{{ count($headers) + 2 }}"
+                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-300 mb-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                            </path>
+                                        </svg>
+                                        <span class="text-lg font-medium">
+                                            No academic years found
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </x-slot>
+                </x-data-table>
 
                 <div class="mt-4">
                     {{ $academicYears->links() }}

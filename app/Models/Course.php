@@ -114,6 +114,20 @@ class Course extends Model
         return $this->belongsTo(Semester::class);
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function (Course $course) {
+            // Detach prerequisites (from pivot table)
+            $course->prerequisites()->detach();
+            $course->prerequisiteForCourses()->detach(); // Also detach where this course is a prerequisite
+
+            // Detach instructors (from pivot table)
+            $course->instructors()->detach();
+        });
+    }
+
     /**
      * Add a prerequisite course.
      */

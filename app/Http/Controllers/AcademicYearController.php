@@ -8,6 +8,7 @@ use App\Models\AcademicYear;
 use App\Models\Department;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log; // Import the Log facade
 use Illuminate\View\View;
 
 class AcademicYearController extends Controller
@@ -50,9 +51,7 @@ class AcademicYearController extends Controller
             },
         ]);
 
-        $departments = Department::all();
-
-        return view('admin.academic_years.show', compact('academicYear', 'departments'));
+        return view('admin.academic_years.show', compact('academicYear'));
     }
 
     /**
@@ -68,14 +67,16 @@ class AcademicYearController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name'       => 'required|string|unique:academic_years,name',
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after:start_date',
-            'is_current' => 'boolean',
-        ]);
+        // 1. handle checkbox input
+        $data = $request->all();
+        $data['is_current'] = $request->boolean('is_current');
 
-        AcademicYear::create($request->all());
+        // 2. enforce single current year
+        if ($data['is_current']) {
+            AcademicYear::query()->update(['is_current' => false]);
+        }
+
+        AcademicYear::create($data);
 
         return redirect()->route('admin.academic-years.index')
             ->with('success', 'Academic Year created successfully.');
@@ -94,14 +95,18 @@ class AcademicYearController extends Controller
      */
     public function update(Request $request, AcademicYear $academicYear): RedirectResponse
     {
-        $request->validate([
-            'name'       => 'required|string|unique:academic_years,name,' . $academicYear->id,
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after:start_date',
-            'is_current' => 'boolean',
-        ]);
+        $request->merge(['is_current' => $request->boolean('is_current')]);
+        
+        // 1. handle checkbox input
+        $data = $request->all();
+        $data['is_current'] = $request->boolean('is_current');
 
-        $academicYear->update($request->all());
+        // 2. enforce single current year
+        if ($data['is_current']) {
+            AcademicYear::query()->update(['is_current' => false]);
+        }
+
+        $academicYear->update($data);
 
         return redirect()->route('admin.academic-years.index')
             ->with('success', 'Academic Year updated successfully.');
@@ -112,8 +117,14 @@ class AcademicYearController extends Controller
      */
     public function destroy(AcademicYear $academicYear): RedirectResponse
     {
-        $academicYear->delete();
-        return redirect()->route('admin.academic-years.index')
-            ->with('success', 'Academic Year deleted successfully.');
+        try {
+            $academicYear->delete(); // Model event will handle cascading soft deletes
+            return redirect()->route('admin.academic-years.index')
+                ->with('success', 'Academic Year deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting academic year: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Failed to delete academic year: ' . $e->getMessage());
+        }
     }
 }

@@ -90,12 +90,12 @@
                                             @if (!empty($routeParams[$paramKey])) {{-- Changed from 'payment' to $paramKey --}}
                                                 <form action="{{ route($action['route'], $routeParams) }}"
                                                     method="POST"
+                                                    x-data="{}"
+                                                    @submit.prevent="confirm('Are you sure you want to delete this item?') && $el.submit()"
                                                     class="inline">
                                                     @csrf
-                                                    @method('DELETE')
                                                     <button type="submit"
-                                                        class="{{ $action['class'] ?? 'text-red-600 hover:text-red-900' }}"
-                                                        onclick="return confirm('Are you sure you want to delete this item?');">
+                                                        class="{{ $action['class'] ?? 'text-red-600 hover:text-red-900' }}">
                                                         {{ $action['label'] }}
                                                     </button>
                                                 </form>

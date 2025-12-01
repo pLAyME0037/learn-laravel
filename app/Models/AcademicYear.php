@@ -6,12 +6,23 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AcademicYear extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['name', 'start_date', 'end_date', 'is_current'];
+
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date'   => 'date',
+            'is_current' => 'boolean',
+        ];
+    }
 
     public function semesters()
     {
@@ -19,43 +30,13 @@ class AcademicYear extends Model
     }
 
     /**
-     * Cast the start_date attribute.
-     */
-    protected function startDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => new Carbon($value),
-            set: fn(Carbon $value) => $value,
-        );
-    }
-
-    /**
-     * Cast the end_date attribute.
-     */
-    protected function endDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => new Carbon($value),
-            set: fn(Carbon $value) => $value,
-        );
-    }
-
-    /**
-     * Cast the is_current attribute.
-     */
-    protected function isCurrent(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => (bool) $value,
-            set: fn(bool $value)   => $value,
-        );
-    }
-
-    /**
      * Get the formatted year range (e.g., "2023-2024").
      */
     public function getYearRangeAttribute(): string
     {
+        if (! $this->start_date || ! $this->end_date) {
+            return 'N/A';
+        }
         return "{$this->start_date->format('Y')}-{$this->end_date->format('Y')}";
     }
 

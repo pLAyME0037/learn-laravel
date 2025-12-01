@@ -1,13 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare (strict_types = 1);
 
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\Semester;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log; // Import the Log facade
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SemesterController extends Controller
@@ -37,8 +40,9 @@ class SemesterController extends Controller
      */
     public function create(): View
     {
-        $academicYears = AcademicYear::all();
-        return view('admin.semesters.create', compact('academicYears'));
+        $academicYears       = AcademicYear::all();
+        $currentAcademicYear = AcademicYear::where('is_current', true)->first();
+        return view('admin.semesters.create', compact('academicYears', 'currentAcademicYear'));
     }
 
     /**
@@ -46,18 +50,21 @@ class SemesterController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Force the boolean value before validation
+        $request->merge(['is_active' => $request->boolean('is_active')]);
+
         $validated = $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'name'             => 'required|string|max:255',
             'start_date'       => 'required|date',
             'end_date'         => 'required|date|after:start_date',
-            'is_current'       => 'boolean',
+            'is_active'        => 'boolean',
         ]);
 
         Semester::create($validated);
 
         return redirect()->route('admin.semesters.index')
-        ->with('success', 'Semester created successfully.');
+            ->with('success', 'Semester created successfully.');
     }
 
     /**
@@ -83,18 +90,25 @@ class SemesterController extends Controller
      */
     public function update(Request $request, Semester $semester): RedirectResponse
     {
+        $request->merge(['is_active' => $request->boolean('is_active')]);
         $validated = $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
-            'name'             => 'required|string|max:255',
+            'name'             => [
+                'required',
+                'string',
+                Rule::unique('semester')->where(fn($q) =>
+                    $q->where('academic_year_id', $request->academic_year_id))
+                    ->ignore($semester->id),
+            ],
             'start_date'       => 'required|date',
             'end_date'         => 'required|date|after:start_date',
-            'is_current'       => 'boolean',
+            'is_active'        => 'boolean',
         ]);
 
         $semester->update($validated);
 
         return redirect()->route('admin.semesters.show', $semester)
-        ->with('success', 'Semester updated successfully.');
+            ->with('success', 'Semester updated successfully.');
     }
 
     /**
@@ -102,8 +116,20 @@ class SemesterController extends Controller
      */
     public function destroy(Semester $semester): RedirectResponse
     {
-        $semester->delete();
-        return redirect()->route('admin.semesters.index')
-        ->with('success', 'Semester deleted successfully.');
+        try {
+            DB::transaction(function () use ($semester) {
+                $semester->classSchedules()->delete(); // Mass delete (faster)
+                $semester->courses()->delete();        // Mass delete (faster)
+                $semester->delete();
+            });
+            DB::commit();
+            return redirect()->route('admin.semesters.index')
+                ->with('success', 'Semester deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting semester: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Failed to delete semester: ' . $e->getMessage());
+        }
     }
 }

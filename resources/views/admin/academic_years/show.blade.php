@@ -16,7 +16,7 @@
                     <div>
                         <x-input-label :value="__('Year')" />
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $academicYear->year }}
+                            {{ $academicYear->name }}
                         </p>
                     </div>
                     <div>
@@ -34,7 +34,7 @@
                     <div>
                         <x-input-label :value="__('Status')" />
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $academicYear->status }}
+                            {{ $academicYear->currently_active ? 'Yes' : 'No' }}
                         </p>
                     </div>
                     <div>

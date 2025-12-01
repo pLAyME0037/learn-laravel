@@ -7,8 +7,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-900">
                     <form method="POST"
                         action="{{ route('admin.semesters.store') }}">
                         @csrf
@@ -29,29 +29,27 @@
                         </div>
 
                         <!-- Start Date -->
-                        <div class="mt-4">
+                        <div class="mb-4">
                             <x-input-label for="start_date"
                                 :value="__('Start Date')" />
-                            <x-text-input id="start_date"
-                                class="block mt-1 w-full"
-                                type="date"
+
+                            <x-date-picker id="start_date"
                                 name="start_date"
-                                :value="old('start_date')"
-                                required />
+                                :value="old('start_date')" />
+
                             <x-input-error :messages="$errors->get('start_date')"
                                 class="mt-2" />
                         </div>
 
                         <!-- End Date -->
-                        <div class="mt-4">
+                        <div class="mb-4">
                             <x-input-label for="end_date"
                                 :value="__('End Date')" />
-                            <x-text-input id="end_date"
-                                class="block mt-1 w-full"
-                                type="date"
+
+                            <x-date-picker id="end_date"
                                 name="end_date"
-                                :value="old('end_date')"
-                                required />
+                                :value="old('end_date')" />
+
                             <x-input-error :messages="$errors->get('end_date')"
                                 class="mt-2" />
                         </div>
@@ -61,14 +59,22 @@
                             <x-input-label for="academic_year_id"
                                 :value="__('Academic Year')" />
                             <x-select-input id="academic_year_id"
-                                class="block mt-1 w-full"
+                                class="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900 block mt-1 w-full"
                                 name="academic_year_id"
                                 :value="old('academic_year_id')"
                                 required>
                                 @foreach ($academicYears as $academicYear)
-                                    <option value="{{ $academicYear->id }}">{{ $academicYear->year }}</option>
+                                <option value="{{ $academicYear->id }}"
+                                    {{ (old('academic_year_id') == $academicYear->id 
+                                    || (!old('academic_year_id') 
+                                    && isset($currentAcademicYear) 
+                                    && $currentAcademicYear->id == $academicYear->id)) ? 'selected' : '' 
+                                    }}>
+                                        {{ $academicYear->name }}
+                                    </option>
                                 @endforeach
                             </x-select-input>
+                            
                             <x-input-error :messages="$errors->get('academic_year_id')"
                                 class="mt-2" />
                         </div>
