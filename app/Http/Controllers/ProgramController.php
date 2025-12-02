@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Degree;
 use App\Models\Department;
+use App\Models\Major;
 use App\Models\Program;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,9 +35,10 @@ class ProgramController extends Controller
      */
     public function create(): View
     {
-        $departments = Department::all();
-        $degrees     = Degree::all();
-        return view('admin.programs.create', compact('departments', 'degrees'));
+        $departments = Department::active()->select('id', 'name')->get();
+        $degrees     = Degree::select('id', 'name')->get();
+        $majors      = Major::select('id', 'name')->get();
+        return view('admin.programs.create', compact('departments', 'degrees', 'majors'));
     }
 
     /**
@@ -46,7 +48,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'name'      => 'required|string|max:255|unique:programs,name,',
-            'major_id'  => 'required|exists:departments,id',
+            'major_id'  => 'required|exists:majors,id', // Corrected validation
             'degree_id' => 'required|exists:degrees,id',
         ]);
 
@@ -72,7 +74,8 @@ class ProgramController extends Controller
     {
         $departments = Department::all();
         $degrees     = Degree::all();
-        return view('admin.programs.edit', compact('program', 'departments', 'degrees'));
+        $majors      = Major::all(); // Fetch all majors for edit view
+        return view('admin.programs.edit', compact('program', 'departments', 'degrees', 'majors'));
     }
 
     /**
@@ -82,7 +85,7 @@ class ProgramController extends Controller
     {
         $validated = $request->validate([
             'name'      => 'required|string|max:255|unique:programs,name,' . $program->id,
-            'major_id'  => 'required|exists:departments,id',
+            'major_id'  => 'required|exists:majors,id', // Corrected validation
             'degree_id' => 'required|exists:degrees,id',
         ]);
 

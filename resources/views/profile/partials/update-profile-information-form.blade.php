@@ -30,7 +30,7 @@
                 <x-profile-image
                     alt="{{ $user->username }}"
                     src="{{ $user->profile_picture_url }}"
-                    size="xl"
+                    size="md"
                     :uploadable="true"
                     name="profile_pic"
                     :userId="$user->id" />

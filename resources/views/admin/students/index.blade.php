@@ -74,12 +74,38 @@
 
                 // TABLE COLUMNS CONFIGURATION
                 $columns = [
-                    ['key' => 'student_id', 'label' => 'Student Identity', 'align' => 'left'],
-                    ['key' => 'department', 'label' => 'Department / Program', 'align' => 'left', 'width' => 'w-1/4'],
-                    ['key' => 'address', 'label' => 'Address', 'align' => 'left', 'width' => 'w-1/4'],
-                    ['key' => 'status', 'label' => 'Status', 'align' => 'center'],
-                    ['key' => 'admission', 'label' => 'Admission', 'align' => 'left'],
-                    ['key' => 'year', 'label' => 'Year', 'align' => 'center'],
+                    [
+                        'key' => 'student_id', 
+                        'label' => 'Student Identity', 
+                        'align' => 'left'
+                    ],
+                    [
+                        'key' => 'department', 
+                        'label' => 'Department / Program', 
+                        'align' => 'left', 
+                        'width' => 'w-1/4'
+                    ],
+                    [
+                        'key' => 'address', 
+                        'label' => 'Address', 
+                        'align' => 'left', 
+                        'width' => 'w-1/4'
+                    ],
+                    [
+                        'key' => 'status', 
+                        'label' => 'Status', 
+                        'align' => 'center'
+                    ],
+                    [
+                        'key' => 'admission', 
+                        'label' => 'Admission', 
+                        'align' => 'left'
+                    ],
+                    [
+                        'key' => 'year', 
+                        'label' => 'Year', 
+                        'align' => 'center'
+                    ],
                 ];
             @endphp
 

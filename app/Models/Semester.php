@@ -29,15 +29,18 @@ class Semester extends Model
         'is_active'  => 'boolean',
     ];
 
-    public function academicYear(): BelongsTo {
+    public function academicYear(): BelongsTo
+    {
         return $this->belongsTo(AcademicYear::class);
     }
 
-    public function classSchedules(): HasMany {
+    public function classSchedules(): HasMany
+    {
         return $this->hasMany(ClassSchedule::class);
     }
 
-    public function courses(): HasMany {
+    public function courses(): HasMany
+    {
         return $this->hasMany(Course::class);
     }
 

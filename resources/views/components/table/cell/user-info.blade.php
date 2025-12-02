@@ -4,7 +4,8 @@
     <div class="flex-shrink-0 h-10 w-10">
         <x-profile-image class="border-blue-700"
             src="{{ $user->profile_picture_url }}"
-            alt="{{ $user->name }}" />
+            alt="{{ $user->name }}"
+            size="sm" />
     </div>
     <div class="ml-4">
         <div class="text-sm font-medium">

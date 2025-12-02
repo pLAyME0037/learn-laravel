@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             ClassScheduleSeeder::class,
             EnrollmentSeeder::class, // Added to create enrollments
             AttendanceSeeder::class,
-            ContactDetailSeeder::class,
+            // ContactDetailSeeder::class, // Removed as StudentManagementSeeder now handles contact details for students
             PaymentSeeder::class,
             TransactionLedgerSeeder::class,
             AuditLogSeeder::class,

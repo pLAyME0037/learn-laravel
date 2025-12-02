@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
@@ -31,20 +32,6 @@ class Student extends Model
         'nationality',
         'id_card_number',
         'passport_number',
-        // Contact Information
-        'phone',
-        'emergency_contact_name',
-        'emergency_contact_phone',
-        'emergency_contact_relation',
-        // Address Information
-        'current_address',
-        'permanent_address',
-        'city',
-        'province',
-        'district',
-        'commune',
-        'village',
-        'postal_code',
         // Academic Information
         'admission_date',
         'expected_graduation',
@@ -75,9 +62,6 @@ class Student extends Model
         'metadata'                => 'array',
         'id_card_number'          => 'encrypted',
         'passport_number'         => 'encrypted',
-        'emergency_contact_name'  => 'encrypted',
-        'emergency_contact_phone' => 'encrypted',
-        'permanent_address'       => 'encrypted',
         'disability_details'      => 'encrypted',
     ];
 
@@ -102,32 +86,31 @@ class Student extends Model
     {
         return $this->hasMany(AcademicRecord::class);
     }
-
     public function gender(): BelongsTo
     {
         return $this->belongsTo(Gender::class);
     }
-
     public function major(): BelongsTo
     {
         return $this->belongsTo(Major::class);
     }
-
     public function degree(): BelongsTo
     {
         return $this->belongsTo(Degree::class);
     }
-
-    public function contactDetails(): HasOne
+    public function contactDetail(): MorphOne
     {
-        return $this->hasOne(ContactDetail::class);
+        // Use morphOne because a student has one contact detail record
+        return $this->morphOne(ContactDetail::class, 'contactable');
     }
-
+    public function address(): HasOne
+    {
+        return $this->hasOne(Address::class);
+    }
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
-
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
@@ -182,31 +165,6 @@ class Student extends Model
         return ($this->total_credits_earned / $this->program->total_credits_required) * 100;
     }
 
-    public function getFormattedAddressAttribute(): string
-    {
-        $addressParts = [];
-        if ($this->current_address) {
-            $addressParts[] = $this->current_address;
-        }
-        if ($this->city) {
-            $addressParts[] = 'City: ' . $this->city;
-        }
-        if ($this->district) {
-            $addressParts[] = 'Ddistrict: ' . $this->district;
-        }
-        if ($this->commune) {
-            $addressParts[] = 'Commune: ' . $this->commune;
-        }
-        if ($this->village) {
-            $addressParts[] = 'Village: ' . $this->village;
-        }
-        if ($this->postal_code) {
-            $addressParts[] = 'Postal: ' . $this->postal_code;
-        }
-
-        return implode('<br>', $addressParts);
-    }
-
     /**
      * Returns the formatted admission date.
      */
@@ -237,18 +195,6 @@ class Student extends Model
     public function getHasDisabilityStatusAttribute(): string
     {
         return $this->has_disability ? 'Yes' : 'No';
-    }
-
-    /**
-     * Combines emergency contact details into a single string.
-     */
-    public function getEmergencyContactInfoAttribute(): string
-    {
-        return "
-        Name: {$this->emergency_contact_name},
-        Phone: {$this->emergency_contact_phone},
-        Relation: {$this->emergency_contact_relation}
-        ";
     }
 
     public function getYearLevelNameAttribute(): string
@@ -309,7 +255,7 @@ class Student extends Model
 
         // 6. Search (Student ID or User Details)
         $query->when($filters['search'] ?? null, function ($q, $search) {
-            $q->where(fn($subQuery) => 
+            $q->where(fn($subQuery) =>
                 $subQuery->where('student_id', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', "%{$search}%")
@@ -348,7 +294,7 @@ class Student extends Model
      */
     public function scopeByAcademicStanding(Builder $query, string $standing): void
     {
-        $query->where('academic_status', $standing); 
+        $query->where('academic_status', $standing);
     }
 
     // Helper Methods
@@ -480,7 +426,7 @@ class Student extends Model
         parent::boot();
         static::creating(function ($student) {
             if (empty($student->student_id)) {
-                $student->student_id = (new static())->generateStudentId();
+                $student->student_id = $student->generateStudentId($student->department_id);
             }
             if (empty($student->year_level)) {
                 $student->year_level = 1; // Default to Freshman

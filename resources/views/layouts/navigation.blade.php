@@ -83,7 +83,7 @@
                     class="flex p-2 rounded-lg bg-slate-100 dark:bg-slate-700 items-center space-x-2 focus:outline-none">
                     <x-profile-image src="{{ Auth::user()->profile_picture_url }}"
                         alt="{{ Auth::user()->username }}"
-                        size="sm" />
+                        size="xs" />
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ auth()->user()->name ?? 'Guest' }}
                     </span>

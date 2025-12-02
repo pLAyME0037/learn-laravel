@@ -25,20 +25,8 @@ return new class extends Migration
             $table->string('id_card_number')->nullable();
             $table->string('passport_number')->nullable();
             
-            // Contact Information
-            $table->string('phone')->nullable();
-            $table->string('emergency_contact_name')->nullable();
-            $table->string('emergency_contact_phone')->nullable();
-            $table->string('emergency_contact_relation')->nullable();
-            
-            // Address Information
-            $table->text('current_address')->nullable();
-            $table->text('permanent_address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('district')->nullable();
-            $table->string('commune')->nullable();
-            $table->string('village')->nullable();
-            $table->string('postal_code')->nullable();
+            // contact in contact detail
+            // Address Information in addresses table
             
             // Academic Information
             $table->date('admission_date');

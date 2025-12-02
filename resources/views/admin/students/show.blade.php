@@ -104,7 +104,7 @@
                                         Expected Graduation
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->expected_graduation?->format('M d, Y') ?? 'N/A' }}
+                                        {{ $student->expected_graduation?->format('d M Y') ?? 'N/A' }}
                                     </p>
                                 </div>
                                 <div>
@@ -116,8 +116,8 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Has
-                                        Outstanding Balance
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Has Outstanding Balance
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
                                         {{ $student->has_outstanding_balance ? 'Yes' : 'No' }}
@@ -187,19 +187,55 @@
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
                                 Address Information
                             </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Current Address
-                                    </h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        {{ $student->current_address }}</p>
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->current_address ?? 'N/A' }}</p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Permanent Address
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->permanent_address ?? 'N/A' }}</p>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">
-                                        Permanent Address</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        {{ $student->permanent_address }}</p>
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        City
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->city ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        District
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->district ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Commune
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->commune ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Village
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->village ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        Postal Code
+                                    </label>
+                                    <p class="text-sm text-gray-900 dark:text-white">
+                                        {{ $student->address->postal_code ?? 'N/A' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -234,7 +270,7 @@
                                         Phone
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->phone }}
+                                        {{ $student->contactDetail->phone_number ?? 'N/A' }}
                                     </p>
                                 </div>
                                 <div>
@@ -266,7 +302,7 @@
                                         Contact Name
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->emergency_contact_name }}
+                                        {{ $student->contactDetail->emergency_contact_name ?? 'N/A' }}
                                     </p>
                                 </div>
                                 <div>
@@ -274,7 +310,7 @@
                                         Contact Phone
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->emergency_contact_phone }}
+                                        {{ $student->contactDetail->emergency_contact_phone ?? 'N/A' }}
                                     </p>
                                 </div>
                                 <div>
@@ -282,7 +318,7 @@
                                         Relationship
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->emergency_contact_relation }}
+                                        {{ $student->contactDetail->emergency_contact_relation ?? 'N/A' }}
 
                                     </p>
                                 </div>
@@ -380,7 +416,7 @@
                                                     {{ $enrollment->course->name ?? 'N/A' }}
                                                 </td>
                                                 <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
-                                                    {{ $enrollment->semester->name }}
+                                                    {{ $enrollment->semester?->name }}
                                                 </td>
                                                 <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
                                                     {{ ucfirst($enrollment->status) }}

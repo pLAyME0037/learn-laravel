@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_details', function (Blueprint $table) {
+        Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('phone_number', 20)->unique();
-            $table->nullableMorphs('contactable');
-            $table->string('emergency_contact_name')->nullable();
-            $table->string('emergency_contact_phone')->nullable();
-            $table->string('emergency_contact_relation')->nullable();
+            $table->text('current_address')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            $table->foreignId('cam_geos_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('student_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('instructor_id')->nullable()->constrained()->onDelete('cascade');
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_details');
+        Schema::dropIfExists('addresses');
     }
 };

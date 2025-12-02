@@ -149,30 +149,29 @@
                                     </div>
 
                                     <!-- Admission Date -->
-                                    <div>
+                                    <div class="mb-4">
                                         <x-input-label for="admission_date"
                                             :value="__('Admission Date')" />
-                                        <x-text-input id="admission_date"
+
+                                        <x-date-picker id="admission_date"
                                             name="admission_date"
-                                            type="date"
                                             class="mt-1 block w-full"
-                                            :value="old('admission_date', $student->admission_date->format('Y-m-d'))"
-                                            required />
-                                        <x-input-error class="mt-2"
-                                            :messages="$errors->get('admission_date')" />
+                                            :value="old('admission_date', $student->admission_date->format('D-M-Y'))" />
+
+                                        <x-input-error :messages="$errors->get('admission_date')"
+                                            class="mt-2" />
                                     </div>
 
                                     <!-- Expected Graduation -->
                                     <div>
                                         <x-input-label for="expected_graduation"
                                             :value="__('Expected Graduation')" />
-                                        <x-text-input id="expected_graduation"
+                                        <x-date-picker id="expected_graduation"
                                             name="expected_graduation"
-                                            type="date"
                                             class="mt-1 block w-full"
                                             :value="old(
                                                 'expected_graduation',
-                                                $student->expected_graduation?->format('Y-m-d'),
+                                                $student->expected_graduation?->format('d-M-Y'),
                                             )" />
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('expected_graduation')" />
@@ -298,11 +297,10 @@
                                     <div>
                                         <x-input-label for="date_of_birth"
                                             :value="__('Date of Birth')" />
-                                        <x-text-input id="date_of_birth"
+                                        <x-date-picker id="date_of_birth"
                                             name="date_of_birth"
-                                            type="date"
                                             class="mt-1 block w-full"
-                                            :value="old('date_of_birth', $student->date_of_birth->format('Y-m-d'))"
+                                            :value="old('date_of_birth', $student->date_of_birth->format('d-M-Y'))"
                                             required />
                                         <x-input-error class="mt-2"
                                             :messages="$errors->get('date_of_birth')" />
@@ -344,16 +342,16 @@
 
                                     <!-- Phone -->
                                     <div>
-                                        <x-input-label for="phone"
+                                        <x-input-label for="contact_detail.phone_number"
                                             :value="__('Phone Number')" />
-                                        <x-text-input id="phone"
-                                            name="phone"
+                                        <x-text-input id="contact_detail.phone_number"
+                                            name="contact_detail[phone_number]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('phone', $student->phone)"
+                                            :value="old('contact_detail.phone_number', $student->contactDetail->phone_number ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('phone')" />
+                                            :messages="$errors->get('contact_detail.phone_number')" />
                                     </div>
 
                                     <!-- Blood Group -->
@@ -414,99 +412,99 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Current Address -->
                                     <div class="md:col-span-2">
-                                        <x-input-label for="current_address"
+                                        <x-input-label for="address.current_address"
                                             :value="__('Current Address')" />
-                                        <textarea id="current_address"
-                                            name="current_address"
+                                        <textarea id="address.current_address"
+                                            name="address[current_address]"
                                             rows="3"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            required>{{ old('current_address', $student->current_address) }}</textarea>
+                                            required>{{ old('address.current_address', $student->address->current_address ?? '') }}</textarea>
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('current_address')" />
+                                            :messages="$errors->get('address.current_address')" />
                                     </div>
 
                                     <!-- Permanent Address -->
                                     <div class="md:col-span-2">
-                                        <x-input-label for="permanent_address"
+                                        <x-input-label for="address.permanent_address"
                                             :value="__('Permanent Address')" />
-                                        <textarea id="permanent_address"
-                                            name="permanent_address"
+                                        <textarea id="address.permanent_address"
+                                            name="address[permanent_address]"
                                             rows="3"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            required>{{ old('permanent_address', $student->permanent_address) }}</textarea>
+                                            required>{{ old('address.permanent_address', $student->address->permanent_address ?? '') }}</textarea>
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('permanent_address')" />
+                                            :messages="$errors->get('address.permanent_address')" />
                                     </div>
 
                                     <!-- City -->
                                     <div>
-                                        <x-input-label for="city"
+                                        <x-input-label for="address.city"
                                             :value="__('City')" />
-                                        <x-text-input id="city"
-                                            name="city"
+                                        <x-text-input id="address.city"
+                                            name="address[city]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('city', $student->city)"
+                                            :value="old('address.city', $student->address->city ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('city')" />
+                                            :messages="$errors->get('address.city')" />
                                     </div>
 
                                     <!-- District -->
                                     <div>
-                                        <x-input-label for="district"
+                                        <x-input-label for="address.district"
                                             :value="__('District')" />
-                                        <x-text-input id="district"
-                                            name="district"
+                                        <x-text-input id="address.district"
+                                            name="address[district]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('district', $student->district)"
+                                            :value="old('address.district', $student->address->district ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('district')" />
+                                            :messages="$errors->get('address.district')" />
                                     </div>
 
                                     <!-- Commune -->
                                     <div>
-                                        <x-input-label for="commune"
+                                        <x-input-label for="address.commune"
                                             :value="__('Commune')" />
-                                        <x-text-input id="commune"
-                                            name="commune"
+                                        <x-text-input id="address.commune"
+                                            name="address[commune]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('commune', $student->commune)"
+                                            :value="old('address.commune', $student->address->commune ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('commune')" />
+                                            :messages="$errors->get('address.commune')" />
                                     </div>
 
                                     <!-- Village -->
                                     <div>
-                                        <x-input-label for="village"
+                                        <x-input-label for="address.village"
                                             :value="__('Village')" />
-                                        <x-text-input id="village"
-                                            name="village"
+                                        <x-text-input id="address.village"
+                                            name="address[village]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('village', $student->village)"
+                                            :value="old('address.village', $student->address->village ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('village')" />
+                                            :messages="$errors->get('address.village')" />
                                     </div>
 
 
                                     <!-- Postal Code -->
                                     <div>
-                                        <x-input-label for="postal_code"
+                                        <x-input-label for="address.postal_code"
                                             :value="__('Postal Code')" />
-                                        <x-text-input id="postal_code"
-                                            name="postal_code"
+                                        <x-text-input id="address.postal_code"
+                                            name="address[postal_code]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('postal_code', $student->postal_code)"
+                                            :value="old('address.postal_code', $student->address->postal_code ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('postal_code')" />
+                                            :messages="$errors->get('address.postal_code')" />
                                     </div>
                                 </div>
                             </div>
@@ -518,50 +516,44 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- Emergency Contact Name -->
                                     <div>
-                                        <x-input-label for="emergency_contact_name"
+                                        <x-input-label for="contact_detail.emergency_contact_name"
                                             :value="__('Contact Name')" />
-                                        <x-text-input id="emergency_contact_name"
-                                            name="emergency_contact_name"
+                                        <x-text-input id="contact_detail.emergency_contact_name"
+                                            name="contact_detail[emergency_contact_name]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old('emergency_contact_name', $student->emergency_contact_name)"
+                                            :value="old('contact_detail.emergency_contact_name', $student->contactDetail->emergency_contact_name ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('emergency_contact_name')" />
+                                            :messages="$errors->get('contact_detail.emergency_contact_name')" />
                                     </div>
 
                                     <!-- Emergency Contact Phone -->
                                     <div>
-                                        <x-input-label for="emergency_contact_phone"
+                                        <x-input-label for="contact_detail.emergency_contact_phone"
                                             :value="__('Contact Phone')" />
-                                        <x-text-input id="emergency_contact_phone"
-                                            name="emergency_contact_phone"
+                                        <x-text-input id="contact_detail.emergency_contact_phone"
+                                            name="contact_detail[emergency_contact_phone]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old(
-                                                'emergency_contact_phone',
-                                                $student->emergency_contact_phone,
-                                            )"
+                                            :value="old('contact_detail.emergency_contact_phone', $student->contactDetail->emergency_contact_phone ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('emergency_contact_phone')" />
+                                            :messages="$errors->get('contact_detail.emergency_contact_phone')" />
                                     </div>
 
                                     <!-- Emergency Contact Relation -->
                                     <div>
-                                        <x-input-label for="emergency_contact_relation"
+                                        <x-input-label for="contact_detail.emergency_contact_relation"
                                             :value="__('Relationship')" />
-                                        <x-text-input id="emergency_contact_relation"
-                                            name="emergency_contact_relation"
+                                        <x-text-input id="contact_detail.emergency_contact_relation"
+                                            name="contact_detail[emergency_contact_relation]"
                                             type="text"
                                             class="mt-1 block w-full"
-                                            :value="old(
-                                                'emergency_contact_relation',
-                                                $student->emergency_contact_relation,
-                                            )"
+                                            :value="old('contact_detail.emergency_contact_relation', $student->contactDetail->emergency_contact_relation ?? '')"
                                             required />
                                         <x-input-error class="mt-2"
-                                            :messages="$errors->get('emergency_contact_relation')" />
+                                            :messages="$errors->get('contact_detail.emergency_contact_relation')" />
                                     </div>
                                 </div>
                             </div>

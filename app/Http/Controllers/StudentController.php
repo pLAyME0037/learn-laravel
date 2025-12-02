@@ -1,15 +1,18 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Department;
 use App\Models\Gender;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\StudentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -45,9 +48,9 @@ class StudentController extends Controller
             ->orderBy('name')
             ->get();
         $programs = Program::join('majors', 'programs.major_id', '=', 'majors.id')
-        ->active()
+            ->active()
             ->select(
-                'programs.id', 
+                'programs.id',
                 'programs.name',
                 'majors.department_id',
             )
@@ -64,8 +67,12 @@ class StudentController extends Controller
 
     public function create(): View
     {
-        $departments = Department::active()->get();
-        $programs    = Program::active()->get();
+        $departments = Department::active()->select('id', 'name')->orderBy('name')->get();
+        $programs    = Program::join('majors', 'programs.major_id', '=', 'majors.id')
+            ->active()
+            ->select('programs.id', 'programs.name', 'majors.department_id')
+            ->orderBy('programs.name')
+            ->get();
         $genders     = Gender::all();
 
         return view(
@@ -78,109 +85,34 @@ class StudentController extends Controller
         );
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreStudentRequest $request, StudentService $service): RedirectResponse
     {
-        // Validate user data
-        $userData = $request->validate([
-            'name'        => 'required|string|max:255',
-            'email'       => 'required|string|email|max:255|unique:users,email',
-            'username'    => 'required|string|max:255|alpha_dash|unique:users,username',
-            'password'    => 'required|string|min:8|confirmed',
-            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        // Validate student data
-        $studentData = $request->validate([
-            'department_id'              => 'required|exists:departments,id',
-            'program_id'                 => 'required|exists:programs,id',
-            'date_of_birth'              => 'required|date',
-            'gender_id'                  => 'required|exists:genders,id',
-            'nationality'                => 'required|string|max:100',
-            'phone'                      => 'required|string|max:20',
-            'emergency_contact_name'     => 'required|string|max:255',
-            'emergency_contact_phone'    => 'required|string|max:20',
-            'emergency_contact_relation' => 'required|string|max:100',
-            'current_address'            => 'required|string',
-            'permanent_address'          => 'required|string',
-            'city'                       => 'required|string|max:100',
-            'district'                   => 'required|string|max:100',
-            'commune'                    => 'required|string|max:100',
-            'village'                    => 'required|string|max:100',
-            'postal_code'                => 'required|string|max:20',
-            'admission_date'             => 'required|date',
-            'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
-            'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
-            'previous_education'         => 'nullable|string',
-            'blood_group'                => 'nullable|string|max:10',
-            'has_disability'             => 'boolean',
-            'disability_details'         => 'nullable|string',
-        ]);
-
-        DB::beginTransaction();
-
         try {
-            $studentData['academic_status'] = 'active';
-
-            $user = User::create([
-                'name'      => $userData['name'],
-                'email'     => $userData['email'],
-                'username'  => $userData['username'],
-                'password'  => Hash::make($userData['password']),
-                'is_active' => true,
-            ]);
-
-            // Assign student role
-            $user->assignRole('student');
-
-            // Handle profile picture upload
-            if ($request->hasFile('profile_pic')) {
-                $path = $request->file('profile_pic')->store('profile-pictures', 'public');
-                $user->update(['profile_pic' => $path]);
-            }
-
-            // Create student record
-            Student::create(array_merge($studentData, [
-                'user_id'    => $user->id,
-                'student_id' => (new Student())->generateStudentId($studentData['department_id']), // Pass department_id for generation
-            ]));
-
-            DB::commit();
+            $service->registerStudent(
+                $request->validated(),
+                $request->file('profile_pic')
+            );
 
             return redirect()->route('admin.students.index')
                 ->with('success', 'Student created successfully.');
 
-        } catch (\Throwable $e) { // Catch Throwable to ensure DB rollback for any exception
-            DB::rollBack();
-            // Log the exception for debugging purposes
-            \Illuminate\Support\Facades\Log::error('Student creation failed: ' . $e->getMessage(), [
-                'exception'    => $e,
-                'request_data' => $request->all(),
-            ]);
-
-            // Re-throw the exception if it's a ValidationException, so Laravel's default handler can process it
-            if ($e instanceof \Illuminate\Validation\ValidationException) {
-                throw $e;
-            }
-
-            return redirect()
-                ->back()
-                ->with(
-                    'error',
-                    'Failed to create student. Please check the form data and try again.'
-                    . ' If the problem persists, contact support.'
-                )
-                ->withInput();
+        } catch (\Exception $e) {
+            Log::error('Student creation error: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'System error: ' . $e->getMessage())
+            ->withInput();
         }
     }
 
     public function show(Student $student): View
     {
         $student->load([
-            'user', 
-            'department', 
+            'user',
+            'department',
             'program',
             'gender',
             'enrollments.course',
+            'enrollments.semester',
             'academicRecords',
         ]);
 
@@ -190,8 +122,8 @@ class StudentController extends Controller
     public function edit(Student $student): View
     {
         $student->load('user');
-        $departments = Department::active()->get();
-        $programs    = Program::active()->get();
+        $departments = Department::active()->select('id', 'name')->get();
+        $programs    = Program::active()->select('id', 'name')->get();
         $genders     = Gender::all();
 
         return view('admin.students.edit',
@@ -203,73 +135,23 @@ class StudentController extends Controller
             )
         );
     }
-
-    public function update(Request $request, Student $student): RedirectResponse
+    public function update(UpdateStudentRequest $request, Student $student, StudentService $service): RedirectResponse
     {
-        DB::beginTransaction();
-
         try {
-            // Validate user data
-            $userData = $request->validate([
-                'name'     => 'required|string|max:255',
-                'email'    => 'required|string|email|max:255
-                    |unique:users,email,' . $student->user_id,
-                'username' => 'required|string|max:255|alpha_dash
-                    |unique:users,username,' . $student->user_id,
-            ]);
-
-            // Validate student data
-            $studentData = $request->validate([
-                'department_id'              => 'required|exists:departments,id',
-                'program_id'                 => 'required|exists:programs,id',
-                'date_of_birth'              => 'required|date',
-                'gender_id'                  => 'required|exists:genders,id',
-                'nationality'                => 'required|string|max:100',
-                'phone'                      => 'required|string|max:20',
-                'emergency_contact_name'     => 'required|string|max:255',
-                'emergency_contact_phone'    => 'required|string|max:20',
-                'emergency_contact_relation' => 'required|string|max:100',
-                'current_address'            => 'required|string',
-                'permanent_address'          => 'required|string',
-                'city'                       => 'required|string|max:100',
-                'district'                   => 'required|string|max:100',
-                'commune'                    => 'required|string|max:100',
-                'village'                    => 'required|string|max:100',
-                'postal_code'                => 'required|string|max:20',
-                'admission_date'             => 'required|date',
-                'expected_graduation'        => 'nullable|date',
-                'current_semester'           => 'required|integer|min:1|max:12',
-                'academic_status'            => 'required|in:active,probation,suspended,graduated,withdrawn,transfered',
-                'enrollment_status'          => 'required|in:full_time,part_time,exchange,study_abroad',
-                'fee_category'               => 'required|in:regular,scholarship,financial_aid,self_financed',
-                'has_outstanding_balance'    => 'boolean',
-                'previous_education'         => 'nullable|string',
-                'blood_group'                => 'nullable|string|max:10',
-                'has_disability'             => 'boolean',
-                'disability_details'         => 'nullable|string',
-            ]);
-
-            // Update user
-            $student->user->update($userData);
-
-            // Handle profile picture upload
-            if ($request->hasFile('profile_pic')) {
-                $path = $request->file('profile_pic')->store('profile-pictures', 'public');
-                $student->user->update(['profile_pic' => $path]);
-            }
-
-            // Update student
-            $student->update($studentData);
-
-            DB::commit();
+            // Validate first (via UpdateStudentRequest), then pass data
+            $service->updateStudent(
+                $student,
+                $request->validated(),
+                $request->file('profile_pic')
+            );
 
             return redirect()->route('admin.students.show', $student)
                 ->with('success', 'Student updated successfully.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            Log::error('Student update error: ' . $e->getMessage());
             return redirect()->back()
-                ->with('error', 'Failed to update student: ' . $e->getMessage())
+                ->with('error', 'System error: ' . $e->getMessage())
                 ->withInput();
         }
     }

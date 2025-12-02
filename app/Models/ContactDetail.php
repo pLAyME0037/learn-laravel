@@ -14,32 +14,26 @@ class ContactDetail extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'person_id';
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
-    protected $appends = ['id'];
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'email',
-        'address',
+        'contactable_id', 
+        'contactable_type',
         'phone_number',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
         'user_id',
         'student_id',
         'instructor_id',
     ];
+
+    public function contactable()
+    {
+        return $this->morphTo();
+    }
 
     /**
      * Get the user that owns the contact detail.
@@ -127,7 +121,7 @@ class ContactDetail extends Model
      */
     public function hasPhoneNumber(): bool
     {
-        return !empty($this->phone_number);
+        return ! empty($this->phone_number);
     }
 
     /**
