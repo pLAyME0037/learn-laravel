@@ -12,6 +12,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            // CamGeoSeeder::class,
+            // LocationSeeder::class,
             AcademicStructureSeeder::class,
             // DegreeSeeder::class,
             // FacultySeeder::class,
@@ -20,10 +22,10 @@ class DatabaseSeeder extends Seeder
             SystemConfigSeeder::class,
             InstructorSeeder::class,
             ProgramSeeder::class,
+            GenderSeeder::class,
             StudentManagementSeeder::class,
             SemesterSeeder::class, // Creates AcademicYear and Semesters
-            // AcademicYearDashboardSeeder::class, // Redundant, AcademicStructureSeeder handles AcademicYear and Semesters
-            // MajorSeeder::class,
+
             ClassroomSeeder::class,
             // CourseSeeder::class, // Moved specific course seeding to AcademicStructureSeeder
             CoursePrerequisiteSeeder::class,

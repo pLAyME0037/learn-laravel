@@ -138,7 +138,8 @@
                             <div class="flex items-center">
                                 <x-profile-image class="md"
                                     src="{{ $student->user?->profile_picture_url }}"
-                                    alt="{{ $student->user?->name ?? 'N/A' }}" />
+                                    alt="{{ $student->user?->name ?? 'N/A' }}"
+                                    size="sm" />
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                                         <span class="text-blue-200">ID:</span>

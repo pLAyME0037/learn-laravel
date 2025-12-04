@@ -103,9 +103,9 @@ class Student extends Model
         // Use morphOne because a student has one contact detail record
         return $this->morphOne(ContactDetail::class, 'contactable');
     }
-    public function address(): HasOne
+    public function address(): MorphOne
     {
-        return $this->hasOne(Address::class);
+        return $this->morphOne(Address::class, 'addressable');
     }
     public function payments(): HasMany
     {
@@ -115,7 +115,6 @@ class Student extends Model
     {
         return $this->hasMany(Attendance::class);
     }
-
     /**
      * Get the credit scores for the student.
      */

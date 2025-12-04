@@ -3,11 +3,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Models\Commune;
 use App\Models\Department;
+use App\Models\District;
 use App\Models\Gender;
 use App\Models\Program;
+use App\Models\Province;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Village;
 use App\Services\StudentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -74,6 +78,8 @@ class StudentController extends Controller
             ->orderBy('programs.name')
             ->get();
         $genders     = Gender::all();
+        $provinces = Province::select('id', 'name_kh')->get();
+        // Districts, Communes, and Villages will be loaded dynamically by Livewire
 
         return view(
             'admin.students.create',
@@ -81,6 +87,7 @@ class StudentController extends Controller
                 'departments',
                 'programs',
                 'genders',
+                'provinces',
             )
         );
     }

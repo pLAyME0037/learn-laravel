@@ -66,7 +66,6 @@ test('student can be created with valid data', function () {
         'emergency_contact_phone'    => $this->faker->phoneNumber,
         'emergency_contact_relation' => 'Parent',
         'current_address'            => $this->faker->address,
-        'permanent_address'          => $this->faker->address,
         'city'                       => $this->faker->city,
         'state'                      => $this->faker->state,
         'country'                    => $this->faker->country,
@@ -123,7 +122,6 @@ test('student creation fails with invalid data', function () {
         'emergency_contact_phone'    => '',                 // Required
         'emergency_contact_relation' => '',                 // Required
         'current_address'            => '',                 // Required
-        'permanent_address'          => '',                 // Required
         'city'                       => '',                 // Required
         'state'                      => '',                 // Required
         'country'                    => '',                 // Required
@@ -150,7 +148,6 @@ test('student creation fails with invalid data', function () {
     expect($errors->has('emergency_contact_phone'))->toBeTrue();
     expect($errors->has('emergency_contact_relation'))->toBeTrue();
     expect($errors->has('current_address'))->toBeTrue();
-    expect($errors->has('permanent_address'))->toBeTrue();
     expect($errors->has('city'))->toBeTrue();
     expect($errors->has('state'))->toBeTrue();
     expect($errors->has('country'))->toBeTrue();
@@ -189,7 +186,6 @@ test('unauthenticated user cannot create student', function () {
         'emergency_contact_phone'    => $this->faker->phoneNumber,
         'emergency_contact_relation' => 'Parent',
         'current_address'            => $this->faker->address,
-        'permanent_address'          => $this->faker->address,
         'city'                       => $this->faker->city,
         'state'                      => $this->faker->state,
         'country'                    => $this->faker->country,

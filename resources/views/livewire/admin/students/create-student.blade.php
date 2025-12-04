@@ -347,64 +347,75 @@
                                         :messages="$errors->get('address.current_address')" />
                                 </div>
 
-                                <div class="md:col-span-2">
-                                    <x-input-label for="address.permanent_address"
-                                        :value="__('Permanent Address')" />
-                                    <textarea id="address.permanent_address"
-                                        wire:model="address.permanent_address"
-                                        rows="3"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
-                                        required></textarea>
+                                <div>
+                                    <x-input-label for="province_id"
+                                        :value="__('City/Province')" />
+                                    <select id="province_id"
+                                        wire:model.live="province_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm">
+                                        <option value="">Select province</option>
+                                        @foreach ($provinces as $province)
+                                            <option value="{{ $province->id }}">
+                                                {{ $province->name_kh }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <x-input-error class="mt-2"
-                                        :messages="$errors->get('address.permanent_address')" />
+                                        :messages="$errors->get('province_id')" />
                                 </div>
 
                                 <div>
-                                    <x-input-label for="address.city"
-                                        :value="__('City')" />
-                                    <x-text-input id="address.city"
-                                        wire:model="address.city"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        required />
-                                    <x-input-error class="mt-2"
-                                        :messages="$errors->get('address.city')" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="address.district"
+                                    <x-input-label for="district_id"
                                         :value="__('District')" />
-                                    <x-text-input id="address.district"
-                                        wire:model="address.district"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        required />
+                                    <select id="district_id"
+                                        wire:model.live="district_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
+                                        {{ empty($districts) ? 'disabled' : '' }}>
+                                        <option value="">Select district</option>
+                                        @foreach ($districts as $district)
+                                            <option value="{{ $district->id }}">
+                                                {{ $district->name_kh }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <x-input-error class="mt-2"
-                                        :messages="$errors->get('address.district')" />
+                                        :messages="$errors->get('district_id')" />
                                 </div>
 
                                 <div>
-                                    <x-input-label for="address.commune"
+                                    <x-input-label for="commune_id"
                                         :value="__('Commune')" />
-                                    <x-text-input id="address.commune"
-                                        wire:model="address.commune"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        required />
+                                     <select id="commune_id"
+                                        wire:model.live="commune_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
+                                        {{ empty($communes) ? 'disabled' : '' }}>
+                                        <option value="">Select commune</option>
+                                        @foreach ($communes as $commune)
+                                            <option value="{{ $commune->id }}">
+                                                {{ $commune->name_kh }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <x-input-error class="mt-2"
-                                        :messages="$errors->get('address.commune')" />
+                                        :messages="$errors->get('commune_id')" />
                                 </div>
 
                                 <div>
-                                    <x-input-label for="address.village"
+                                    <x-input-label for="village_id"
                                         :value="__('Village')" />
-                                    <x-text-input id="address.village"
-                                        wire:model="address.village"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        required />
+                                    <select id="village_id"
+                                        wire:model.live="village_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
+                                        {{ empty($villages) ? 'disabled' : '' }}>
+                                        <option value="">Select village</option>
+                                        @foreach ($villages as $village)
+                                            <option value="{{ $village->id }}">
+                                                {{ $village->name_kh }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <x-input-error class="mt-2"
-                                        :messages="$errors->get('address.village')" />
+                                        :messages="$errors->get('address.village_id')" />
                                 </div>
 
                                 <div>

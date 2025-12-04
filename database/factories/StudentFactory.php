@@ -44,7 +44,6 @@ class StudentFactory extends Factory
             'emergency_contact_phone'    => $this->faker->phoneNumber,
             'emergency_contact_relation' => $this->faker->randomElement(['Parent', 'Sibling', 'Guardian']),
             'current_address'            => $this->faker->address,
-            'permanent_address'          => $this->faker->address,
             'city'                       => $this->faker->city,
             'state'                      => $this->faker->state,
             'country'                    => $this->faker->country,

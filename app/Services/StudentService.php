@@ -70,14 +70,9 @@ class StudentService
             // 5. Create Address
             if (isset($data['address'])) {
                 $student->address()->create([
-                    // 'user_id' => $user->id, // REMOVED: Rely on the relationship
                     'current_address'   => $data['address']['current_address'] ?? null,
-                    'permanent_address' => $data['address']['permanent_address'] ?? null,
-                    'city'              => $data['address']['city'] ?? null,
-                    'district'          => $data['address']['district'] ?? null,
-                    'commune'           => $data['address']['commune'] ?? null,
-                    'village'           => $data['address']['village'] ?? null,
                     'postal_code'       => $data['address']['postal_code'] ?? null,
+                    'village_id'        => $data['address']['village_id'] ?? null,
                 ]);
             }
 

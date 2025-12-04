@@ -195,40 +195,33 @@
                                     <p class="text-sm text-gray-900 dark:text-white">
                                         {{ $student->address->current_address ?? 'N/A' }}</p>
                                 </div>
-                                <div class="md:col-span-2">
-                                    <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                        Permanent Address
-                                    </label>
-                                    <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->permanent_address ?? 'N/A' }}</p>
-                                </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         City
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->city ?? 'N/A' }}</p>
+                                        {{ $student->address->province->name_kh ?? 'N/A' }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         District
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->district ?? 'N/A' }}</p>
+                                        {{ $student->address->district->name_kh ?? 'N/A' }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Commune
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->commune ?? 'N/A' }}</p>
+                                        {{ $student->address->commune->name_kh ?? 'N/A' }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Village
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->village ?? 'N/A' }}</p>
+                                        {{ $student->address->village->name_kh ?? 'N/A' }}</p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">

@@ -2,9 +2,13 @@
 namespace App\Livewire\Admin\Students;
 
 use App\Http\Requests\StoreStudentRequest;
+use App\Models\Commune;
 use App\Models\Department;
+use App\Models\District;
 use App\Models\Gender;
 use App\Models\Program;
+use App\Models\Province;
+use App\Models\Village;
 use App\Services\StudentService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -61,23 +65,30 @@ class CreateStudent extends Component
 
     public $address = [
         'current_address'   => '',
-        'permanent_address' => '',
-        'city'              => '',
-        'district'          => '',
-        'commune'           => '',
-        'village'           => '',
         'postal_code'       => '',
+        'village_id'        => null, // Will be set by updatedVillageId
     ];
 
-    // --- 5. Data Sources ---
+    // --- 5. Address Data ---
+    public $province_id = '';
+    public $district_id = '';
+    public $commune_id  = '';
+    public $village_id  = '';
+
+    // --- 6. Data Sources ---
     public $departments;
     public $programs = []; // Empty until dept is selected
     public $genders;
+    public $provinces;
+    public $districts = [];
+    public $communes  = [];
+    public $villages  = [];
 
     public function mount()
     {
         $this->departments = Department::active()->select('id', 'name')->get();
         $this->genders     = Gender::all();
+        $this->provinces   = Province::select('id', 'name_kh')->get();
     }
 
     // This runs AUTOMATICALLY when department_id changes
@@ -93,6 +104,44 @@ class CreateStudent extends Component
             $this->programs = [];
         }
         $this->program_id = '';
+    }
+
+    // Reactively load districts when province changes
+    public function updatedProvinceId($value)
+    {
+        $this->districts = $value 
+        ? District::where('province_id', $value)->select('id', 'name_kh')->get() 
+        : [];
+        $this->communes  = [];
+        $this->villages  = [];
+        $this->district_id = '';
+        $this->commune_id  = '';
+        $this->village_id  = '';
+        $this->address['village_id'] = null; // Reset village_id in address array
+    }
+
+    // Reactively load communes when district changes
+    public function updatedDistrictId($value)
+    {
+        $this->communes = $value ? Commune::where('district_id', $value)->select('id', 'name_kh')->get() : [];
+        $this->villages = [];
+        $this->commune_id = '';
+        $this->village_id = '';
+        $this->address['village_id'] = null; // Reset village_id in address array
+    }
+
+    // Reactively load villages when commune changes
+    public function updatedCommuneId($value)
+    {
+        $this->villages = $value ? Village::where('commune_id', $value)->select('id', 'name_kh')->get() : [];
+        $this->village_id = '';
+        $this->address['village_id'] = null; // Reset village_id in address array
+    }
+
+    // Update address array when village changes
+    public function updatedVillageId($value)
+    {
+        $this->address['village_id'] = $value; // Set the actual village_id
     }
 
     public function save(StudentService $service)

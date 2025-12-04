@@ -112,22 +112,18 @@ class StudentManagementSeeder extends Seeder
                 'updated_at'                 => $now,
             ]);
 
+            // Fetch a random CamGeoVillage for the address
+            $randomVillage = \App\Models\Village::inRandomOrder()->first();
+
             // Create Address for the student
-            Address::create([
-                'student_id'        => $student->id,
-                'user_id'           => $userId,
-                'current_address'   => '123 Campus Dr',
-                'permanent_address' => '123 Campus Dr',
-                'city'              => 'Cityville',
-                'district'          => 'Central',
-                'commune'           => 'Sector 1',
-                'village'           => 'Village A',
+            $student->address()->create([
+                'current_address'   => 'DUMMY ADDRESS',
+                'village_id'        => $randomVillage ? $randomVillage->id : null,
                 'postal_code'       => '12345',
                 'created_at'        => $now,
                 'updated_at'        => $now,
             ]);
         }
-
         // Bulk Insert Roles
         if (! empty($modelHasRolesData)) {
             DB::table('model_has_roles')->insert($modelHasRolesData);

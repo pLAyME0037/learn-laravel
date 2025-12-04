@@ -16,13 +16,14 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // Insert initial data
         DB::table('genders')->insert([
-            ['name' => 'male', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'female', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'other', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Male', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Female', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Other', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         Schema::table('students', function (Blueprint $table) {
@@ -47,7 +48,7 @@ return new class extends Migration
         Schema::table('students', function (Blueprint $table) {
             $table->dropForeign(['gender_id']);
             $table->dropColumn('gender_id');
-            $table->enum('gender', ['male', 'female', 'other'])->nullable()->after('date_of_birth');
+            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable()->after('date_of_birth');
         });
         Schema::dropIfExists('genders');
     }

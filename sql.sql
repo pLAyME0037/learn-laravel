@@ -119,14 +119,12 @@ Table students {
   emergency_contact_phone varchar
   emergency_contact_relation varchar
   current_address text
-  permanent_address text
   city varchar
   district varchar
   commune varchar
   village varchar
   postal_code varchar
   admission_date date
-  expected_graduation date
   current_semester integer
   cgpa decimal
   total_credits_earned integer

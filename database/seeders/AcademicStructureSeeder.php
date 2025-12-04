@@ -10,6 +10,7 @@ use App\Models\Major;
 use App\Models\Program;
 use App\Models\AcademicYear; // Added
 use App\Models\Semester;
+use Database\Seeders\GenderSeeder; // Import GenderSeeder
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

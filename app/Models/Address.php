@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Village;
 
 class Address extends Model
 {
@@ -26,38 +27,29 @@ class Address extends Model
      */
     protected $fillable = [
         'current_address',
-        'permanent_address',
         'city',
         'district',
         'commune',
         'village',
         'postal_code',
-        'user_id',
-        'student_id',
-        'instructor_id',
+        'addressable_id',
+        'addressable_type',
+        'village_id',
     ];
 
     /**
-     * Get the user that owns the contact detail.
+     * Get the parent addressable model (User, Student, or Instructor).
      */
-    public function user()
+    public function addressable()
     {
-        return $this->belongsTo(User::class);
+        return $this->morphTo();
     }
 
     /**
-     * Get the student that owns the contact detail.
+     * Get the village associated with the address.
      */
-    public function student()
+    public function village()
     {
-        return $this->belongsTo(Student::class);
-    }
-
-    /**
-     * Get the instructor that owns the contact detail.
-     */
-    public function instructor()
-    {
-        return $this->belongsTo(Instructor::class);
+        return $this->belongsTo(Village::class, 'village_id');
     }
 }

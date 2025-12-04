@@ -14,7 +14,6 @@ return new class extends Migration
         'passport_number',
         'emergency_contact_name',
         'emergency_contact_phone',
-        'permanent_address',
         'disability_details',
     ];
 

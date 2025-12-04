@@ -62,13 +62,9 @@ class StoreStudentRequest extends FormRequest
             'contact_detail.emergency_contact_relation' => ['nullable', 'string', 'max:255'],
 
             // Address (nested)
-            'address.current_address'                   => ['nullable', 'string'],
-            'address.permanent_address'                 => ['nullable', 'string'],
-            'address.city'                              => ['nullable', 'string', 'max:255'],
-            'address.district'                          => ['nullable', 'string', 'max:255'],
-            'address.commune'                           => ['nullable', 'string', 'max:255'],
-            'address.village'                           => ['nullable', 'string', 'max:255'],
-            'address.postal_code'                       => ['nullable', 'string', 'max:255'],
+            'address.current_address'                   => ['required', 'string'], // Made required based on blade
+            'address.postal_code'                       => ['required', 'string', 'max:255'], // Made required based on blade
+            'address.village_id'                        => ['required', 'integer', Rule::exists('villages', 'id')],
         ];
     }
 
@@ -95,7 +91,7 @@ class StoreStudentRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'address.city'                => 'city',
+            'address.village_id'          => 'village', // Custom attribute for village_id
             'contact_detail.phone_number' => 'phone number',
         ];
     }

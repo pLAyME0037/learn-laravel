@@ -423,19 +423,6 @@
                                             :messages="$errors->get('address.current_address')" />
                                     </div>
 
-                                    <!-- Permanent Address -->
-                                    <div class="md:col-span-2">
-                                        <x-input-label for="address.permanent_address"
-                                            :value="__('Permanent Address')" />
-                                        <textarea id="address.permanent_address"
-                                            name="address[permanent_address]"
-                                            rows="3"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                            required>{{ old('address.permanent_address', $student->address->permanent_address ?? '') }}</textarea>
-                                        <x-input-error class="mt-2"
-                                            :messages="$errors->get('address.permanent_address')" />
-                                    </div>
-
                                     <!-- City -->
                                     <div>
                                         <x-input-label for="address.city"

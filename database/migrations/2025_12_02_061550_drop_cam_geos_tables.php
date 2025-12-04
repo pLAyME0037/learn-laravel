@@ -11,6 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('villages');
+        Schema::dropIfExists('communes');
+        Schema::dropIfExists('districts');
+        Schema::dropIfExists('provinces');
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
         // 1. Create Provinces
         Schema::create('provinces', function (Blueprint $table) {
             $table->id();
@@ -52,16 +63,5 @@ return new class extends Migration
             $table->string('name_en');
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('provinces');
-        Schema::dropIfExists('districts');
-        Schema::dropIfExists('communes');
-        Schema::dropIfExists('villages');
     }
 };
