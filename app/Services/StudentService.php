@@ -4,14 +4,13 @@ declare (strict_types = 1);
 
 namespace App\Services;
 
+use App\Models\ContactDetail;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Arr; // Import Arr helper
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 
 class StudentService
 {
@@ -26,13 +25,12 @@ class StudentService
             $studentId = $this->generateUniqueStudentId((int) $data['department_id']);
 
             // 3. Create Student
-            // Note: We use Arr::get to safely retrieve values even if keys are missing
             $student = Student::create([
                 'user_id'                 => $user->id,
                 'student_id'              => $studentId,
                 'department_id'           => $data['department_id'],
                 'program_id'              => $data['program_id'],
-                'year_level'              => $data['year_level'] ?? 1, // Default to 1
+                'year_level'              => $data['year_level'] ?? 1,
                 'registration_number'     => $data['registration_number'] ?? null,
                 'date_of_birth'           => $data['date_of_birth'],
                 'gender_id'               => $data['gender_id'],
@@ -41,8 +39,8 @@ class StudentService
                 'passport_number'         => $data['passport_number'] ?? null,
                 'admission_date'          => $data['admission_date'],
                 'expected_graduation'     => $data['expected_graduation'],
-                'semester'                => $data['semester'] ?? 'semester_one', // Align with StoreStudentRequest preprocessing
-                'cgpa'                    => 0.00, // Default for new students
+                'semester'                => $data['semester'] ?? 'semester_one',
+                'cgpa'                    => 0.00,
                 'total_credits_earned'    => 0,
                 'academic_status'         => 'active',
                 'enrollment_status'       => $data['enrollment_status'],
@@ -50,31 +48,31 @@ class StudentService
                 'has_outstanding_balance' => false,
                 'previous_education'      => $data['previous_education'] ?? null,
                 'blood_group'             => $data['blood_group'] ?? null,
-                'has_disability'          => isset($data['has_disability']), // Checkbox check
+                'has_disability'          => isset($data['has_disability']),
                 'disability_details'      => $data['disability_details'] ?? null,
                 'metadata'                => null,
             ]);
 
             // 4. Create Contact Details
-            // $student->contactDetail() will automatically set student_id/contactable_id
-            if (isset($data['contact_detail'])) {
-                $student->contactDetail()->create([
-                    // 'user_id' => $user->id, // REMOVED: Rely on the relationship
-                    'phone_number'               => $data['contact_detail']['phone_number'] ?? null,
-                    'emergency_contact_name'     => $data['contact_detail']['emergency_contact_name'] ?? null,
-                    'emergency_contact_phone'    => $data['contact_detail']['emergency_contact_phone'] ?? null,
-                    'emergency_contact_relation' => $data['contact_detail']['emergency_contact_relation'] ?? null,
-                ]);
+            if (! isset($data['contact_detail'])) {
+                return;
             }
+            $student->contactDetail()->create([
+                'phone_number'               => $data['contact_detail']['phone_number'] ?? null,
+                'emergency_contact_name'     => $data['contact_detail']['emergency_contact_name'] ?? null,
+                'emergency_contact_phone'    => $data['contact_detail']['emergency_contact_phone'] ?? null,
+                'emergency_contact_relation' => $data['contact_detail']['emergency_contact_relation'] ?? null,
+            ]);
 
             // 5. Create Address
-            if (isset($data['address'])) {
-                $student->address()->create([
-                    'current_address'   => $data['address']['current_address'] ?? null,
-                    'postal_code'       => $data['address']['postal_code'] ?? null,
-                    'village_id'        => $data['address']['village_id'] ?? null,
-                ]);
+            if (! isset($data['address'])) {
+                return;
             }
+            $student->address()->create([
+                'current_address' => $data['address']['current_address'] ?? null,
+                'postal_code'     => $data['address']['postal_code'] ?? null,
+                'village_id'      => $data['address']['village_id'] ?? null,
+            ]);
 
             return $student;
         });
@@ -82,22 +80,18 @@ class StudentService
 
     /**
      * Update an existing student record.
-     *
-     * @param Student $student
-     * @param array $data
-     * @param UploadedFile|null $profilePic
-     * @return Student
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function updateStudent(Student $student, array $data, ?UploadedFile $profilePic = null): Student
-    {
+    public function updateStudent(
+        Student $student,
+        array $data,
+        ?UploadedFile $profilePic = null
+    ): Student {
         return DB::transaction(function () use ($student, $data, $profilePic) {
-            
+
             // 1. Update User
             $userData = Arr::only($data, ['name', 'email', 'username']);
-            
-            // Only hash password if a new one was entered
-            if (!empty($data['password'])) {
+
+            if (! empty($data['password'])) {
                 $userData['password'] = Hash::make($data['password']);
             }
 
@@ -108,31 +102,56 @@ class StudentService
             $student->user->update($userData);
 
             // 2. Update Student
-            // Exclude non-student table fields
             $studentData = Arr::except($data, [
-                'name', 'email', 'username', 'password', 'password_confirmation', 
-                'contact_detail', 'address', 'profile_pic'
+                'name', 'email', 'username', 'password', 'password_confirmation',
+                'contact_detail', 'address', 'profile_pic',
             ]);
 
             $student->update($studentData);
 
-            // 3. Update Relationships
+            // 3. Update Relationships (Extracted for flatness)
             if (isset($data['contact_detail'])) {
-                $student->contactDetail()->updateOrCreate(
-                    ['student_id' => $student->id], // Condition
-                    $data['contact_detail']         // Values
-                );
+                $this->handleContactUpdate($student, $data['contact_detail']);
             }
 
             if (isset($data['address'])) {
                 $student->address()->updateOrCreate(
-                    ['student_id' => $student->id], // Condition
-                    $data['address']                // Values
+                    ['addressable_id' => $student->id],
+                    $data['address']
                 );
             }
 
             return $student;
         });
+    }
+
+    /**
+     * Handle Contact Update with Self-Healing logic using Early Returns.
+     */
+    private function handleContactUpdate(Student $student, array $data): void
+    {
+        // 1. Normal Path: If student already has a linked contact, just update it.
+        if ($student->contactDetail()->exists()) {
+            $student->contactDetail()->update($data);
+            return;
+        }
+
+        // 2. Self-Healing Path: Check if a "lost" record exists with this phone number.
+        // (This happens if validation ignored the ID, but the record wasn't linked properly)
+        $lostRecord = ContactDetail::where('phone_number', $data['phone_number'] ?? '')->first();
+
+        if ($lostRecord) {
+            $lostRecord->update([
+                'contactable_id'   => $student->id,
+                'contactable_type' => get_class($student),
+            ]);
+        }
+
+        // 3. Final Update/Create ensure consistency
+        $student->contactDetail()->updateOrCreate(
+            ['contactable_id' => $student->id],
+            $data
+        );
     }
 
     private function createUser(array $data, ?UploadedFile $profilePic): User

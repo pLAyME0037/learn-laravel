@@ -67,28 +67,28 @@
             $columns = [
                 [
                     'key' => 'user_info',
-                    'label' => 'User',
-                    'align' => 'left',
+                    'label' => 'User Infrmation',
+                    'align' => 'center',
                 ],
                 [
                     'key' => 'roles',
                     'label' => 'Role',
-                    'align' => 'left',
+                    'align' => 'center',
                 ],
                 [
                     'key' => 'status',
                     'label' => 'Status',
-                    'align' => 'left',
+                    'align' => 'center',
                 ],
                 [
                     'key' => 'email_verified_at',
                     'label' => 'Email Verified',
-                    'align' => 'left',
+                    'align' => 'center',
                 ],
                 [
                     'key' => 'user_status',
                     'label' => 'User Status',
-                    'align' => 'left',
+                    'align' => 'center',
                 ],
             ];
         @endphp
@@ -193,16 +193,6 @@
                                             :row="$user" />
                                     @endcan
                                 @else
-                                    @can('view', $user)
-                                        <x-table.action :action="[
-                                            'type' => 'link',
-                                            'label' => 'Show',
-                                            'route' => 'admin.users.show',
-                                            'params' => ['user' => 'id'],
-                                            'class' => 'text-gray-500',
-                                        ]"
-                                            :row="$user" />
-                                    @endcan
                                     @can('changePassword', $user)
                                         <x-table.action :action="[
                                             'type' => 'link',
@@ -214,19 +204,13 @@
                                     @endcan
                                     @can('updateStatus', $user)
                                         <x-table.action :action="[
-                                            'type' => 'link',
-                                            'label' => 'Access',
-                                            'route' => 'admin.users.edit-access',
-                                            'params' => ['user' => 'id'],
-                                            'class' => 'text-amber-600',
-                                        ]"
-                                            :row="$user" />
-                                        <x-table.action :action="[
                                             'type' => 'post-button',
                                             'label' => $user->is_active ? 'Deactivate' : 'Activate',
                                             'route' => 'admin.users.status',
                                             'params' => ['user' => 'id'],
-                                            'class' => $user->is_active ? 'text-amber-600' : 'text-green-600',
+                                            'class' => $user->is_active 
+                                            ? 'text-amber-600 hover:text-amber-500' 
+                                            : 'text-green-600 hover:text-green-500',
                                         ]"
                                             :row="$user" />
                                     @endcan

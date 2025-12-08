@@ -13,7 +13,9 @@
     <div class="flex flex-wrap items-center gap-x-1 text-xs text-gray-500 dark:text-gray-400 leading-tight">
         @php
             $parts = array_filter([
-                $student->address?->village?->name_kh ? 'Village: ' . $student->address->village->name_kh : null,
+                $student->address?->village?->name_kh 
+                    ? 'Village: ' . $student->address->village->name_kh 
+                    : null,
                 $student->address?->village?->commune?->name_kh
                     ? 'Commune: ' . $student->address->village->commune->name_kh
                     : null,

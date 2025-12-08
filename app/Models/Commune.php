@@ -4,6 +4,8 @@ namespace App\Models;
 use App\Models\District;
 use App\Models\Village;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Commune extends Model
 {
@@ -14,34 +16,17 @@ class Commune extends Model
      *
      * @var string
      */
-    protected $table = 'commune';
+    protected $table = 'communes';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'camdx_id',
-        'code',
-        'name_kh',
-        'name_en',
-        'district_id',
-    ];
-
-    /**
-     * Get the district that owns the commune.
-     */
-    public function district()
+    public function district() :BelongsTo
     {
-        return $this->belongsTo(District::class, 'district_id');
+        // (Related Model, Foreign Key in this table, Local Key in other table)
+        // Links 'district_id' (102) in this table to 'dist_id' (102) in districts table
+        return $this->belongsTo(District::class, 'district_id', 'dist_id');
     }
 
-    /**
-     * Get the villages for the commune.
-     */
-    public function villages()
+    public function villages() :HasMany
     {
-        return $this->hasMany(Village::class, 'commune_id');
+        return $this->hasMany(Village::class, 'commune_id', 'comm_id');
     }
 }

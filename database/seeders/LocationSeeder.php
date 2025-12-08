@@ -9,56 +9,86 @@ class LocationSeeder extends Seeder
 {
     public function run(): void
     {
-        ini_set('memory_limit', '1024M');
-        set_time_limit(300);
+        ini_set('memory_limit', '2048M');
+        set_time_limit(600);
 
-        $path = database_path('dispute_db_server.sql');
+        $path = database_path('cam_geos.json');
 
         if (! File::exists($path)) {
-            $this->command->error("SQL file not found.");
+            $this->command->error("File not found: $path");
             return;
         }
 
-        $this->command->info('Processing SQL file...');
+        $this->command->info('Reading JSON file...');
+        $json = json_decode(File::get($path), true);
 
-        // 1. Disable Foreign Keys for SQLite
-        DB::connection('sqlite_locations')->statement('PRAGMA foreign_keys = OFF;');
+        if (! $json) {
+            $this->command->error("Invalid JSON format.");
+            return;
+        }
 
-        // 2. Read and Clean
-        $sqlContent = File::get($path);
-        $sqlContent = str_replace('`', '"', $sqlContent);
-        $sqlContent = str_replace("\\'", "''", $sqlContent);
+        $connection = DB::connection('sqlite_locations');
 
-        // Remove Comments
-        $sqlContent = preg_replace('/^--.*$/m', '', $sqlContent);
-        $sqlContent = preg_replace('/\/\*.*?\*\//s', '', $sqlContent);
+        // 1. Disable Foreign Keys (Critical for SQLite/MySQL bulk imports)
+        $connection->statement('PRAGMA foreign_keys = OFF;');
+        // If using MySQL: $connection->statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        $statements = preg_split('/;\s*[\r\n]+/', $sqlContent);
-        $count      = 0;
+        // 2. Configuration: Map JSON names to DB names AND unique keys
+        $tableConfig = [
+            'province' => ['table' => 'provinces', 'unique' => 'prov_id'],
+            'district' => ['table' => 'districts', 'unique' => 'dist_id'],
+            'commune'  => ['table' => 'communes', 'unique' => 'comm_id'],
+            'village'  => ['table' => 'villages', 'unique' => 'vill_id'],
+        ];
 
-        foreach ($statements as $statement) {
-            $statement = trim($statement);
-            if (empty($statement)) {
+        foreach ($json as $block) {
+            if (! isset($block['type']) || $block['type'] !== 'table') {
                 continue;
             }
 
-            if (stripos($statement, 'INSERT INTO') === 0) {
-                try {
-                    DB::connection('sqlite_locations')->statement($statement);
-                    $count++;
-                } catch (\Exception $e) {
-                    // --- ERROR DEBUGGING ---
-                    $this->command->error("❌ Failed Statement:");
-                    // Print first 100 chars of query to identify table
-                    $this->command->warn(substr($statement, 0, 10) . '...');
-                    // Print the actual SQL Error
-                    $this->command->error("Reason: " . $e->getMessage());
-                    return; // Stop on first error so you can see it
-                }
+            $jsonName = $block['name'];
+
+            if (! isset($tableConfig[$jsonName])) {
+                continue;
+            }
+
+            $config    = $tableConfig[$jsonName];
+            $dbTable   = $config['table'];
+            $uniqueKey = $config['unique'];
+
+            $rows  = $block['data'];
+            $count = count($rows);
+
+            $this->command->info("Processing $dbTable ($count rows)...");
+
+            // 3. Process in chunks
+            $chunks = array_chunk($rows, 500);
+
+            foreach ($chunks as $chunk) {
+                // Clean up the data (handle empty strings for nullable fields)
+                $cleanChunk = array_map(function ($row) {
+                    // Convert "is_not_active": "" to null if present
+                    if (array_key_exists('is_not_active', $row) && $row['is_not_active'] === "") {
+                        $row['is_not_active'] = null;
+                    }
+                    return $row;
+                }, $chunk);
+
+                // 4. Use Upsert instead of Insert
+                // This prevents "UNIQUE constraint failed" errors
+                $connection->table($dbTable)->upsert(
+                    $cleanChunk,
+                    [$uniqueKey], // The column that must be unique
+                                  // Columns to update if duplicate found (update everything except ID/Unique)
+                    array_diff(array_keys($cleanChunk[0]), ['id', $uniqueKey])
+                );
             }
         }
 
-        DB::connection('sqlite_locations')->statement('PRAGMA foreign_keys = ON;');
-        $this->command->info("✅ Success! Imported $count INSERT statements.");
+        // 5. Re-enable Foreign Keys
+        $connection->statement('PRAGMA foreign_keys = ON;');
+        // If using MySQL: $connection->statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        $this->command->info('✅ Location seeding completed successfully!');
     }
 }

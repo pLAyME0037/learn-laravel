@@ -1,22 +1,12 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreStudentRequest;
-use App\Http\Requests\UpdateStudentRequest;
-use App\Models\Commune;
 use App\Models\Department;
-use App\Models\District;
-use App\Models\Gender;
 use App\Models\Program;
-use App\Models\Province;
 use App\Models\Student;
-use App\Models\User;
-use App\Models\Village;
-use App\Services\StudentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -71,44 +61,8 @@ class StudentController extends Controller
 
     public function create(): View
     {
-        $departments = Department::active()->select('id', 'name')->orderBy('name')->get();
-        $programs    = Program::join('majors', 'programs.major_id', '=', 'majors.id')
-            ->active()
-            ->select('programs.id', 'programs.name', 'majors.department_id')
-            ->orderBy('programs.name')
-            ->get();
-        $genders     = Gender::all();
-        $provinces = Province::select('id', 'name_kh')->get();
-        // Districts, Communes, and Villages will be loaded dynamically by Livewire
-
-        return view(
-            'admin.students.create',
-            compact(
-                'departments',
-                'programs',
-                'genders',
-                'provinces',
-            )
-        );
-    }
-
-    public function store(StoreStudentRequest $request, StudentService $service): RedirectResponse
-    {
-        try {
-            $service->registerStudent(
-                $request->validated(),
-                $request->file('profile_pic')
-            );
-
-            return redirect()->route('admin.students.index')
-                ->with('success', 'Student created successfully.');
-
-        } catch (\Exception $e) {
-            Log::error('Student creation error: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'System error: ' . $e->getMessage())
-            ->withInput();
-        }
+        // Data loading is now handled by the Livewire Component's mount() method
+        return view('admin.students.create');
     }
 
     public function show(Student $student): View
@@ -128,39 +82,10 @@ class StudentController extends Controller
 
     public function edit(Student $student): View
     {
-        $student->load('user');
-        $departments = Department::active()->select('id', 'name')->get();
-        $programs    = Program::active()->select('id', 'name')->get();
-        $genders     = Gender::all();
-
-        return view('admin.students.edit',
-            compact(
-                'student',
-                'departments',
-                'programs',
-                'genders',
-            )
-        );
-    }
-    public function update(UpdateStudentRequest $request, Student $student, StudentService $service): RedirectResponse
-    {
-        try {
-            // Validate first (via UpdateStudentRequest), then pass data
-            $service->updateStudent(
-                $student,
-                $request->validated(),
-                $request->file('profile_pic')
-            );
-
-            return redirect()->route('admin.students.show', $student)
-                ->with('success', 'Student updated successfully.');
-
-        } catch (\Exception $e) {
-            Log::error('Student update error: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'System error: ' . $e->getMessage())
-                ->withInput();
-        }
+        // Dropdown data loading is now handled by the Livewire Component's mount() method
+        // Only pass the student so the blade view can pass the ID to Livewire:
+        // <livewire:admin.students.edit-student :id="$student->id" />
+        return view('admin.students.edit', compact('student'));
     }
 
     public function destroy(Student $student): RedirectResponse

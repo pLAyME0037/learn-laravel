@@ -138,7 +138,8 @@
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
                                         {{ $student->date_of_birth->format('M d, Y') }}
-                                        ({{ $student->date_of_birth->age }} years old)</p>
+                                        ({{ $student->date_of_birth->age }} years old)
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -161,14 +162,16 @@
                                         Blood Group
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->blood_group ?? 'N/A' }}</p>
+                                        {{ $student->blood_group ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Previous Education
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->previous_education ?? 'N/A' }}</p>
+                                        {{ $student->previous_education ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 @if ($student->has_disability)
                                     <div class="md:col-span-2">
@@ -176,7 +179,8 @@
                                             Disability Details
                                         </label>
                                         <p class="text-sm text-gray-900 dark:text-white">
-                                            {{ $student->disability_details ?? 'N/A' }}</p>
+                                            {{ $student->disability_details ?? 'N/A' }}
+                                        </p>
                                     </div>
                                 @endif
                             </div>
@@ -193,42 +197,48 @@
                                         Current Address
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->current_address ?? 'N/A' }}</p>
+                                        {{ $student->address->current_address ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         City
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->province->name_kh ?? 'N/A' }}</p>
+                                        {{ $student->address->village->commune->district->province->name_kh ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         District
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->district->name_kh ?? 'N/A' }}</p>
+                                        {{ $student->address->village->commune->district->name_kh ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Commune
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->commune->name_kh ?? 'N/A' }}</p>
+                                        {{ $student->address->village->commune->name_kh ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Village
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->village->name_kh ?? 'N/A' }}</p>
+                                        {{ $student->address->village->name_kh ?? 'N/A' }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="text-sm font-medium text-gray-500 dark:text-gray-400">
                                         Postal Code
                                     </label>
                                     <p class="text-sm text-gray-900 dark:text-white">
-                                        {{ $student->address->postal_code ?? 'N/A' }}</p>
+                                        {{ $student->address->postal_code ?? 'N/A' }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

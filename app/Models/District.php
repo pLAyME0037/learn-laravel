@@ -4,6 +4,8 @@ namespace App\Models;
 use App\Models\Commune;
 use App\Models\Province;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class District extends Model
 {
@@ -14,35 +16,21 @@ class District extends Model
      *
      * @var string
      */
-    protected $table = 'district';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'camdx_id',
-        'code',
-        'name_kh',
-        'name_en',
-        'type',
-        'province_id',
-    ];
+    protected $table = 'districts';
 
     /**
      * Get the province that owns the district.
      */
-    public function province()
+    public function province() :BelongsTo
     {
-        return $this->belongsTo(Province::class, 'province_id');
+        return $this->belongsTo(Province::class, 'province_id', 'prov_id');
     }
 
     /**
      * Get the communes for the district.
      */
-    public function communes()
+    public function communes() :HasMany
     {
-        return $this->hasMany(Commune::class, 'district_id');
+        return $this->hasMany(Commune::class, 'district_id', 'dist_id');
     }
 }

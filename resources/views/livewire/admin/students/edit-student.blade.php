@@ -1,8 +1,26 @@
 <div class="py-9">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6">
+            <!-- Current Student Info -->
+            <div class="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
+                <x-profile-image size="md"
+                    src="{{ $student->user->profile_picture_url }}"
+                    alt="{{ $student->user->name }}"
+                    class="bg-gray-700"
+                    wire:model="profile_pic" />
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {{ $student->user->name }}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $student->student_id }}
+                        • {{ $student->department->name ?? 'N/A' }}
+                        • {{ $student->program->name ?? 'N/A' }}
+                    </p>
+                </div>
+            </div>
 
+            <div class="px-6 pb-6">
                 <!-- Display System Errors if Service Fails -->
                 @error('system_error')
                     <div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg">
@@ -21,39 +39,15 @@
                                 User Information
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                                <div>
-                                    <x-input-label for="profile_pic"
-                                        :value="__('Profile Picture')" />
-
-                                    <div class="mt-2 flex items-center space-x-4">
-                                        <x-profile-image size="xl"
-                                            :src="$profile_pic
-                                                ? $profile_pic->temporaryUrl()
-                                                : asset('default-avatar.png')"
-                                            class="bg-gray-700"
-                                            :uploadable="true"
-                                            wire:model="profile_pic" />
-                                    </div>
-
-                                    <!-- Hidden field for profile picture removal -->
-                                    <input type="hidden"
-                                        id="remove-profile-pic"
-                                        name="remove_profile_pic"
-                                        value="0">
-                                    <x-input-error class="mt-2"
-                                        :messages="$errors->get('profile_pic')" />
-                                </div>
-
                                 <div>
                                     <x-input-label for="name"
                                         :value="__('Full Name')" />
                                     <x-text-input id="name"
                                         wire:model="name"
                                         type="text"
-                                        class="mt-1 block w-full"
+                                        class="mt-1 block w-full bg-gray-200 dark:bg-gray-600 cursor-not-allowed"
                                         required
-                                        autofocus />
+                                        disabled />
                                     <x-input-error class="mt-2"
                                         :messages="$errors->get('name')" />
                                 </div>
@@ -64,8 +58,9 @@
                                     <x-text-input id="email"
                                         wire:model="email"
                                         type="email"
-                                        class="mt-1 block w-full"
-                                        required />
+                                        class="mt-1 block w-full bg-gray-200 dark:bg-gray-600 cursor-not-allowed"
+                                        required
+                                        disabled />
                                     <x-input-error class="mt-2"
                                         :messages="$errors->get('email')" />
                                 </div>
@@ -76,32 +71,11 @@
                                     <x-text-input id="username"
                                         wire:model="username"
                                         type="text"
-                                        class="mt-1 block w-full"
-                                        required />
+                                        class="mt-1 block w-full bg-gray-200 dark:bg-gray-600 cursor-not-allowed"
+                                        required
+                                        disabled />
                                     <x-input-error class="mt-2"
                                         :messages="$errors->get('username')" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="password"
-                                        :value="__('Password')" />
-                                    <x-text-input id="password"
-                                        wire:model="password"
-                                        type="password"
-                                        class="mt-1 block w-full"
-                                        required />
-                                    <x-input-error class="mt-2"
-                                        :messages="$errors->get('password')" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="password_confirmation"
-                                        :value="__('Confirm Password')" />
-                                    <x-text-input id="password_confirmation"
-                                        wire:model="password_confirmation"
-                                        type="password"
-                                        class="mt-1 block w-full"
-                                        required />
                                 </div>
                             </div>
                         </div>
@@ -304,20 +278,18 @@
                                         :value="__('Has Disability')"
                                         class="ml-2" />
                                 </div>
-                                @if ($has_disability)
-                                    <div class="md:col-span-2">
-                                        <x-input-label for="disability_details"
-                                            :value="__('Disability Details')" />
-                                        <textarea id="disability_details"
-                                            wire:model="disability_details"
-                                            rows="3"
-                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
-                                            {{ !$has_disability ? 'disabled' : '' }}></textarea>
-                                        <x-input-error class="mt-2"
-                                            :messages="$errors->get('disability_details')" />
-                                    </div>
-                                @endif
 
+                                <div class="md:col-span-2">
+                                    <x-input-label for="disability_details"
+                                        :value="__('Disability Details')" />
+                                    <textarea id="disability_details"
+                                        wire:model="disability_details"
+                                        rows="3"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
+                                        {{ !$has_disability ? 'disabled' : '' }}></textarea>
+                                    <x-input-error class="mt-2"
+                                        :messages="$errors->get('disability_details')" />
+                                </div>
 
                                 <div class="md:col-span-2">
                                     <x-input-label for="previous_education"
@@ -349,6 +321,13 @@
                                     <x-input-error class="mt-2"
                                         :messages="$errors->get('address.current_address')" />
                                 </div>
+
+                                {{-- <div class="bg-yellow-100 p-4 mb-4 text-sm font-mono text-red-600">
+                                    DEBUGGING:<br>
+                                    Selected Province ID: {{ $address['province_id'] ?? 'NULL' }}<br>
+                                    Districts Count: {{ count($districts) }}<br>
+                                    First District (if any): {{ isset($districts[0]) ? json_encode($districts[0]) : 'None' }}
+                                </div> --}}
 
                                 <div>
                                     <x-input-label for="address.province_id"
@@ -409,8 +388,7 @@
                                         :value="__('Village')" />
                                     <select id="address.village_id"
                                         wire:model.live="address.village_id"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm 
-                                        @error('address.village_id') border-red-500 @enderror"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm @error('address.village_id') border-red-500 @enderror"
                                         {{ empty($villages) ? 'disabled' : '' }}>
                                         <option value="">Select village</option>
                                         @foreach ($villages as $village)
@@ -488,8 +466,8 @@
                             </a>
 
                             <x-primary-button wire:loading.attr="disabled">
-                                <span wire:loading.remove>{{ __('Create Student') }}</span>
-                                <span wire:loading>{{ __('Processing...') }}</span>
+                                <span wire:loading.remove>{{ __('Update Student') }}</span>
+                                <span wire:loading>{{ __('Updating...') }}</span>
                             </x-primary-button>
                         </div>
                     </div>

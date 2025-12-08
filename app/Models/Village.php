@@ -13,27 +13,13 @@ class Village extends Model
      *
      * @var string
      */
-    protected $table = 'village';    
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'camdx_id',
-        'code',
-        'name_kh',
-        'name_en',
-        'is_not_active',
-        'commune_id',
-    ];
+    protected $table = 'villages';    
 
     /**
      * Get the commune that owns the village.
      */
     public function commune()
     {
-        return $this->belongsTo(Commune::class, 'commune_id');
+        return $this->belongsTo(Commune::class, 'commune_id', 'comm_id');
     }
 }

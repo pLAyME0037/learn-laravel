@@ -15,12 +15,6 @@ class Address extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * The primary key for the model.
-     *
-     * @var string
-     */
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

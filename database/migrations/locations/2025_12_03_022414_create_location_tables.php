@@ -11,61 +11,53 @@ return new class extends Migration
     public function up(): void
     {
         // 1. PROVINCE
-        Schema::create('province', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedInteger('camdx_id')->nullable()->index(); // Nullable
-            $table->string('code', 10)->index();                   // Changed CHAR(2) to String(10) to be safe
+        Schema::create('provinces', function (Blueprint $table) {
+            $table->id(); // Auto-increment ID (e.g., 1, 2, 3)
+            $table->integer('prov_id')->unique(); // GeoCode (e.g., 01, 02)
             $table->string('name_kh')->nullable();
             $table->string('name_en')->nullable();
-            $table->timestamps();
         });
 
         // 2. DISTRICT
-        Schema::create('district', function (Blueprint $table) {
+        Schema::create('districts', function (Blueprint $table) {
             $table->id();
-            // Remove constrained() for import safety, add index manually
-            $table->foreignId('province_id')->index();
-            $table->unsignedInteger('camdx_id')->nullable()->index();
-            $table->string('code', 10)->index();
+            // Note: This refers to the 'prov_id' code, NOT the province 'id'
+            $table->integer('province_id')->index(); 
+            $table->integer('dist_id')->unique(); // GeoCode (e.g., 102)
             $table->string('name_kh')->nullable();
             $table->string('name_en')->nullable();
             $table->string('type')->nullable();
-            $table->timestamps();
         });
 
         // 3. COMMUNE
-        Schema::create('commune', function (Blueprint $table) {
+        Schema::create('communes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('district_id')->index();
-            $table->unsignedInteger('camdx_id')->nullable()->index();
-            $table->string('code', 10)->index();
+            // Note: This refers to the 'dist_id' code
+            $table->integer('district_id')->index();
+            $table->integer('comm_id')->unique(); // GeoCode (e.g., 10201)
             $table->string('name_kh')->nullable();
             $table->string('name_en')->nullable();
-            $table->timestamps();
         });
 
         // 4. VILLAGE
-        Schema::create('village', function (Blueprint $table) {
+        Schema::create('villages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('commune_id')->index();
-            $table->unsignedBigInteger('camdx_id')->nullable()->index();
-            $table->string('code', 15)->index(); // Some village codes might be longer
+            // Note: This refers to the 'comm_id' code
+            $table->integer('commune_id')->index(); 
+            $table->bigInteger('vill_id')->unique(); // GeoCode (e.g., 1020101)
             $table->string('name_kh')->nullable();
             $table->string('name_en')->nullable();
-
-            // CRITICAL FIX: Must be nullable because the dump inserts NULL here
+            
+            // Handling the "is_not_active" from JSON
             $table->boolean('is_not_active')->nullable();
-
-            $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        // Drop in reverse order to avoid Foreign Key constraints
-        Schema::dropIfExists('village');
-        Schema::dropIfExists('commune');
-        Schema::dropIfExists('district');
-        Schema::dropIfExists('province');
+        Schema::dropIfExists('villages');
+        Schema::dropIfExists('communes');
+        Schema::dropIfExists('districts');
+        Schema::dropIfExists('provinces');
     }
 };

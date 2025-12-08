@@ -1,7 +1,7 @@
 @props(['user'])
 
 <div class="flex items-center">
-    <div class="flex-shrink-0 h-10 w-10">
+    <div>
         <x-profile-image class="border-blue-700"
             src="{{ $user->profile_picture_url }}"
             alt="{{ $user->name }}"
