@@ -1,302 +1,92 @@
 <?php
-
 namespace Database\Seeders;
 
+use App\Models\AcademicYear;
+use App\Models\ClassSession;
 use App\Models\Course;
 use App\Models\Degree;
 use App\Models\Department;
+use App\Models\Enrollment;
 use App\Models\Faculty;
 use App\Models\Major;
 use App\Models\Program;
-use App\Models\AcademicYear; // Added
 use App\Models\Semester;
-use Database\Seeders\GenderSeeder; // Import GenderSeeder
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class AcademicStructureSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Clean Slate
+        // 1. Clean Slate (Disable Foreign Keys for speed)
         DB::statement('PRAGMA foreign_keys = OFF;');
-        AcademicYear::truncate(); // Added
-        Degree::truncate();
-        Faculty::truncate();
-        Department::truncate();
-        Major::truncate();
-        Program::truncate();
+
+                                                     // Truncate tables in dependency order
+        DB::table('program_structures')->truncate(); 
+        ClassSession::truncate();
+        Enrollment::truncate();
         Course::truncate();
+        Program::truncate();
+        Major::truncate();
+        Department::truncate();
+        Faculty::truncate();
         Semester::truncate();
+        Degree::truncate();
+        AcademicYear::truncate();
+
         DB::statement('PRAGMA foreign_keys = ON;');
 
         $now = now();
 
-        // Ensure an Academic Year exists for semesters
-        $academicYear = AcademicYear::firstOrCreate(
-            ['name' => '2025'], // Use 'name' instead of 'year'
+        // ------------------------------------------------------------------
+        // PHASE 1: Academic Year & Semesters
+        // ------------------------------------------------------------------
+        $academicYear = AcademicYear::create([
+            'name'       => '2025-2026',
+            'start_date' => $now->copy()->startOfYear(),
+            'end_date'   => $now->copy()->endOfYear(),
+            'is_current' => true,
+        ]);
+
+        Semester::insert([
             [
-                'start_date' => $now->copy()->startOfYear(),
-                'end_date' => $now->copy()->endOfYear(),
-                'is_current' => true,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]
-        );
-        $academicYearId = $academicYear->id;
+                'academic_year_id' => $academicYear->id,
+                'name'             => 'Semester 1',
+                'start_date'       => $now->copy()->subMonth(),
+                'end_date'         => $now->copy()->addMonths(3),
+                'is_active'        => true, // Active Semester
+                'created_at'       => $now, 'updated_at' => $now,
+            ],
+            [
+                'academic_year_id' => $academicYear->id,
+                'name'             => 'Semester 2',
+                'start_date'       => $now->copy()->addMonths(4),
+                'end_date'         => $now->copy()->addMonths(8),
+                'is_active'        => false,
+                'created_at'       => $now, 'updated_at' => $now,
+            ],
+        ]);
+
+        // Cache the active semester ID for scheduling
+        $activeSemesterId = Semester::where('is_active', true)->value('id');
 
         // ------------------------------------------------------------------
-        // PHASE 1: Global Lookups
+        // PHASE 2: Global Lookups (Degrees)
         // ------------------------------------------------------------------
-        $degrees = [
+        Degree::insert([
             ['name' => 'Bachelor', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'Master', 'created_at' => $now, 'updated_at' => $now],
             ['name' => 'PhD', 'created_at' => $now, 'updated_at' => $now],
-        ];
-        Degree::insert($degrees);
+        ]);
         $degreeMap = Degree::pluck('id', 'name')->toArray();
 
-        $semesters = [
-            [
-                'academic_year_id' => $academicYearId, // Added
-                'name' => 'Fall 2025', 
-                'start_date' => $now->copy()->addMonths(1), 
-                'end_date' => $now->copy()->addMonths(5), 
-                'is_active' => true, 'created_at' => $now, 
-                'updated_at' => $now
-            ],
-            [
-                'academic_year_id' => $academicYearId, // Added
-                'name' => 'Spring 2026', 
-                'start_date' => $now->copy()->addMonths(6), 
-                'end_date' => $now->copy()->addMonths(10), 
-                'is_active' => false, 
-                'created_at' => $now, 
-                'updated_at' => $now
-            ],
-        ];
-        Semester::insert($semesters);
-        $semesterId = Semester::first()->id;
+        // ------------------------------------------------------------------
+        // PHASE 3: Hierarchy (Faculty -> Dept -> Major -> Program)
+        // ------------------------------------------------------------------
+        $structure = $this->getUniversityStructure();
 
-        // ------------------------------------------------------------------
-        // PHASE 2: The Complete Data Structure
-        // ------------------------------------------------------------------
-        $structure = [
-            'Faculty of Engineering & Technology' => [
-                'Computer Science' => [
-                    'Software Engineering',
-                    'Artificial Intelligence',
-                    'Cyber Security',
-                    'Data Science',
-                    'Network Engineering',
-                    'Information Systems',
-                    'Game Development',
-                    'Cloud Computing'
-                ],
-                'Electrical Engineering' => [
-                    'Power Systems',
-                    'Electronics & Telecommunication',
-                    'Mechatronics',
-                    'Control Systems',
-                    'Renewable Energy',
-                    'Signal Processing'
-                ],
-                'Civil Engineering' => [
-                    'Structural Engineering',
-                    'Geotechnical Engineering',
-                    'Transportation Engineering',
-                    'Construction Management',
-                    'Environmental Engineering',
-                    'Urban Planning'
-                ],
-                'Mechanical Engineering' => [
-                    'Automotive Engineering',
-                    'Thermal Engineering',
-                    'Manufacturing Systems',
-                    'Robotics',
-                    'Aerospace Engineering',
-                    'Fluid Dynamics'
-                ],
-                'Chemical Engineering' => [
-                    'Process Engineering',
-                    'Materials Science',
-                    'Biochemical Engineering',
-                    'Petroleum Engineering'
-                ]
-            ],
-            'Faculty of Business & Economics' => [
-                'Business Administration' => [
-                    'Marketing Management',
-                    'Human Resource Management',
-                    'Supply Chain Management',
-                    'International Business',
-                    'Entrepreneurship',
-                    'Operations Management',
-                    'Strategic Management'
-                ],
-                'Accounting & Finance' => [
-                    'Public Accounting',
-                    'Corporate Finance',
-                    'Banking & Insurance',
-                    'Taxation',
-                    'FinTech',
-                    'Risk Management',
-                    'Investment Analysis'
-                ],
-                'Economics' => [
-                    'Development Economics',
-                    'International Economics',
-                    'Econometrics',
-                    'Behavioral Economics',
-                    'Public Policy'
-                ]
-            ],
-            'Faculty of Health Sciences' => [
-                'Nursing' => [
-                    'Adult Health Nursing',
-                    'Pediatric Nursing',
-                    'Critical Care Nursing',
-                    'Community Health',
-                    'Mental Health Nursing',
-                    'Midwifery'
-                ],
-                'Medicine' => [
-                    'General Medicine',
-                    'Surgery',
-                    'Pediatrics',
-                    'Internal Medicine',
-                    'Cardiology',
-                    'Neurology'
-                ],
-                'Pharmacy' => [
-                    'Clinical Pharmacy',
-                    'Pharmaceutical Chemistry',
-                    'Pharmacology',
-                    'Toxicology',
-                    'Industrial Pharmacy'
-                ],
-                'Public Health' => [
-                    'Epidemiology',
-                    'Health Policy & Management',
-                    'Environmental Health',
-                    'Nutrition & Dietetics',
-                    'Biostatistics'
-                ],
-                'Dentistry' => [
-                    'Oral Surgery',
-                    'Orthodontics',
-                    'Periodontology',
-                    'Prosthodontics'
-                ]
-            ],
-            'Faculty of Arts & Humanities' => [
-                'English Language & Literature' => [
-                    'English Literature',
-                    'Linguistics',
-                    'Creative Writing',
-                    'Teaching English as a Second Language (TESL)',
-                    'Comparative Literature'
-                ],
-                'History & Political Science' => [
-                    'Modern History',
-                    'Political Science',
-                    'International Relations',
-                    'Archaeology',
-                    'Ancient History',
-                    'Public Administration'
-                ],
-                'Psychology' => [
-                    'Clinical Psychology',
-                    'Counseling Psychology',
-                    'Industrial-Organizational Psychology',
-                    'Developmental Psychology',
-                    'Forensic Psychology'
-                ],
-                'Sociology & Anthropology' => [
-                    'Sociology',
-                    'Cultural Anthropology',
-                    'Social Work',
-                    'Criminology'
-                ],
-                'Philosophy & Religion' => [
-                    'Philosophy',
-                    'Ethics',
-                    'Religious Studies',
-                    'Logic'
-                ]
-            ],
-            'Faculty of Science' => [
-                'Biological Sciences' => [
-                    'Microbiology',
-                    'Genetics',
-                    'Biotechnology',
-                    'Botany',
-                    'Zoology',
-                    'Marine Biology',
-                    'Bioinformatics'
-                ],
-                'Chemistry' => [
-                    'Organic Chemistry',
-                    'Analytical Chemistry',
-                    'Industrial Chemistry',
-                    'Physical Chemistry',
-                    'Inorganic Chemistry'
-                ],
-                'Physics & Mathematics' => [
-                    'Theoretical Physics',
-                    'Applied Mathematics',
-                    'Statistics',
-                    'Astrophysics',
-                    'Actuarial Science',
-                    'Nuclear Physics'
-                ],
-                'Earth & Environmental Sciences' => [
-                    'Geology',
-                    'Environmental Science',
-                    'Meteorology',
-                    'Oceanography'
-                ]
-            ],
-            'Faculty of Law' => [
-                'Law' => [
-                    'Civil Law',
-                    'Criminal Law',
-                    'International Law',
-                    'Corporate Law',
-                    'Constitutional Law',
-                    'Human Rights Law'
-                ]
-            ],
-            'Faculty of Architecture & Design' => [
-                'Architecture' => [
-                    'Architectural Design',
-                    'Landscape Architecture',
-                    'Urban Design',
-                    'Interior Architecture'
-                ],
-                'Design' => [
-                    'Graphic Design',
-                    'Industrial Design',
-                    'Fashion Design',
-                    'Multimedia Arts',
-                    'Animation'
-                ]
-            ],
-            'Faculty of Education' => [
-                'Education' => [
-                    'Primary Education',
-                    'Secondary Education',
-                    'Educational Leadership',
-                    'Special Education',
-                    'Curriculum Design'
-                ]
-            ]
-        ];
-
-        // ------------------------------------------------------------------
-        // PHASE 3: Faculties
-        // ------------------------------------------------------------------
+        // A. Faculties
         $facultyData = [];
         foreach (array_keys($structure) as $name) {
             $facultyData[] = ['name' => $name, 'created_at' => $now, 'updated_at' => $now];
@@ -304,266 +94,409 @@ class AcademicStructureSeeder extends Seeder
         Faculty::insert($facultyData);
         $facultyMap = Faculty::pluck('id', 'name')->toArray();
 
-        // ------------------------------------------------------------------
-        // PHASE 4: Departments
-        // ------------------------------------------------------------------
-        $deptData = [];
-        foreach ($structure as $facultyName => $departments) {
-            $facId = $facultyMap[$facultyName];
-            foreach (array_keys($departments) as $deptName) {
+        // B. Departments
+        $deptData  = [];
+        $usedCodes = [];
+
+        foreach ($structure as $facName => $depts) {
+            $facId = $facultyMap[$facName];
+            foreach (array_keys($depts) as $deptName) {
+                // Generate Unique Code
+                $code         = $this->generateCode($deptName);
+                $originalCode = $code;
+                $counter      = 1;
+                while (in_array($code, $usedCodes)) {
+                    $code = substr($originalCode, 0, 4) . $counter;
+                    $counter++;
+                }
+                $usedCodes[] = $code;
+
                 $deptData[] = [
-                    'name' => $deptName,
-                    'code' => $this->generateCode($deptName),
-                    'description' => "Department of $deptName",
+                    'name'       => $deptName,
+                    'code'       => $code,
                     'faculty_id' => $facId,
-                    'created_at' => $now,
-                    'updated_at' => $now
+                    'created_at' => $now, 'updated_at' => $now,
                 ];
             }
         }
         Department::insert($deptData);
         $deptMap = Department::pluck('id', 'name')->toArray();
 
-        // ------------------------------------------------------------------
-        // PHASE 5: Majors
-        // ------------------------------------------------------------------
+        // C. Majors
         $majorData = [];
         foreach ($structure as $facName => $depts) {
             foreach ($depts as $deptName => $majors) {
                 $deptId = $deptMap[$deptName] ?? null;
-                if (!$deptId) continue;
+                if (! $deptId) {
+                    continue;
+                }
 
                 foreach ($majors as $majorName) {
                     $majorData[] = [
-                        'name' => $majorName,
+                        'name'          => $majorName,
                         'department_id' => $deptId,
-                        'degree_id' => $degreeMap['Bachelor'], // Default
-                        'cost' => rand(1000, 5000),
-                        'payment_frequency' => 'term', // Changed from 'semester' to 'term'
-                        'created_at' => $now,
-                        'updated_at' => $now
+                        'degree_id'     => $degreeMap['Bachelor'],
+                        'cost_per_term' => 1500.00, // Updated column name per new migration
+                        'created_at'    => $now, 'updated_at' => $now,
                     ];
                 }
             }
         }
-        foreach (array_chunk($majorData, 100) as $chunk) {
+        // Batch Insert Majors (200 at a time)
+        foreach (array_chunk($majorData, 200) as $chunk) {
             Major::insert($chunk);
         }
         $majorMap = Major::pluck('id', 'name')->toArray();
 
-        // ------------------------------------------------------------------
-        // PHASE 6: Programs
-        // ------------------------------------------------------------------
+        // D. Programs
         $programData = [];
-        foreach ($majorMap as $majorName => $majorId) {
-            // Bachelor
+        foreach ($majorMap as $name => $id) {
             $programData[] = [
-                'name' => "Bachelor of $majorName",
-                'major_id' => $majorId,
-                'degree_id' => $degreeMap['Bachelor'],
-                'created_at' => $now, 'updated_at' => $now
+                'name'       => "Bachelor of $name",
+                'major_id'   => $id,
+                'degree_id'  => $degreeMap['Bachelor'],
+                'created_at' => $now, 'updated_at' => $now,
             ];
-            // Master (Always create Master for Software Engineering, 30% for others)
-            if ($majorName === 'Software Engineering' || rand(1, 100) <= 30) {
+
+            // Random Masters
+            if ($id % 2 === 0) {
                 $programData[] = [
-                    'name' => "Master of $majorName",
-                    'major_id' => $majorId,
-                    'degree_id' => $degreeMap['Master'],
-                    'created_at' => $now, 'updated_at' => $now
+                    'name'       => "Master of $name",
+                    'major_id'   => $id,
+                    'degree_id'  => $degreeMap['Master'],
+                    'created_at' => $now, 'updated_at' => $now,
                 ];
             }
         }
-        foreach (array_chunk($programData, 100) as $chunk) {
+        foreach (array_chunk($programData, 200) as $chunk) {
             Program::insert($chunk);
         }
-        $programs = Program::select('id', 'major_id')->get();
 
         // ------------------------------------------------------------------
-        // PHASE 7: Courses (Specific Courses required by ClassScheduleSeeder)
+        // PHASE 4: Staff & Catalog Setup
         // ------------------------------------------------------------------
+        // Create default Instructor
+        $instructor = User::firstOrCreate(
+            ['email' => 'staff@university.com'],
+            [
+                'name'      => 'Dr. Default Staff',
+                'username'  => 'staff',
+                'password'  => '$2y$12$K.x.examplehash', // Fast hash
+                'is_active' => true,
+            ]
+        );
+
+        // Pre-fetch Program Map for speed
+        $programMap = Program::pluck('id', 'name')->toArray();
+
+        // Define Specific Courses to Seed
         $coursesToSeed = [
-            // Computer Science Courses
-            [
-                'program_name'  => 'Bachelor of Software Engineering', // Updated to full program name for exact match
-                'faculty_name'  => 'Faculty of Engineering & Technology',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Introduction to Computer Science',
-                'code'          => 'CS101',
-                'credits'       => 3,
-                'max_students'  => 50,
-                'start_date'    => $now->copy()->addDays(10),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            [
-                'program_name'  => 'Bachelor of Software Engineering',
-                'faculty_name'  => 'Faculty of Engineering & Technology',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Data Structures and Algorithms',
-                'code'          => 'CS201',
-                'credits'       => 4,
-                'max_students'  => 45,
-                'start_date'    => $now->copy()->addDays(10),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            [
-                'program_name'  => 'Master of Software Engineering', // Updated to full program name
-                'faculty_name'  => 'Faculty of Engineering & Technology',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Advanced Algorithms',
-                'code'          => 'CS501',
-                'credits'       => 3,
-                'max_students'  => 30,
-                'start_date'    => $now->copy()->addDays(15),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            // Mathematics Courses
-            [
-                'program_name'  => 'Bachelor of Applied Mathematics', // Updated to full program name
-                'faculty_name'  => 'Faculty of Science',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Calculus I',
-                'code'          => 'MATH101',
-                'credits'       => 4,
-                'max_students'  => 60,
-                'start_date'    => $now->copy()->addDays(10),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            [
-                'program_name'  => 'Bachelor of Applied Mathematics',
-                'faculty_name'  => 'Faculty of Science',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Linear Algebra',
-                'code'          => 'MATH201',
-                'credits'       => 3,
-                'max_students'  => 55,
-                'start_date'    => $now->copy()->addDays(15),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            // Electrical Engineering Courses
-            [
-                'program_name'  => 'Bachelor of Power Systems', // Updated to full program name
-                'faculty_name'  => 'Faculty of Engineering & Technology',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Circuit Theory',
-                'code'          => 'EE201',
-                'credits'       => 4,
-                'max_students'  => 40,
-                'start_date'    => $now->copy()->addDays(10),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            [
-                'program_name'  => 'Bachelor of Power Systems',
-                'faculty_name'  => 'Faculty of Engineering & Technology',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Electromagnetics',
-                'code'          => 'EE301',
-                'credits'       => 3,
-                'max_students'  => 35,
-                'start_date'    => $now->copy()->addDays(15),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
-            // Business Administration Courses
-            [
-                'program_name'  => 'Bachelor of Marketing Management', // Updated to full program name
-                'faculty_name'  => 'Faculty of Business & Economics',
-                'semester_name' => 'Fall 2025',
-                'name'          => 'Principles of Management',
-                'code'          => 'MGMT101',
-                'credits'       => 3,
-                'max_students'  => 50,
-                'start_date'    => $now->copy()->addDays(10),
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => 'Active',
-            ],
+            // =================================================================
+            // BACHELOR OF SOFTWARE ENGINEERING (The Main Demo)
+            // =================================================================
+            
+            // --- Year 1, Term 1 (Freshman - Full Load of 5 Classes) ---
+            ['Bachelor of Software Engineering', 'CS101',   'Intro to Programming',       3, 1, 1, 'Logic and Python/C++ basics.'],
+            ['Bachelor of Software Engineering', 'MATH101', 'Calculus I',                 3, 1, 1, 'Limits and Derivatives.'],
+            ['Bachelor of Software Engineering', 'ENG101',  'Academic English',           3, 1, 1, 'Writing and Research skills.'],
+            ['Bachelor of Software Engineering', 'PHY101',  'General Physics I',          3, 1, 1, 'Mechanics and Motion.'],
+            ['Bachelor of Software Engineering', 'HIS101',  'World History',              2, 1, 1, 'General Education requirement.'],
+
+            // --- Year 1, Term 2 (Progression) ---
+            ['Bachelor of Software Engineering', 'CS102',   'Object Oriented Programming', 4, 1, 2, 'Java/C# concepts.'],
+            ['Bachelor of Software Engineering', 'CS103',   'Web Fundamentals',            3, 1, 2, 'HTML, CSS, JS.'],
+            ['Bachelor of Software Engineering', 'MATH102', 'Linear Algebra',              3, 1, 2, 'Vectors and Matrices.'],
+            ['Bachelor of Software Engineering', 'STAT101', 'Probability & Statistics',    3, 1, 2, 'Data analysis basics.'],
+            
+            // --- Year 2, Term 1 (Sophomore - Advanced) ---
+            ['Bachelor of Software Engineering', 'CS201',   'Data Structures & Algos',     4, 2, 1, 'Trees, Graphs, Sorting.'],
+            ['Bachelor of Software Engineering', 'CS202',   'Database Systems',            3, 2, 1, 'SQL and Relational Design.'],
+
+            // =================================================================
+            // OTHER MAJORS (To show filtering works)
+            // =================================================================
+            
+            // Mathematics
+            ['Bachelor of Applied Mathematics', 'MATH101', 'Calculus I',                 3, 1, 1, 'Shared Course.'],
+            ['Bachelor of Applied Mathematics', 'MATH105', 'Discrete Math',              3, 1, 1, 'Logic and Proofs.'],
+
+            // Marketing
+            ['Bachelor of Marketing Management', 'MKT101', 'Principles of Marketing',    3, 1, 1, 'Market analysis basics.'],
+            ['Bachelor of Marketing Management', 'ECO101', 'Microeconomics',             3, 1, 1, 'Supply and Demand.'],
+            ['Bachelor of Marketing Management', 'ACC101', 'Financial Accounting',       3, 1, 1, 'Balance sheets.'],
         ];
 
-        $courseDataForInsert = [];
-        $programNameToIdMap = Program::pluck('id', 'name')->toArray(); // Refresh map for full names
-        $facultyNameToIdMap = Faculty::pluck('id', 'name')->toArray();
-        $semesterNameToIdMap = Semester::pluck('id', 'name')->toArray();
-        $departmentNameToIdMap = Department::pluck('id', 'name')->toArray();
-
-
-        foreach ($coursesToSeed as $course) {
-            $program = Program::where('name', $course['program_name'])->first(); // Exact match for program name
-            $faculty = Faculty::where('name', $course['faculty_name'])->first();
-            $semester = Semester::where('name', $course['semester_name'])->first();
-
-            if (!$program || !$faculty || !$semester) {
-                $this->command->warn("Skipping course '{$course['code']}' due to missing Program ('{$course['program_name']}'), Faculty ('{$course['faculty_name']}'), or Semester ('{$course['semester_name']}').");
+        foreach ($coursesToSeed as [$progName, $cCode, $cName, $credits, $year, $termNum, $desc]) {
+            $progId = $programMap[$progName] ?? null;
+            if (! $progId) {
                 continue;
             }
 
-            $department = Department::find($program->major->department_id ?? null); // Access through major relation
+            // Efficiently find Department via Program -> Major
+            $program = Program::with('major')->find($progId);
 
-            if (!$department) {
-                $this->command->warn("Skipping course '{$course['code']}' due to missing Department for program {$program->name}.");
-                continue;
-            }
+            // 1. Create Course (Catalog)
+            $course = Course::firstOrCreate(
+                ['code' => $cCode],
+                [
+                    'name'          => $cName,
+                    'department_id' => $program->major->department_id,
+                    'credits'       => $credits,
+                    'description'   => $desc,
+                ]
+            );
 
+            // 2. Schedule Class Session (The Instance)
+            ClassSession::create([
+                'course_id'     => $course->id,
+                'semester_id'   => $activeSemesterId,
+                'instructor_id' => $instructor->id,
+                'section_name'  => 'A', // Fixed: matches schema 'section_name'
+                'capacity'      => 40,
+                'day_of_week'   => 'Mon',
+                'start_time'    => '09:00:00',
+                'end_time'      => '10:30:00',
+                'status'        => 'open',
+            ]);
 
-            $courseDataForInsert[] = [
-                'name'          => $course['name'],
-                'code'          => $course['code'],
-                'description'   => $course['description'] ?? null,
-                'credits'       => $course['credits'],
-                'department_id' => $department->id,
-                // 'faculty_id'    => $faculty->id, // Removed as per "course should access faculty through department"
-                'program_id'    => $program->id,
-                'semester_id'   => $semester->id,
-                'max_students'  => $course['max_students'],
-                'start_date'    => $course['start_date'],
-                'end_date'      => $now->copy()->addMonths(4),
-                'status'        => $course['status'],
-                'created_at'    => $now,
-                'updated_at'    => $now,
-            ];
-        }
-
-        foreach (array_chunk($courseDataForInsert, 200) as $chunk) {
-            Course::insert($chunk);
+            // 3. Add to Roadmap (Program Structure)
+            // This is critical for the Batch Enrollment tool to work
+            DB::table('program_structures')->insertOrIgnore([
+                'program_id'       => $progId,
+                'course_id'        => $course->id,
+                'recommended_year' => $year,
+                'recommended_term' => $termNum,
+                'created_at'       => $now,
+                'updated_at'       => $now,
+            ]);
         }
     }
 
     private function generateCode(string $string): string
     {
-        $string = strtoupper($string);
-        // Split by common delimiters (space, &, -, /, \) and remove empty matches
-        $words = array_filter(preg_split('/[\s\&\-\/\\\\]+/', $string), fn($w) => !empty($w) && !in_array($w, ['OF', 'AND']));
-        
-        $code = '';
-
-        if (count($words) < 2) { // Changed this condition
-            // If no significant words or only one word, use a slug from the original string or first word
-            if (!empty($words)) {
-                $code = substr($words[0], 0, 4);
-            } else {
-                return strtoupper(substr(Str::slug($string), 0, 4));
+        $words = array_filter(preg_split('/[\s\&\-\/\\\\]+/', strtoupper($string)));
+        $code  = '';
+        foreach ($words as $w) {
+            if (in_array($w, ['OF', 'AND'])) {
+                continue;
             }
-        } else {
-            // For multi-word departments (count($words) >= 2)
-            // Take first two letters of the first word
-            $code .= substr($words[0], 0, 2);
-            // Then take first letter of subsequent words
-            for ($i = 1; $i < count($words); $i++) {
-                $code .= substr($words[$i], 0, 1);
-            }
-            // Ensure a reasonable max length
-            $code = substr($code, 0, 5); // Limit to 5 characters
-        }
-        
-        // Final fallback if still too short (e.g. from very short words)
-        if (strlen($code) < 3) {
-            return strtoupper(substr(Str::slug($string), 0, 4));
-        }
 
-        return $code;
+            $code .= substr($w, 0, 1);
+        }
+        return (strlen($code) < 2) ? strtoupper(substr($string, 0, 3)) : substr($code, 0, 4);
+    }
+    private function getUniversityStructure()
+    {
+        return [
+            'Faculty of Engineering & Technology' => [
+                'Computer Science'       => [
+                    'Software Engineering',
+                    'Artificial Intelligence',
+                    'Cyber Security',
+                    'Data Science',
+                    'Network Engineering',
+                    'Information Systems',
+                    'Game Development',
+                    'Cloud Computing',
+                ],
+                'Electrical Engineering' => [
+                    'Power Systems',
+                    'Electronics & Telecommunication',
+                    'Mechatronics',
+                    'Control Systems',
+                    'Renewable Energy',
+                    'Signal Processing',
+                ],
+                'Civil Engineering'      => [
+                    'Structural Engineering',
+                    'Geotechnical Engineering',
+                    'Transportation Engineering',
+                    'Construction Management',
+                    'Environmental Engineering',
+                    'Urban Planning',
+                ],
+                'Mechanical Engineering' => [
+                    'Automotive Engineering',
+                    'Thermal Engineering',
+                    'Manufacturing Systems',
+                    'Robotics',
+                    'Aerospace Engineering',
+                    'Fluid Dynamics',
+                ],
+                'Chemical Engineering'   => [
+                    'Process Engineering',
+                    'Materials Science',
+                    'Biochemical Engineering',
+                    'Petroleum Engineering',
+                ],
+            ],
+            'Faculty of Business & Economics'     => [
+                'Business Administration' => [
+                    'Marketing Management',
+                    'Human Resource Management',
+                    'Supply Chain Management',
+                    'International Business',
+                    'Entrepreneurship',
+                    'Operations Management',
+                    'Strategic Management',
+                ],
+                'Accounting & Finance'    => [
+                    'Public Accounting',
+                    'Corporate Finance',
+                    'Banking & Insurance',
+                    'Taxation',
+                    'FinTech',
+                    'Risk Management',
+                    'Investment Analysis',
+                ],
+                'Economics'               => [
+                    'Development Economics',
+                    'International Economics',
+                    'Econometrics',
+                    'Behavioral Economics',
+                    'Public Policy',
+                ],
+            ],
+            'Faculty of Health Sciences'          => [
+                'Nursing'       => [
+                    'Adult Health Nursing',
+                    'Pediatric Nursing',
+                    'Critical Care Nursing',
+                    'Community Health',
+                    'Mental Health Nursing',
+                    'Midwifery',
+                ],
+                'Medicine'      => [
+                    'General Medicine',
+                    'Surgery',
+                    'Pediatrics',
+                    'Internal Medicine',
+                    'Cardiology',
+                    'Neurology',
+                ],
+                'Pharmacy'      => [
+                    'Clinical Pharmacy',
+                    'Pharmaceutical Chemistry',
+                    'Pharmacology',
+                    'Toxicology',
+                    'Industrial Pharmacy',
+                ],
+                'Public Health' => [
+                    'Epidemiology',
+                    'Health Policy & Management',
+                    'Environmental Health',
+                    'Nutrition & Dietetics',
+                    'Biostatistics',
+                ],
+                'Dentistry'     => [
+                    'Oral Surgery',
+                    'Orthodontics',
+                    'Periodontology',
+                    'Prosthodontics',
+                ],
+            ],
+            'Faculty of Arts & Humanities'        => [
+                'English Language & Literature' => [
+                    'English Literature',
+                    'Linguistics',
+                    'Creative Writing',
+                    'Teaching English as a Second Language (TESL)',
+                    'Comparative Literature',
+                ],
+                'History & Political Science'   => [
+                    'Modern History',
+                    'Political Science',
+                    'International Relations',
+                    'Archaeology',
+                    'Ancient History',
+                    'Public Administration',
+                ],
+                'Psychology'                    => [
+                    'Clinical Psychology',
+                    'Counseling Psychology',
+                    'Industrial-Organizational Psychology',
+                    'Developmental Psychology',
+                    'Forensic Psychology',
+                ],
+                'Sociology & Anthropology'      => [
+                    'Sociology',
+                    'Cultural Anthropology',
+                    'Social Work',
+                    'Criminology',
+                ],
+                'Philosophy & Religion'         => [
+                    'Philosophy',
+                    'Ethics',
+                    'Religious Studies',
+                    'Logic',
+                ],
+            ],
+            'Faculty of Science'                  => [
+                'Biological Sciences'            => [
+                    'Microbiology',
+                    'Genetics',
+                    'Biotechnology',
+                    'Botany',
+                    'Zoology',
+                    'Marine Biology',
+                    'Bioinformatics',
+                ],
+                'Chemistry'                      => [
+                    'Organic Chemistry',
+                    'Analytical Chemistry',
+                    'Industrial Chemistry',
+                    'Physical Chemistry',
+                    'Inorganic Chemistry',
+                ],
+                'Physics & Mathematics'          => [
+                    'Theoretical Physics',
+                    'Applied Mathematics',
+                    'Statistics',
+                    'Astrophysics',
+                    'Actuarial Science',
+                    'Nuclear Physics',
+                ],
+                'Earth & Environmental Sciences' => [
+                    'Geology',
+                    'Environmental Science',
+                    'Meteorology',
+                    'Oceanography',
+                ],
+            ],
+            'Faculty of Law'                      => [
+                'Law' => [
+                    'Civil Law',
+                    'Criminal Law',
+                    'International Law',
+                    'Corporate Law',
+                    'Constitutional Law',
+                    'Human Rights Law',
+                ],
+            ],
+            'Faculty of Architecture & Design'    => [
+                'Architecture' => [
+                    'Architectural Design',
+                    'Landscape Architecture',
+                    'Urban Design',
+                    'Interior Architecture',
+                ],
+                'Design'       => [
+                    'Graphic Design',
+                    'Industrial Design',
+                    'Fashion Design',
+                    'Multimedia Arts',
+                    'Animation',
+                ],
+            ],
+            'Faculty of Education'                => [
+                'Education' => [
+                    'Primary Education',
+                    'Secondary Education',
+                    'Educational Leadership',
+                    'Special Education',
+                    'Curriculum Design',
+                ],
+            ],
+        ];
     }
 }

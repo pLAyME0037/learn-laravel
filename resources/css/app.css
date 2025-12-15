@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 1. IMPORT THE FONT FIRST (Top of file) */
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap');
+
 /* Import standard Flatpickr styles */
 @import 'flatpickr/dist/flatpickr.min.css';
 
 /* Import Dark Mode theme (Optional, looks better in dark mode) */
 @import 'flatpickr/dist/themes/dark.css';
+
+
+

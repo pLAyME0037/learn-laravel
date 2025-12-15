@@ -1,56 +1,56 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Cache;
 
 class SystemConfig extends Model
 {
     protected $fillable = ['key', 'value'];
 
+    const CACHE_KEY = 'system_configs_all';
+
     /**
-     * Cast the value attribute.
+     * Boot: Clear cache automatically.
      */
-    protected function value(): Attribute
+    protected static function booted()
     {
-        return Attribute::make(
-            get: fn (string $value) => json_decode($value, true) ?? $value,
-            set: fn (mixed $value) => is_array($value) ? json_encode($value) : $value,
-        );
+        static::saved(fn () => Cache::forget(self::CACHE_KEY));
+        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
     }
 
     /**
-     * Scope a query to filter configurations by key.
+     * Get a config value.
+     * Usage: SystemConfig::get('site_name', 'My University');
      */
-    public function scopeByKey(Builder $query, string $key): void
+    public static function get(string $key, $default = null)
     {
-        $query->where('key', $key);
+        $configs = Cache::rememberForever(self::CACHE_KEY, function () {
+            return self::all()->pluck('value', 'key');
+        });
+
+        return $configs[$key] ?? $default;
     }
 
     /**
-     * Static helper to easily retrieve a setting.
+     * Set a config value (Create or Update).
+     * Usage: SystemConfig::set('maintenance_mode', 'true');
      */
-    public static function getSetting(string $key, mixed $default = null): mixed
+    public static function set(string $key, $value): void
     {
-        $config = static::byKey($key)->first();
-        if ($config) {
-            return $config->value;
-        }
-        return $default;
-    }
-
-    /**
-     * Static helper to easily set a setting.
-     */
-    public static function setSetting(string $key, mixed $value): static
-    {
-        return static::updateOrCreate(
+        self::updateOrCreate(
             ['key' => $key],
             ['value' => $value]
         );
+    }
+    
+    /**
+     * Helper checks for boolean values stored as text.
+     */
+    public static function isTrue(string $key): bool 
+    {
+        $val = self::get($key);
+        return $val === '1' || $val === 'true' || $val === true;
     }
 }

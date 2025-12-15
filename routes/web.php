@@ -1,38 +1,37 @@
 <?php
 
-use App\Http\Controllers\AcademicRecordController;
-use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\Admin\InstructorController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogController;
-use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ClassroomController;
-use App\Http\Controllers\ClassScheduleController;
-use App\Http\Controllers\ContactDetailController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\CoursePrerequisiteController;
-use App\Http\Controllers\CreditScoreController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DegreeController;
 use App\Http\Controllers\DepartmentController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\FacultyController;
-use App\Http\Controllers\GenderController;
-use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\LoginHistoryController;
-use App\Http\Controllers\MajorController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SidebarController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\SystemConfigController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
+use App\Livewire\Academic\Dashboard as AcademicDashboard;
+use App\Livewire\Academic\ScheduleViewer;
+use App\Livewire\Admin\Academic\BatchEnrollment;
+use App\Livewire\Admin\Academic\CalendarManager;
+use App\Livewire\Admin\Academic\CourseManager;
+use App\Livewire\Admin\Academic\CurriculumBuilder;
+use App\Livewire\Admin\Academic\ScheduleManager;
+use App\Livewire\Admin\Academic\StructureManager;
+use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\Admin\Finance\InvoiceList;
+use App\Livewire\Admin\Instructors\InstructorForm;
+use App\Livewire\Admin\Instructors\InstructorList;
+use App\Livewire\Admin\Settings\DictionaryManager;
+use App\Livewire\Admin\Settings\SystemSettings;
+use App\Livewire\Admin\Students\StudentForm;
+use App\Livewire\Admin\Students\StudentList;
 use App\Livewire\Admin\UserManagement;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +39,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
+Route::get('dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -53,12 +52,18 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
 });
 
-// Admin only routes
+/*
+|--------------------------------------------------------------------------
+| Admin / Staff Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'verified'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        // department Management
+        Route::get('/dashboard', AdminDashboard::class)
+            ->name('dashboard');
+
         Route::resource('departments', DepartmentController::class)
             ->except(['show']);
         Route::get('/departments/{department}/show', [
@@ -71,7 +76,6 @@ Route::middleware(['auth', 'verified'])
             DepartmentController::class, 'forceDelete',
         ])->name('departments.force-delete');
 
-        // user management routes
         Route::resource('users', UserController::class)
             ->except(['show']);
         Route::get('users/{user}/show', [
@@ -84,7 +88,6 @@ Route::middleware(['auth', 'verified'])
             UserController::class, 'updateAccess',
         ])->name('users.update-access');
 
-        // User actions - all as POST since they're form submissions
         Route::post('users/{user}/status', [
             UserController::class, 'updateStatus',
         ])->name('users.status');
@@ -98,84 +101,19 @@ Route::middleware(['auth', 'verified'])
         Route::get('user-management', UserManagement::class)
             ->name('users.management');
 
-        // Student Management Routes
-        Route::resource('students', StudentController::class)
-            ->except(['show']);
-        Route::get('/students/{student}/show', [
-            StudentController::class, 'show',
-        ])->name('students.show');
-        Route::put('/students/{student}/restore', [
-            StudentController::class, 'restore',
-        ])->name('students.restore');
-        Route::delete('/students/{student}/force-delete', [
-            StudentController::class, 'forceDelete',
-        ])->name('students.force-delete');
-        Route::get('/students/{student}/status', [
-            StudentController::class, 'updateStatus',
-        ])->name('students.status');
-
-        // Login History
         Route::get('login-history', [
             LoginHistoryController::class, 'index',
         ])->name('login-histories.index');
-        // System Configuration
-        Route::resource('system-configs', SystemConfigController::class);
 
-        // Academic Year Management
-        Route::resource('academic-years', AcademicYearController::class);
+        Route::get('/academic/batch-enroll', BatchEnrollment::class)
+            ->name('academic.batch-enroll');
 
-        // Academic Record Management
-        Route::resource('academic-records', AcademicRecordController::class);
-
-        // Attendance Management
         Route::resource('attendances', AttendanceController::class);
 
-        // Audit Log Management
         Route::resource('audit-logs', AuditLogController::class);
 
-        // Classroom Management
         Route::resource('classrooms', ClassroomController::class);
 
-        // Class Schedule Management
-        Route::resource('class-schedules', ClassScheduleController::class);
-
-        // Contact Detail Management
-        Route::resource('contact-details', ContactDetailController::class);
-
-        // Course Management
-        Route::resource('courses', CourseController::class);
-
-        // Course Prerequisite Management
-        Route::resource('course-prerequisites', CoursePrerequisiteController::class);
-
-        // Credit Score Management
-        Route::resource('credit-scores', CreditScoreController::class);
-
-        // Degree Management
-        Route::resource('degrees', DegreeController::class);
-
-        // Enrollment Management
-        Route::resource('enrollments', EnrollmentController::class);
-
-        // Faculty Management
-        Route::resource('faculties', FacultyController::class);
-
-        // Gender Management
-        Route::resource('genders', GenderController::class);
-
-        // Instructor Management
-        Route::resource('instructors', InstructorController::class);
-
-        // Major Management
-        Route::resource('majors', MajorController::class);
-
-        // Payment Management
-        Route::resource('payments', PaymentController::class);
-
-        // Program Management
-        Route::resource('programs', ProgramController::class);
-
-        // Role Management
         Route::resource('roles', RoleController::class);
 
         Route::get('roles/{role}/edit-permissions', [
@@ -185,41 +123,118 @@ Route::middleware(['auth', 'verified'])
             RoleController::class, 'updatePermissions',
         ])->name('roles.update-permissions');
 
-        // Semester Management
         Route::resource('semesters', SemesterController::class);
 
-        // Transaction Ledger Management
         Route::resource('transaction-ledgers', TransactionLedgerController::class);
 
-        // Permission Management
         Route::resource('permissions', PermissionController::class)->except(['show']);
 
         // Notification Sending
-        Route::post('send-notification', [
-            NotificationController::class, 'sendGeneralNotification',
-        ])->name('send-notification');
+        // Route::post('send-notification', [
+        //     NotificationController::class, 'sendGeneralNotification',
+        // ])->name('send-notification');
 
-        // Backup & Recovery
-        Route::get('backups', [
-            BackupController::class, 'index',
-        ])->name('backups.index');
-        Route::post('backups/create', [
-            BackupController::class, 'create',
-        ])->name('backups.create');
-        Route::get('backups/download/{filename}', [
-            BackupController::class, 'download',
-        ])->name('backups.download');
-        Route::post('backups/restore/{filename}', [
-            BackupController::class, 'restore',
-        ])->name('backups.restore');
-        Route::delete('backups/{filename}', [
-            BackupController::class, 'destroy',
-        ])->name('backups.destroy');
+        // // Backup & Recovery
+        // Route::get('backups', [
+        //     BackupController::class, 'index',
+        // ])->name('backups.index');
+        // Route::post('backups/create', [
+        //     BackupController::class, 'create',
+        // ])->name('backups.create');
+        // Route::get('backups/download/{filename}', [
+        //     BackupController::class, 'download',
+        // ])->name('backups.download');
+        // Route::post('backups/restore/{filename}', [
+        //     BackupController::class, 'restore',
+        // ])->name('backups.restore');
+        // Route::delete('backups/{filename}', [
+        //     BackupController::class, 'destroy',
+        // ])->name('backups.destroy');
+
+        Route::get('/settings/dictionaries', DictionaryManager::class)
+            ->name('settings.dictionaries');
+
+        Route::get('/settings/system', SystemSettings::class)
+            ->name('settings.system');
+
+        Route::get('/manager/structure', StructureManager::class)
+            ->name('manager.structure');
+
+        Route::get('/manager/calender', CalendarManager::class)
+            ->name('manager.calender');
+
+        // Course Catalog
+        Route::get('/courses', CourseManager::class)
+            ->name('courses.index');
+
+        // Curriculum Builder (Must pass Program ID)
+        Route::get('/programs/{program}/curriculum', CurriculumBuilder::class)
+            ->name('programs.curriculum');
+
+        // Academic Schedule
+        Route::get('/academic/schedule', ScheduleManager::class)
+            ->name('academic.schedule');
+
+        // Finance
+        Route::get('/finance/invoices', InvoiceList::class)
+            ->name('finance.invoices');
+
+        // === STUDENTS ===
+        // List (Livewire)
+        Route::get('/students', StudentList::class)
+            ->name('students.index');
+        // Create (Livewire Form)
+        Route::get('/students/create', StudentForm::class)
+            ->name('students.create');
+        // Edit (Livewire Form - pass ID)
+        Route::get('/students/{studentId}/edit', StudentForm::class)
+            ->name('students.edit');
+        // Show (Controller -> Blade View)
+        Route::get('/students/{student}', [
+            StudentController::class, 'show',
+        ])->name('students.show');
+
+        // === INSTRUCTORS ===
+        // List (Livewire)
+        Route::get('/instructors', InstructorList::class)
+            ->name('instructors.index');
+        // Create
+        Route::get('/instructors/create', InstructorForm::class)
+            ->name('instructors.create');
+        // Edit
+        Route::get('/instructors/{instructorId}/edit', InstructorForm::class)
+            ->name('instructors.edit');
+        // Show
+        Route::get('/instructors/{instructor}', [
+            InstructorController::class, 'show',
+        ])->name('instructors.show');
     });
 
+/*
+|--------------------------------------------------------------------------
+| Student / Academic Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'verified'])
+    ->prefix('academic')
+    ->name('academic.')
+    ->group(function () {
+        Route::get('/dashboard', AcademicDashboard::class)
+            ->name('dashboard');
+
+        // Weekly Schedule
+        Route::get('/schedule', ScheduleViewer::class)
+            ->name('schedule');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Theme Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['web'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware(['auth', 'verified'])
         ->name('dashboard');
     Route::post('/toggle-sidebar', [SidebarController::class, 'toggle'])
         ->name('sidebar.toggle');

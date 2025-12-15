@@ -13,7 +13,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-3 max-w-7xl mx-auto sm:px-6 lg:px-8">
 
         {{-- FILTER SECTION --}}
         <div x-data="{
@@ -167,7 +167,7 @@
                         </x-table.cell>
 
                         {{-- 3. ADDRESS --}}
-                        <x-table.cell class="whitespace-normal">
+                        <x-table.cell class="whitespace-normal font-khmer">
                             <x-address-block :student="$student" />
                         </x-table.cell>
 

@@ -2,37 +2,81 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use App\Models\Instructor;
-use App\Models\Faculty; // Import Faculty model
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Role;
+use App\Models\User;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
-use Faker\Factory; // Import Faker Factory
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class InstructorSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Initialize Faker
-        $faker = Factory::create();
+        $faker = Faker::create();
+        $password = Hash::make('password'); // Pre-hash for speed
+        
+        $departments = Department::pluck('id')->toArray();
+        // Get Role ID (Spatie) directly to avoid model overhead in loop
+        $staffRoleId = DB::table('roles')->where('name', 'staff')->value('id');
 
-        // Get existing faculty IDs to assign instructors to them
-        $facultyIds = Faculty::pluck('id')->toArray();
-
-        // Ensure there are faculties to assign instructors to
-        if (empty($facultyIds)) {
-            $this->command->warn('No faculties found. Please seed faculties first.');
+        if (empty($departments)) {
+            $this->command->error('No Departments found. Run AcademicStructureSeeder first.');
             return;
         }
 
-        // Create a few instructors using the factory
-        // The factory will handle assigning users and departments
-        Instructor::factory()->count(10)->create([
-            'faculty_id' => function () use ($facultyIds, $faker) { // Pass $faker to the closure
-                return $faker->randomElement($facultyIds);
-            },
-        ]);
+        // Create 20 Instructors
+        for ($i = 1; $i <= 20; $i++) {
+            
+            $firstName = $faker->firstName;
+            $lastName = $faker->lastName;
+            $username = strtolower($firstName . '.' . $lastName . rand(100, 999));
+
+            // 1. Create User
+            $userId = DB::table('users')->insertGetId([
+                'name' => "Dr. $firstName $lastName",
+                'username' => $username,
+                'email' => "$username@university.edu",
+                'password' => $password,
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Assign Role
+            if ($staffRoleId) {
+                DB::table('model_has_roles')->insert([
+                    'role_id' => $staffRoleId,
+                    'model_type' => 'App\Models\User',
+                    'model_id' => $userId,
+                ]);
+            }
+
+            // 2. Create Instructor Profile
+            $instructor = Instructor::create([
+                'user_id' => $userId,
+                'department_id' => $departments[array_rand($departments)], // Random Dept
+                'staff_id' => 'STF-' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'attributes' => [
+                    'specialization' => $faker->jobTitle,
+                    'office_hours' => 'Mon-Wed 2pm-4pm'
+                ]
+            ]);
+
+            // 3. Contact
+            $instructor->contactDetail()->create([
+                'phone' => $faker->phoneNumber(),
+                'emergency_name' => $faker->name,
+                'emergency_phone' => $faker->phoneNumber(),
+            ]);
+
+            // 4. Address
+            $instructor->address()->create([
+                'current_address' => $faker->streetAddress,
+                'postal_code' => $faker->postcode,
+            ]);
+        }
     }
 }

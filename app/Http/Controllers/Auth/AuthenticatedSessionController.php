@@ -47,9 +47,17 @@ class AuthenticatedSessionController extends Controller
             'login_at'           => now(),
         ]);
 
-        return redirect()->intended(route(
-            'dashboard', absolute: false)
-        );
+        $user = $request->user();
+        $level1 = $user->hasRole(['Super Administrator', 'admin', 'staff']);
+        $level2 = $user->hasRole(['instructor', 'profressor']);
+        $level3 = $user->hasRole('student');
+
+        switch ($user) {
+        case $level1: return redirect()->intended(route('admin.dashboard'));
+        case $level2: return redirect()->intended(route('dashboard'));
+        case $level3: return redirect()->intended(route('academic.dashboard'));
+        default: return redirect()->intended(route('dashboard', absolute: false));
+        }
     }
 
     /**

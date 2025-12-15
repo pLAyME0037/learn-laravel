@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between px-6 py-4">
         <div class="flex items-start gap-3 overflow-hidden">
             <x-application-logo class="w-8 h-8 text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span x-show="!collapsed"
+            <span
                 class="font-bold text-xl text-gray-800 dark:text-white whitespace-nowrap transition-opacity duration-200">
                 Schul SYS
             </span>

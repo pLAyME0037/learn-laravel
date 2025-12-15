@@ -5,6 +5,7 @@ declare (strict_types = 1);
 namespace App\Services;
 
 use App\Models\ContactDetail;
+use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -14,64 +15,61 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentService
 {
-    public function registerStudent(array $data, ?UploadedFile $profilePic = null): Student
-    {
-        return DB::transaction(function () use ($data, $profilePic) {
-
+    public function registerStudent(
+        array $userData,
+        array $studentData,
+        array $addressData,
+        array $contactData,
+        ?UploadedFile $profilePic = null
+    ): Student {
+        return DB::transaction(function () use (
+            $userData,
+            $studentData,
+            $addressData,
+            $contactData,
+            $profilePic,
+        ) {
             // 1. Create User
-            $user = $this->createUser($data, $profilePic);
+            $user = $this->createUser($userData, $profilePic);
+
+            // Find dept from prog (Needed for ID Generation)
+            $program = Program::with('major')
+                ->find($studentData['program_id']);
+            $departmentId = $program?->major?->department_id ?? 0;
 
             // 2. Generate ID
-            $studentId = $this->generateUniqueStudentId((int) $data['department_id']);
+            $studentId = $this->generateUniqueStudentId((int) $departmentId);
 
             // 3. Create Student
-            $student = Student::create([
+            $__student = array_merge($studentData, [
                 'user_id'                 => $user->id,
                 'student_id'              => $studentId,
-                'department_id'           => $data['department_id'],
-                'program_id'              => $data['program_id'],
-                'year_level'              => $data['year_level'] ?? 1,
-                'registration_number'     => $data['registration_number'] ?? null,
-                'date_of_birth'           => $data['date_of_birth'],
-                'gender_id'               => $data['gender_id'],
-                'nationality'             => $data['nationality'],
-                'id_card_number'          => $data['id_card_number'] ?? null,
-                'passport_number'         => $data['passport_number'] ?? null,
-                'admission_date'          => $data['admission_date'],
-                'expected_graduation'     => $data['expected_graduation'],
-                'semester'                => $data['semester'] ?? 'semester_one',
                 'cgpa'                    => 0.00,
                 'total_credits_earned'    => 0,
-                'academic_status'         => 'active',
-                'enrollment_status'       => $data['enrollment_status'],
-                'fee_category'            => $data['fee_category'],
                 'has_outstanding_balance' => false,
-                'previous_education'      => $data['previous_education'] ?? null,
-                'blood_group'             => $data['blood_group'] ?? null,
-                'has_disability'          => isset($data['has_disability']),
-                'disability_details'      => $data['disability_details'] ?? null,
-                'metadata'                => null,
+                'current_term'            => $studentData['current_term'] ?? 1,
             ]);
 
-            // 4. Create Contact Details
-            if (! isset($data['contact_detail'])) {
+            $student = Student::create($__student);
+
+            // Create Address
+            if (empty($contactData)) {
                 return;
             }
             $student->contactDetail()->create([
-                'phone_number'               => $data['contact_detail']['phone_number'] ?? null,
-                'emergency_contact_name'     => $data['contact_detail']['emergency_contact_name'] ?? null,
-                'emergency_contact_phone'    => $data['contact_detail']['emergency_contact_phone'] ?? null,
-                'emergency_contact_relation' => $data['contact_detail']['emergency_contact_relation'] ?? null,
+                'phone'              => $contactData['phone'] ?? null,
+                'emergency_name'     => $contactData['emergency_name'] ?? null,
+                'emergency_phone'    => $contactData['emergency_phone'] ?? null,
+                'emergency_relation' => $contactData['emergency_relation'] ?? null,
             ]);
 
-            // 5. Create Address
-            if (! isset($data['address'])) {
+            if (empty($addressData)) {
                 return;
             }
             $student->address()->create([
-                'current_address' => $data['address']['current_address'] ?? null,
-                'postal_code'     => $data['address']['postal_code'] ?? null,
-                'village_id'      => $data['address']['village_id'] ?? null,
+                'current_address' => $addressData['current_address'] ?? null,
+                'postal_code'     => $addressData['postal_code'] ?? null,
+                'village_id'      => $addressData['village_id'] ?? null,
             ]);
 
             return $student;
@@ -83,42 +81,48 @@ class StudentService
      */
     public function updateStudent(
         Student $student,
-        array $data,
+        array $userData,
+        array $studentData,
+        array $addressData,
+        array $contactData,
         ?UploadedFile $profilePic = null
     ): Student {
-        return DB::transaction(function () use ($student, $data, $profilePic) {
+        return DB::transaction(function () use (
+            $student,
+            $userData,
+            $studentData,
+            $addressData,
+            $contactData,
+            $profilePic,
+        ) {
 
             // 1. Update User
-            $userData = Arr::only($data, ['name', 'email', 'username']);
+            $updataUserData = Arr::only($userData, [
+                'name', 'email', 'username',
+            ]);
 
-            if (! empty($data['password'])) {
-                $userData['password'] = Hash::make($data['password']);
+            if (! empty($userData['password'])) {
+                $updataUserData['password'] = Hash::make($userData['password']);
             }
 
             if ($profilePic) {
-                $userData['profile_pic'] = $profilePic->store('profile-pictures', 'public');
+                $updataUserData['profile_pic'] = $profilePic->store('profile-pictures', 'public');
             }
 
-            $student->user->update($userData);
-
-            // 2. Update Student
-            $studentData = Arr::except($data, [
-                'name', 'email', 'username', 'password', 'password_confirmation',
-                'contact_detail', 'address', 'profile_pic',
-            ]);
+            $student->user->update($updataUserData);
 
             $student->update($studentData);
 
-            // 3. Update Relationships (Extracted for flatness)
-            if (isset($data['contact_detail'])) {
-                $this->handleContactUpdate($student, $data['contact_detail']);
+            if (! empty($contactData)) {
+                $this->handleContactUpdate($student, $contactData);
             }
+            if (! empty($addressData)) {
+                $student->address()->updateOrCreate([], [
+                    'current_address' => $addressData['current_address'] ?? null,
+                    'postal_code'     => $addressData['postal_code'] ?? null,
+                    'village_id'      => $addressData['village_id'] ?? null,
 
-            if (isset($data['address'])) {
-                $student->address()->updateOrCreate(
-                    ['addressable_id' => $student->id],
-                    $data['address']
-                );
+                ]);
             }
 
             return $student;
@@ -130,28 +134,11 @@ class StudentService
      */
     private function handleContactUpdate(Student $student, array $data): void
     {
-        // 1. Normal Path: If student already has a linked contact, just update it.
-        if ($student->contactDetail()->exists()) {
-            $student->contactDetail()->update($data);
-            return;
-        }
-
-        // 2. Self-Healing Path: Check if a "lost" record exists with this phone number.
-        // (This happens if validation ignored the ID, but the record wasn't linked properly)
-        $lostRecord = ContactDetail::where('phone_number', $data['phone_number'] ?? '')->first();
-
-        if ($lostRecord) {
-            $lostRecord->update([
-                'contactable_id'   => $student->id,
-                'contactable_type' => get_class($student),
-            ]);
-        }
-
-        // 3. Final Update/Create ensure consistency
-        $student->contactDetail()->updateOrCreate(
-            ['contactable_id' => $student->id],
-            $data
-        );
+        $student->contactDetail()->updateOrCreate([
+            'phone'           => $data['phone'] ?? null,
+            'emergency_name'  => $data['emergency_name'] ?? null,
+            'emergency_phone' => $data['emergency_phone'] ?? null,
+        ]);
     }
 
     private function createUser(array $data, ?UploadedFile $profilePic): User
@@ -169,7 +156,9 @@ class StudentService
         }
 
         $user = User::create($userData);
-        $user->assignRole('student');
+        if (method_exists($user, 'assignRole')) {
+            $user->assignRole('student');
+        }
 
         return $user;
     }
@@ -190,5 +179,30 @@ class StudentService
         }
 
         return $id;
+    }
+
+    public function calculateCGPA(Student $student)
+    {
+        $completed = $student->enrollments()
+            ->where('status', 'completed')
+            ->whereNotNull('grade_points')
+            ->get();
+
+        if ($completed->isEmpty()) {
+            return 0;
+        }
+
+        $totalPoints  = 0;
+        $totalCredits = 0;
+
+        foreach ($completed as $record) {
+            $credits = $record->classSession->course->credits;
+            $totalPoints += ($record->grade_points * $credits);
+            $totalCredits += $credits;
+        }
+
+        $cgpa = $totalCredits > 0 ? ($totalPoints / $totalCredits) : 0;
+
+        $student->update(['cgpa' => round($cgpa, 2)]);
     }
 }

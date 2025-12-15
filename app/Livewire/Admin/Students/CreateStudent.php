@@ -144,7 +144,6 @@ class CreateStudent extends Component
     }
 
     // --- Academic Hooks ---
-
     public function updatedDepartmentId($value)
     {
         $this->reset('program_id', 'programs');

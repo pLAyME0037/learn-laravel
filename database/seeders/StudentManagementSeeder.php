@@ -1,13 +1,12 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Address;
-use App\Models\ContactDetail;
-use App\Models\Department;
-use App\Models\Gender;
+use App\Models\Dictionary; // Or Gender model if you kept it
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\Student;
+use App\Models\Location\Village;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -19,114 +18,113 @@ class StudentManagementSeeder extends Seeder
     {
         $faker        = Faker::create();
         $now          = now();
-        $password     = Hash::make('password'); // Hash once, use everywhere
+        // Pre-hash password for performance
+        $passwordHash = Hash::make('password');
         $studentCount = 50;
 
-        // 1. Fetch Maps (ID Lookups)
-        $genders  = Gender::pluck('id')->toArray();
-        $programs = Program::with('major.department')
-            ->whereHas('major.department')
-            ->get();
+        // 1. Fetch Dependencies
+        // Use Dictionary keys if using that system, or IDs if using Tables
+        // Assuming Dictionary based on your recent code:
+        $genders = ['male', 'female']; 
+        // If using Gender Table: $genders = \App\Models\Gender::pluck('id')->toArray();
 
-        if ($programs->isEmpty() || empty($genders)) {
-            $this->command->error('Missing Programs or Genders.');
+        $programs = Program::with('major.department')->get();
+        $villageIds = Village::inRandomOrder()->limit(100)->pluck('id')->toArray();
+
+        if ($programs->isEmpty()) {
+            $this->command->error('Missing Programs. Run AcademicStructureSeeder first.');
             return;
         }
 
-        // 2. Fetch Role ID for "student" (for pivot table insert)
-        $studentRoleId = Role::where('name', 'student')->value('id');
+        // Get Role ID (Spatie)
+        $studentRoleId = DB::table('roles')->where('name', 'student')->value('id');
 
-        // --- PHASE A: Bulk Create Users --- // For manual pivot insert
-        $modelHasRolesData = [];
-
-        // Pre-calculate random choices to save CPU cycles
         $bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-        $feeCats     = ['regular', 'scholarship', 'international'];
-
-        DB::beginTransaction(); // Speed up transaction
+        
+        DB::beginTransaction();
 
         for ($i = 0; $i < $studentCount; $i++) {
-            // Pick Program
-            $program      = $programs->random();
-            $departmentId = $program->major->department->id;
+            $program = $programs->random();
+            
+            // Calculate Progress
+            $currentTerm = rand(1, 8); // Term 1-8
+            $yearLevel   = ceil($currentTerm / 2); // 1-4
 
             // User Data
             $firstName = $faker->firstName;
             $lastName  = $faker->lastName;
-            $username  = strtolower($firstName . '_' . $lastName . rand(100, 999));
+            $username  = strtolower($firstName . '.' . $lastName . rand(100, 999));
 
-            // Creating User individually is necessary to get the ID for the Student record
-            // But since we pre-hashed the password, this is much faster.
+            // 2. Create User (Raw DB insert is faster for seeders)
             $userId = DB::table('users')->insertGetId([
                 'name'              => "$firstName $lastName",
                 'username'          => $username,
                 'email'             => "$username@student.edu",
-                'password'          => $password,
+                'password'          => $passwordHash,
                 'is_active'         => true,
                 'email_verified_at' => $now,
                 'created_at'        => $now,
                 'updated_at'        => $now,
             ]);
 
-            // Prepare Role Data (Manual Pivot Insert)
+            // Assign Role
             if ($studentRoleId) {
-                $modelHasRolesData[] = [
+                DB::table('model_has_roles')->insert([
                     'role_id'    => $studentRoleId,
                     'model_type' => 'App\Models\User',
                     'model_id'   => $userId,
-                ];
+                ]);
             }
 
-            // Create Student
+            // 3. Create Student
+            // Note: We move personal details to 'attributes' JSON if your schema uses it
+            $attributes = [
+                'dob'         => $faker->dateTimeBetween('-25 years', '-18 years')->format('Y-m-d'),
+                'gender'      => $genders[array_rand($genders)],
+                'nationality' => 'Cambodian', // Example
+                'blood_group' => $bloodGroups[array_rand($bloodGroups)],
+            ];
+
+            // Encrypt Sensitive Data (if your schema requires it, otherwise nullable)
+            // Here we skip encryption for seeder speed unless strictly enforced by Model Accessor
+            
+            $studentIdStr = 'STU-' . $now->year . '-' . str_pad((string) rand(1, 99999), 5, '0', STR_PAD_LEFT);
+
             $student = Student::create([
                 'user_id'                 => $userId,
-                'student_id'              => 'STU-' . $now->year . '-' . str_pad((string) rand(1, 99999), 5, '0', STR_PAD_LEFT),
-                'department_id'           => $departmentId,
                 'program_id'              => $program->id,
-                'date_of_birth'           => $faker->dateTimeBetween('-25 years', '-18 years'),
-                'gender_id'               => $genders[array_rand($genders)],
-                'nationality'             => 'United States',
-                'id_card_number'          => rand(100000000, 999999999),
-                'admission_date'          => $now,
-                'expected_graduation'     => $now->copy()->addYears(4),
-                'semester'                => 'Semester ' . rand(1, 8),
+                'student_id'              => $studentIdStr,
+                
+                // Academic Progress
+                'year_level'              => $yearLevel,
+                'current_term'            => $currentTerm,
                 'academic_status'         => 'active',
-                'enrollment_status'       => 'full_time',
-                'fee_category'            => $feeCats[array_rand($feeCats)],
-                'blood_group'             => $bloodGroups[array_rand($bloodGroups)],
-                'has_disability'          => 0,
-                'has_outstanding_balance' => rand(0, 1),
+                
+                // Store JSON Attributes
+                'attributes'              => $attributes,
+                
+                // Others (if columns exist in your specific migration version)
+                'cgpa'                    => $faker->randomFloat(2, 2.0, 4.0),
+                'has_outstanding_balance' => (bool)rand(0, 1),
+                
                 'created_at'              => $now,
                 'updated_at'              => $now,
             ]);
 
-            // Create ContactDetail for the student
-            ContactDetail::create([
-                'student_id'                 => $student->id,
-                'user_id'                    => $userId,
-                'phone_number'               => $faker->unique()->phoneNumber(),
-                'emergency_contact_name'     => "Parent of $firstName",
-                'emergency_contact_phone'    => $faker->phoneNumber(),
-                'emergency_contact_relation' => 'Parent',
-                'created_at'                 => $now,
-                'updated_at'                 => $now,
+            // 4. Contact Detail (Polymorphic)
+            $student->contactDetail()->create([
+                'phone'              => $faker->phoneNumber(),
+                'emergency_name'     => "Parent of $firstName",
+                'emergency_phone'    => $faker->phoneNumber(),
+                'emergency_relation' => 'Parent',
             ]);
 
-            // Fetch a random CamGeoVillage for the address
-            $randomVillage = \App\Models\Village::inRandomOrder()->first();
-
-            // Create Address for the student
+            // 5. Address (Polymorphic)
             $student->address()->create([
-                'current_address'   => 'DUMMY ADDRESS',
-                'village_id'        => $randomVillage ? $randomVillage->id : null,
-                'postal_code'       => '12345',
-                'created_at'        => $now,
-                'updated_at'        => $now,
+                'current_address' => $faker->streetAddress,
+                'postal_code'     => $faker->postcode,
+                'village_id'      => !empty($villageIds) ? $villageIds[array_rand($villageIds)] : null,
             ]);
-        }
-        // Bulk Insert Roles
-        if (! empty($modelHasRolesData)) {
-            DB::table('model_has_roles')->insert($modelHasRolesData);
         }
 
         DB::commit();

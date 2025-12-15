@@ -18,9 +18,18 @@ class Enrollment extends Model
 
     protected $fillable = [
         'student_id',
-        'class_schedule_id',
-        'enrollment_date',
+        'class_session_id',
+        'final_grade',
+        'grade_point',
+        'grade_letter',
         'status',
+        'enrollment_date',
+    ];
+
+    protected $cast = [
+        'final_grade' => 'decimal:2',
+        'grade_point' => 'decimal:2',
+        'enrollment_data' => 'datetime',
     ];
 
     /**
@@ -34,104 +43,14 @@ class Enrollment extends Model
     /**
      * Get the class schedule that the Enrollment belongs to.
      */
-    public function classSchedule(): BelongsTo
-    {
-        return $this->belongsTo(ClassSchedule::class);
+    public function classSession(): BelongsTo {
+        return $this->belongsTo(ClassSession::class);
     }
 
     /**
-     * Get the course through the class schedule.
+     * Get the course through the class session.
      */
-    public function course(): HasOneThrough
-    {
-        return $this->hasOneThrough(Course::class, ClassSchedule::class,
-            'id',                // Foreign key on ClassSchedule table
-            'id',                // Foreign key on Course table
-            'class_schedule_id', // Local key on Enrollment table
-            'course_id'          // Local key on ClassSchedule table
-        );
-    }
-    public function semester()
-    {
-        return $this->belongsTo(Semester::class);
-    }
-
-    /**
-     * Get a human-readable enrollment status.
-     */
-    public function getEnrollmentStatusAttribute(): string
-    {
-        return match (strtolower($this->status)) {
-            'enrolled'  => 'Enrolled',
-            'dropped'   => 'Dropped',
-            'completed' => 'Completed',
-            default     => 'Unknown',
-        };
-    }
-
-    /**
-     * Cast the enrollment_date attribute.
-     */
-    protected function enrollmentDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn(string $value) => new Carbon($value),
-            set: fn(Carbon $value) => $value,
-        );
-    }
-    /**
-     * Get a formatted enrollment date.
-     */
-    public function getFormattedEnrollmentDateAttribute(): string
-    {
-        return $this->enrollment_date->format('M d, Y');
-    }
-
-    /**
-     * Scope a query to only include enrollments by a specific student.
-     */
-    public function scopeByStudent(Builder $query, int $studentId): void
-    {
-        $query->where('student_id', $studentId);
-    }
-
-    /**
-     * Scope a query to only include enrollments by a specific class schedule.
-     */
-    public function scopeByClassSchedule(Builder $query, int $classScheduleId): void
-    {
-        $query->where('class_schedule_id', $classScheduleId);
-    }
-
-    /**
-     * Scope a query to filter for active enrollments.
-     */
-    public function scopeActive(Builder $query): void
-    {
-        $query->where('status', 'enrolled');
-    }
-
-    /**
-     * Scope a query to filter for completed enrollments.
-     */
-    public function scopeCompleted(Builder $query): void
-    {
-        $query->where('status', 'completed');
-    }
-
-    /**
-     * Checks if the enrollment is active.
-     */
-    public function isEnrolled(): bool
-    {
-        return strtolower($this->status) === 'enrolled';
-    }
-
-    /**
-     * Checks if the enrollment is completed.
-     */
-    public function isCompleted(): bool
-    {
-        return strtolower($this->status) === 'completed';
+    public function getCourseAttribute() {
+        return $this->classSession->course;
     }
 }

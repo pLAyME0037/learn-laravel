@@ -1,49 +1,54 @@
 <?php
 
-declare (strict_types = 1);
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Location\Village; // Import the external model
+use App\Models\Village as ModelsVillage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Village;
 
 class Address extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'current_address',
-        'city',
-        'district',
-        'commune',
-        'village',
-        'postal_code',
         'addressable_id',
         'addressable_type',
-        'village_id',
+        'current_address',
+        'postal_code',
+        'village_id', // This ID lives in the other database
     ];
 
-    /**
-     * Get the parent addressable model (User, Student, or Instructor).
-     */
     public function addressable()
     {
         return $this->morphTo();
     }
 
     /**
-     * Get the village associated with the address.
+     * Relationship to the Village in the external DB.
+     * Eloquent handles cross-database relationships automatically 
+     * as long as the models define their connections correctly.
      */
     public function village()
     {
-        return $this->belongsTo(Village::class, 'village_id');
+        return $this->belongsTo(Village::class, 'village_id', 'id');
+    }
+    
+    // Helper to display the full address easily
+    public function getFullTextAttribute()
+    {
+        $base = $this->current_address;
+        
+        if ($this->village) {
+            $v = $this->village;
+            $c = $v->commune;
+            $d = $c->district;
+            $p = $d->province;
+            
+            // Format: #123 St 456, Village, Commune, District, Province
+            return "{$base}, {$v->name_en}, {$c->name_en}, {$d->name_en}, {$p->name_en}";
+        }
+        
+        return $base;
     }
 }
