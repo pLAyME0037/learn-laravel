@@ -41,7 +41,7 @@ class Classroom extends Model
      */
     public function classSchedules()
     {
-        return $this->hasMany(ClassSchedule::class, 'room_number', 'room_number');
+        return $this->hasMany(ClassSession::class, 'room_number', 'room_number');
     }
 
     /**

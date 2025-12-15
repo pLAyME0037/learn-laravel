@@ -18,6 +18,7 @@ use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
 use App\Livewire\Academic\Dashboard as AcademicDashboard;
 use App\Livewire\Academic\ScheduleViewer;
+use App\Livewire\Academic\StudentFinancials;
 use App\Livewire\Admin\Academic\BatchEnrollment;
 use App\Livewire\Admin\Academic\CalendarManager;
 use App\Livewire\Admin\Academic\CourseManager;
@@ -226,6 +227,9 @@ Route::middleware(['auth', 'verified'])
         // Weekly Schedule
         Route::get('/schedule', ScheduleViewer::class)
             ->name('schedule');
+
+        Route::get('/finance', StudentFinancials::class)
+            ->name('finance');
     });
 
 /*

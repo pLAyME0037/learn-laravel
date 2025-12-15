@@ -110,28 +110,4 @@ class Student extends Model
     {
         return $this->program?->major?->department;
     }
-
-    public function generateStudentId(?int $departmentId = null): string
-    {
-        // Get department code. If departmentId is provided, use it to fetch the department.
-        // Otherwise, assume $this->department_id is available (though it might not be set on a new instance).
-        $departmentCode = 'GEN';
-        if ($departmentId) {
-            $department     = Department::find($departmentId);
-            $departmentCode = (string) ($department->code ?? 'GEN');
-        } elseif ($this->department_id) {
-            $department     = Department::find($this->department_id);
-            $departmentCode = (string) ($department->code ?? 'GEN');
-        }
-
-        $year = now()->format('y');
-
-        $sequence = Student::where('department_id', $departmentId ?? $this->department_id)
-            ->whereYear('created_at', now()->year)
-            ->count() + 1;
-
-        return $departmentCode
-        . $year
-        . str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
-    }
 }

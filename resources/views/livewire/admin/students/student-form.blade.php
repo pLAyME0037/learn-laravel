@@ -18,41 +18,20 @@
             <!-- 1. Account Info -->
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
                 <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">User Account</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        User Account
+                    </h3>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <!-- Profile Picture Upload -->
                     <div class="md:col-span-2 flex items-center space-x-6">
-                        <div class="shrink-0">
-                            @if ($profile_pic)
-                                <img src="{{ $profile_pic->temporaryUrl() }}"
-                                    class="h-16 w-16 object-cover rounded-full">
-                            @elseif($isEdit && $student->user->profile_pic)
-                                <img src="{{ Storage::url($student->user->profile_pic) }}"
-                                    class="h-16 w-16 object-cover rounded-full">
-                            @else
-                                <div
-                                    class="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500 font-bold text-xl">
-                                    ?
-                                </div>
-                            @endif
-                        </div>
-                        <label class="block">
-                            <span class="sr-only">Choose profile photo</span>
-                            <input type="file"
-                                wire:model="profile_pic"
-                                class="block w-full text-sm text-slate-500
-                              file:mr-4 file:py-2 file:px-4
-                              file:rounded-full file:border-0
-                              file:text-sm file:font-semibold
-                              file:bg-indigo-50 file:text-indigo-700
-                              hover:file:bg-indigo-100
-                            " />
-                            @error('profile_pic')
-                                <span class="text-red-500 text-xs">{{ $message }}</span>
-                            @enderror
-                        </label>
+                        <x-profile-image class="border-blue-700"
+                            wire:model="profile_pic"
+                            uploadable=true
+                            src="{{ $student?->$user->profile_picture_url }}"
+                            alt="{{ $student?->$user->name }}"
+                            size="md" />
                     </div>
 
                     <!-- Name -->

@@ -5,7 +5,8 @@ use App\Models\Dictionary;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
-use App\Services\StudentService; // Assuming logic is moved here
+use App\Services\StudentService;
+use Illuminate\Http\UploadedFile;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -146,18 +147,18 @@ class StudentForm extends Component
                 $this->contact,
                 $this->profile_pic,
             );
-            session()->with('success', 'Student updated successfully.');
+            return redirect()->route('admin.students.index')
+                ->with('success', 'Student updated successfully.');
         } else {
             $service->registerStudent(
                 $this->user,
                 $this->profile,
                 $this->address,
                 $this->contact,
-                $this->profile_pic,
+                $this->profile_pic instanceof UploadedFile ? $this->profile_pic : null,
             );
-            
             return redirect()->route('admin.students.index')
-            ->with('success', 'Student created successfully.');
+                ->with('success', 'Student created successfully.');
         }
     }
 

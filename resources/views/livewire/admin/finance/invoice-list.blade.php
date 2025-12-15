@@ -1,21 +1,28 @@
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-        <!-- Summary Card -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-6 border-l-4 border-red-500">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Total Outstanding Due</h3>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">${{ number_format($totalDue, 2) }}</p>
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border-l-4 border-red-500">
+                <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                    Total Outstanding
+                </h3>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                    ${{ number_format($totalOutstanding, 2) }}
+                </p>
+            </div>
         </div>
 
-        <!-- Filters -->
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex gap-4">
+        <!-- Toolbar -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div class="flex gap-4 w-full md:w-2/3">
                 <input wire:model.live.debounce.300ms="search"
                     type="text"
-                    placeholder="Search Student ID..."
-                    class="rounded-md border-gray-300 dark:bg-gray-900">
+                    placeholder="Search Student Name or ID..."
+                    class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
+
                 <select wire:model.live="statusFilter"
-                    class="rounded-md border-gray-300 dark:bg-gray-900">
+                    class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
                     <option value="">All Statuses</option>
                     <option value="unpaid">Unpaid</option>
                     <option value="partial">Partial</option>
@@ -29,48 +36,137 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice #</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Semester</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Paid</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Balance</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach ($invoices as $inv)
-                        <tr>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                    @forelse($invoices as $inv)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                             <td class="px-6 py-4 text-xs font-mono text-gray-500">#{{ $inv->id }}</td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                                     {{ $inv->student->user->name }}</div>
                                 <div class="text-xs text-gray-500">{{ $inv->student->student_id }}</div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ $inv->semester_name }}
-                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ $inv->semester_name }}</td>
                             <td class="px-6 py-4 text-right text-sm font-bold text-gray-900 dark:text-white">
-                                ${{ number_format($inv->amount, 2) }}</td>
+                                ${{ number_format($inv->amount, 2) }}
+                            </td>
+                            <td class="px-6 py-4 text-right text-sm text-green-600">
+                                ${{ number_format($inv->paid_amount, 2) }}
+                            </td>
                             <td class="px-6 py-4 text-right text-sm font-bold text-red-600">
-                                ${{ number_format($inv->balance, 2) }}</td>
+                                ${{ number_format($inv->amount - $inv->paid_amount, 2) }}
+                            </td>
                             <td class="px-6 py-4 text-center">
                                 <span
                                     class="px-2 py-1 text-xs font-bold rounded-full 
-                                    {{ $inv->status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                    {{ $inv->status === 'paid' ? 'bg-green-100 text-green-800' : ($inv->status === 'partial' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                     {{ ucfirst($inv->status) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right text-sm">
-                                <a href="#"
-                                    class="text-indigo-600 hover:text-indigo-900">
-                                    View
-                                 </a>
+                                @if ($inv->status !== 'paid')
+                                    <button wire:click="openPaymentModal({{ $inv->id }})"
+                                        class="text-indigo-600 hover:text-indigo-900 font-medium">
+                                        Record Payment
+                                    </button>
+                                @else
+                                    <span class="text-gray-400 cursor-not-allowed">
+                                        Completed
+                                    </span>
+                                @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="8"
+                                class="px-6 py-8 text-center text-gray-500">
+                                No invoices found.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
-            <div class="p-4">{{ $invoices->links() }}</div>
+            <div class="p-4 border-t dark:border-gray-700">
+                {{ $invoices->links() }}
+            </div>
         </div>
+
+        <!-- PAYMENT MODAL -->
+        @if ($showPaymentModal)
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md shadow-xl transform transition-all">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">
+                        Record Payment
+                        <span class="text-sm font-normal text-gray-500 block mt-1">
+                            Invoice #{{ $selectedInvoice->id }} - {{ $selectedInvoice->student->user->name }}
+                        </span>
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div
+                            class="bg-gray-50 dark:bg-gray-700 p-3 rounded text-sm text-gray-700 dark:text-gray-300 flex justify-between">
+                            <span>Balance Due:</span>
+                            <span
+                                class="font-bold text-red-600">
+                                ${{ number_format($selectedInvoice->amount - $selectedInvoice->paid_amount, 2) }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Amount Received ($)
+                            </label>
+                            <input type="number"
+                                step="0.01"
+                                wire:model="payAmount"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @error('payAmount')
+                                <span class="text-red-500 text-xs">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Reference / Method
+                            </label>
+                            <input type="text"
+                                wire:model="payReference"
+                                placeholder="e.g. Cash, Check #123"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:bg-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            @error('payReference')
+                                <span class="text-red-500 text-xs">
+                                    {{ $message }}
+                                </span>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button wire:click="$set('showPaymentModal', false)"
+                            class="px-4 py-2 text-gray-500 hover:text-gray-700">
+                            Cancel
+                        </button>
+                        <button wire:click="savePayment"
+                            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 shadow">
+                            Confirm Payment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
     </div>
 </div>
+@push('scripts')
+    <x-sweet-alert />
+@endpush

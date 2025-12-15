@@ -122,8 +122,8 @@
 
         <!-- Action Button -->
         <div class="flex justify-end">
-            <button wire:click="enroll"
-                wire:confirm="Are you sure you want to enroll {{ $studentCount }} students into {{ count($selectedClasses) }} classes?"
+            <button wire:click="confirmEnrollment"
+                {{-- wire:confirm="Are you sure you want to enroll {{ $studentCount }} students into {{ count($selectedClasses) }} classes?" --}}
                 class="px-6 py-3 bg-indigo-600 text-white font-bold rounded hover:bg-indigo-700 disabled:opacity-50"
                 @if ($studentCount == 0 || count($selectedClasses) == 0) disabled @endif>
                 Execute Batch Enrollment
@@ -131,3 +131,6 @@
         </div>
     </div>
 </div>
+@push('scripts')
+    <x-sweet-alert />
+@endpush

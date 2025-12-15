@@ -30,24 +30,19 @@ class ClassSession extends Model
 
     // --- Relationships ---
 
-    public function course()
-    {
+    public function course() {
         return $this->belongsTo(Course::class);
     }
-
-    public function semester()
-    {
+    public function semester() {
         return $this->belongsTo(Semester::class);
     }
-
-    public function instructor()
-    {
+    public function instructor() {
         return $this->belongsTo(User::class, 'instructor_id'); 
-        // Note: Linking to User is safer for Auth, but linking to Instructor model is fine too if preferred.
     }
-
-    public function enrollments()
-    {
+    public function classroom() {
+        return $this->belongsTo(Classroom::class);
+    }
+    public function enrollments() {
         return $this->hasMany(Enrollment::class);
     }
 

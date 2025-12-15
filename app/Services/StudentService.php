@@ -110,8 +110,8 @@ class StudentService
             }
 
             $student->user->update($updataUserData);
-
-            $student->update($studentData);
+            $cleanStudentData = Arr::except($studentData, ['student_id']);
+            $student->update($cleanStudentData);
 
             if (! empty($contactData)) {
                 $this->handleContactUpdate($student, $contactData);
@@ -165,20 +165,30 @@ class StudentService
 
     private function generateUniqueStudentId(int $departmentId): string
     {
-        $maxRetries = 5;
-        $attempt    = 0;
+        // 1. Get Dept Code
+        $department = \App\Models\Department::find($departmentId);
+        $code       = $department ? $department->code : 'GEN';
 
-        do {
-            $id     = (new Student)->generateStudentId($departmentId);
-            $exists = Student::where('student_id', $id)->exists();
-            $attempt++;
-        } while ($exists && $attempt < $maxRetries);
+        $year   = now()->format('y'); // e.g. "25"
+        $prefix = $code . $year;      // e.g. "CS25"
 
-        if ($exists) {
-            throw new \Exception("Failed to generate a unique Student ID. System is busy.");
+        // 2. Find the highest ID that starts with this prefix
+        $lastRecord = \App\Models\Student::where('student_id', 'LIKE', "{$prefix}%")
+            ->orderBy('student_id', 'desc')
+            ->first();
+
+        // 3. Determine next sequence
+        if ($lastRecord) {
+            // Extract the last 4 digits
+            // ID: CS250042 -> substr returns "0042" -> intval returns 42
+            $lastSequence = intval(substr($lastRecord->student_id, strlen($prefix)));
+            $sequence     = $lastSequence + 1;
+        } else {
+            $sequence = 1;
         }
 
-        return $id;
+        // 4. Format
+        return $prefix . str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
 
     public function calculateCGPA(Student $student)

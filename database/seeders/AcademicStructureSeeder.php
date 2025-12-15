@@ -196,41 +196,39 @@ class AcademicStructureSeeder extends Seeder
             // =================================================================
             
             // --- Year 1, Term 1 (Freshman - Full Load of 5 Classes) ---
-            ['Bachelor of Software Engineering', 'CS101',   'Intro to Programming',       3, 1, 1, 'Logic and Python/C++ basics.'],
-            ['Bachelor of Software Engineering', 'MATH101', 'Calculus I',                 3, 1, 1, 'Limits and Derivatives.'],
-            ['Bachelor of Software Engineering', 'ENG101',  'Academic English',           3, 1, 1, 'Writing and Research skills.'],
-            ['Bachelor of Software Engineering', 'PHY101',  'General Physics I',          3, 1, 1, 'Mechanics and Motion.'],
-            ['Bachelor of Software Engineering', 'HIS101',  'World History',              2, 1, 1, 'General Education requirement.'],
+            ['Bachelor of Software Engineering', 'CS101',   'Intro to Programming',       3, 1, 1, 'Mon', 'Logic and Python/C++ basics.'],
+            ['Bachelor of Software Engineering', 'MATH101', 'Calculus I',                 3, 1, 1, 'Tue', 'Limits and Derivatives.'],
+            ['Bachelor of Software Engineering', 'ENG101',  'Academic English',           3, 1, 1, 'Wed', 'Writing and Research skills.'],
+            ['Bachelor of Software Engineering', 'PHY101',  'General Physics I',          3, 1, 1, 'Thu', 'Mechanics and Motion.'],
+            ['Bachelor of Software Engineering', 'HIS101',  'World History',              2, 1, 1, 'Fri', 'General Education requirement.'],
 
             // --- Year 1, Term 2 (Progression) ---
-            ['Bachelor of Software Engineering', 'CS102',   'Object Oriented Programming', 4, 1, 2, 'Java/C# concepts.'],
-            ['Bachelor of Software Engineering', 'CS103',   'Web Fundamentals',            3, 1, 2, 'HTML, CSS, JS.'],
-            ['Bachelor of Software Engineering', 'MATH102', 'Linear Algebra',              3, 1, 2, 'Vectors and Matrices.'],
-            ['Bachelor of Software Engineering', 'STAT101', 'Probability & Statistics',    3, 1, 2, 'Data analysis basics.'],
+            ['Bachelor of Software Engineering', 'CS102',   'Object Oriented Programming', 4, 1, 2, 'Mon', 'Java/C# concepts.'],
+            ['Bachelor of Software Engineering', 'CS103',   'Web Fundamentals',            3, 1, 2, 'Tue', 'HTML, CSS, JS.'],
+            ['Bachelor of Software Engineering', 'MATH102', 'Linear Algebra',              3, 1, 2, 'Wed', 'Vectors and Matrices.'],
+            ['Bachelor of Software Engineering', 'STAT101', 'Probability & Statistics',    3, 1, 2, 'Thu', 'Data analysis basics.'],
             
             // --- Year 2, Term 1 (Sophomore - Advanced) ---
-            ['Bachelor of Software Engineering', 'CS201',   'Data Structures & Algos',     4, 2, 1, 'Trees, Graphs, Sorting.'],
-            ['Bachelor of Software Engineering', 'CS202',   'Database Systems',            3, 2, 1, 'SQL and Relational Design.'],
+            ['Bachelor of Software Engineering', 'CS201',   'Data Structures & Algos',     4, 2, 1, 'Mon', 'Trees, Graphs, Sorting.'],
+            ['Bachelor of Software Engineering', 'CS202',   'Database Systems',            3, 2, 1, 'Tue', 'SQL and Relational Design.'],
 
             // =================================================================
             // OTHER MAJORS (To show filtering works)
             // =================================================================
             
             // Mathematics
-            ['Bachelor of Applied Mathematics', 'MATH101', 'Calculus I',                 3, 1, 1, 'Shared Course.'],
-            ['Bachelor of Applied Mathematics', 'MATH105', 'Discrete Math',              3, 1, 1, 'Logic and Proofs.'],
+            ['Bachelor of Applied Mathematics', 'MATH101', 'Calculus I',                 3, 1, 1, 'Mon', 'Shared Course.'],
+            ['Bachelor of Applied Mathematics', 'MATH105', 'Discrete Math',              3, 1, 1, 'Tue', 'Logic and Proofs.'],
 
             // Marketing
-            ['Bachelor of Marketing Management', 'MKT101', 'Principles of Marketing',    3, 1, 1, 'Market analysis basics.'],
-            ['Bachelor of Marketing Management', 'ECO101', 'Microeconomics',             3, 1, 1, 'Supply and Demand.'],
-            ['Bachelor of Marketing Management', 'ACC101', 'Financial Accounting',       3, 1, 1, 'Balance sheets.'],
+            ['Bachelor of Marketing Management', 'MKT101', 'Principles of Marketing',    3, 1, 1, 'Mon', 'Market analysis basics.'],
+            ['Bachelor of Marketing Management', 'ECO101', 'Microeconomics',             3, 1, 1, 'Tue', 'Supply and Demand.'],
+            ['Bachelor of Marketing Management', 'ACC101', 'Financial Accounting',       3, 1, 1, 'Wed', 'Balance sheets.'],
         ];
 
-        foreach ($coursesToSeed as [$progName, $cCode, $cName, $credits, $year, $termNum, $desc]) {
+        foreach ($coursesToSeed as [$progName, $cCode, $cName, $credits, $year, $termNum, $day, $desc]) {
             $progId = $programMap[$progName] ?? null;
-            if (! $progId) {
-                continue;
-            }
+            if (! $progId) continue;
 
             // Efficiently find Department via Program -> Major
             $program = Program::with('major')->find($progId);
@@ -253,7 +251,7 @@ class AcademicStructureSeeder extends Seeder
                 'instructor_id' => $instructor->id,
                 'section_name'  => 'A', // Fixed: matches schema 'section_name'
                 'capacity'      => 40,
-                'day_of_week'   => 'Mon',
+                'day_of_week'   => $day,
                 'start_time'    => '09:00:00',
                 'end_time'      => '10:30:00',
                 'status'        => 'open',

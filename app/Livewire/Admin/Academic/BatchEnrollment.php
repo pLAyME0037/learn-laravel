@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Services\BatchEnrollmentService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class BatchEnrollment extends Component
@@ -32,7 +33,6 @@ class BatchEnrollment extends Component
     }
 
     // --- Lifecycle Hooks (Auto-Load when dropdowns change) ---
-
     public function updatedProgramId()
     {$this->loadRecommendedClasses();}
     public function updatedYearLevel()
@@ -81,7 +81,10 @@ class BatchEnrollment extends Component
         }
     }
 
-    public function enroll(BatchEnrollmentService $service)
+    /**
+     * The trigger (Click Button)
+     */
+    public function confirmEnrollment()
     {
         $this->validate([
             'program_id'      => 'required',
@@ -93,31 +96,49 @@ class BatchEnrollment extends Component
         // Formula: Year 1/Sem 1 = Term 1. Year 2/Sem 1 = Term 3.
         $targetTerm = ($this->year_level - 1) * 2 + $this->semester;
 
-        // 2. Find the Cohort (Students)
-        $students = Student::query()
+        $studentCount = Student::query()
             ->where('program_id', $this->program_id)
             ->where('current_term', $targetTerm) // Using the new Integer column
             ->where('academic_status', 'active')
-            ->get();
+            ->count();
 
-        if ($students->isEmpty()) {
-            $this->addError('system', "No active students found in Year {$this->year_level}, Semester {$this->semester} (Term {$targetTerm}).");
+        if ($studentCount === 0) {
+            $this->dispatch('swal:error', [
+                'message' => 'No active student students found for this batch.',
+            ]);
             return;
         }
 
-        // 3. Get Class Objects
-        $classes = ClassSession::whereIn('id', $this->selectedClasses)->get();
+        $this->dispatch('swal:confirm', [
+            'title' => 'Ready to Enroll?',
+            'text'  => "This batch are about to enroll {$studentCount} students into "
+            . count($this->selectedClasses) . " classes.",
+        ]);
+    }
 
-        // 4. Run Batch Enrollment
+    #[On('runEnrollment')]
+    public function runEnrollment(BatchEnrollmentService $service)
+    {
         try {
-            $count = $service->enrollCohort($students, $classes);
+            $targetTerm = ($this->year_level - 1) * 2 + $this->semester;
 
-            session()->flash('success', ''
-                . "Batch Complete: {$students->count()} students processed. "
-                . "{$count} new enrollments created."
-            );
+            $students = Student::query()
+                ->where('program_id', $this->program_id)
+                ->where('current_term', $targetTerm) // Using the new Integer column
+                ->where('academic_status', 'active')
+                ->get();
+
+            $classes = ClassSession::whereIn('id', $this->selectedClasses)
+                ->get();
+
+            $count = $service->enrollCohort($students, $classes);
+            $this->dispatch('swal:success', [
+                'message' => "Batch Complete! {$count} enrollment created.",
+            ]);
         } catch (\Exception $e) {
-            $this->addError('system', 'Batch failed: ' . $e->getMessage());
+            $this->dispatch('swal:error', [
+                'message' => "Batch failed: " . $e->getMessage(),
+            ]);
         }
     }
 
