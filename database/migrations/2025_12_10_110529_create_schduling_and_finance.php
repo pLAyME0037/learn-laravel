@@ -32,12 +32,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
             $table->foreignId('class_session_id')->constrained()->cascadeOnDelete();
-            
-            $table->string('status')->default('enrolled'); // enrolled, dropped
-            
             // Grades
             $table->decimal('final_grade', 5, 2)->nullable();
-            $table->decimal('grade_points', 3, 2)->nullable();
+            $table->string('grade_letter')->nullable()->after('final_grade');
+            $table->decimal('grade_points', 3, 2)->nullable()->after('grade_letter');
+            
+            $table->string('status')->default('enrolled'); // enrolled, dropped
             
             $table->timestamp('enrollment_date')->useCurrent();
             $table->timestamps();

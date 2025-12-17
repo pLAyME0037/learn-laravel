@@ -88,8 +88,7 @@
                                             </h4>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                                 Room: {{ $enrollment->classSession->classroom->room_number ?? 'TBA' }} •
-                                                Instructor:
-                                                {{ $enrollment->classSession->instructor->name ?? 'Staff' }}
+                                                Instructor: {{ $enrollment->classSession->instructor->name ?? 'Staff' }}
                                             </p>
                                         </div>
                                         <div>

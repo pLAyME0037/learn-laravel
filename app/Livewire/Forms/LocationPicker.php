@@ -29,29 +29,40 @@ class LocationPicker extends Component
         $this->provinces = Province::orderBy('name_en')->get();
 
         // If editing, reverse-engineer the dropdowns
-        if ($selectedVillageId) {
-            $this->village_id = $selectedVillageId;
-            $village          = Village::find($selectedVillageId);
-
-            if ($village) {
-                $this->commune_id = $village->commune_id; // Note: using comm_id code relation
-                $commune          = $village->commune;
-
-                if ($commune) {
-                    $this->district_id = $commune->district_id;
-                    $district          = $commune->district;
-
-                    if ($district) {
-                        $this->province_id = $district->province_id;
-
-                        // Load lists for the selected hierarchy
-                        $this->updatedProvinceId($this->province_id);
-                        $this->updatedDistrictId($this->district_id);
-                        $this->updatedCommuneId($this->commune_id);
-                    }
-                }
-            }
+        if (! $selectedVillageId) {
+            return;
         }
+
+        $this->village_id = $selectedVillageId;
+        $village          = Village::find($selectedVillageId);
+
+        if (! $village) {
+            return;
+        }
+        $this->commune_id = $village->commune_id; // Note: using comm_id code relation
+        $commune          = $village->commune;
+
+        if (! $commune) {
+            return;
+        }
+        $this->district_id = $commune->district_id;
+        $district          = $commune->district;
+
+        if (! $district) {
+            return;
+        }
+        $this->province_id = $district->province_id;
+
+        // --- Populate Lists ---
+        $this->districts = District::where('province_id', $this->province_id)
+            ->orderBy('name_en')
+            ->get();
+        $this->communes = Commune::where('district_id', $this->district_id)
+            ->orderBy('name_en')
+            ->get();
+        $this->villages = Village::where('commune_id', $this->commune_id)
+            ->orderBy('name_en')
+            ->get();
     }
 
     public function updatedProvinceId($value)

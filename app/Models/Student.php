@@ -33,12 +33,14 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
     public function program()
     {
         return $this->belongsTo(Program::class);
     }
-
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);

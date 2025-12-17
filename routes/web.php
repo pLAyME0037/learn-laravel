@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Livewire\Academic\Dashboard as AcademicDashboard;
 use App\Livewire\Academic\ScheduleViewer;
 use App\Livewire\Academic\StudentFinancials;
+use App\Livewire\Academic\TranscriptViewer;
 use App\Livewire\Admin\Academic\BatchEnrollment;
 use App\Livewire\Admin\Academic\CalendarManager;
 use App\Livewire\Admin\Academic\CourseManager;
@@ -34,6 +35,8 @@ use App\Livewire\Admin\Settings\SystemSettings;
 use App\Livewire\Admin\Students\StudentForm;
 use App\Livewire\Admin\Students\StudentList;
 use App\Livewire\Admin\UserManagement;
+use App\Livewire\Instructor\Dashboard as InstructorDashboard;
+use App\Livewire\Instructor\Gradebook;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -216,22 +219,35 @@ Route::middleware(['auth', 'verified'])
 | Student / Academic Routes
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth', 'verified'])
-    ->prefix('academic')
-    ->name('academic.')
-    ->group(function () {
-        Route::get('/dashboard', AcademicDashboard::class)
-            ->name('dashboard');
+->prefix('academic')
+->name('academic.')
+->group(function () {
 
-        // Weekly Schedule
-        Route::get('/schedule', ScheduleViewer::class)
-            ->name('schedule');
+Route::get('/dashboard', AcademicDashboard::class)->name('dashboard');
+// Weekly Schedule
+Route::get('/schedule', ScheduleViewer::class)->name('schedule');
 
-        Route::get('/finance', StudentFinancials::class)
-            ->name('finance');
-    });
+Route::get('/finance', StudentFinancials::class)->name('finance');
 
+Route::get('/transcript', TranscriptViewer::class)->name('transcript');
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Instructor Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])
+->prefix('instructor')
+->name('instructor.')
+->group(function () {
+
+Route::get('/dashboard', InstructorDashboard::class)->name('dashboard');
+Route::get('/gradebook/{classSessionId}', Gradebook::class)->name('gradebook');
+
+});
 /*
 |--------------------------------------------------------------------------
 | Theme Routes

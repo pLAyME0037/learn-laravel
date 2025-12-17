@@ -20,7 +20,7 @@ class Enrollment extends Model
         'student_id',
         'class_session_id',
         'final_grade',
-        'grade_point',
+        'grade_points',
         'grade_letter',
         'status',
         'enrollment_date',

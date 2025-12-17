@@ -39,7 +39,9 @@
 
                 <!-- Search -->
                 <div class="flex-1">
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Search Course</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        Search Course
+                    </label>
                     <input type="text"
                         wire:model.live.debounce.300ms="search"
                         placeholder="Code or Name..."
@@ -88,11 +90,15 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-indigo-600 dark:text-indigo-400">
                                     {{ $class->course->code }}</div>
-                                <div class="text-xs text-gray-500">{{ $class->course->name }} (Sec
-                                    {{ $class->section_name }})</div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $class->course->name }} (Sec{{ $class->section_name }})
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                                 {{ $class->instructor->name ?? 'TBA' }}
+                                <p class="text-xs text-gray-500">
+                                    {{ $class->instructor?->email ?? 'N/A' }}
+                                </p>
                             </td>
                             <td class="px-6 py-4 text-center">
                                 <span class="text-xs font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">

@@ -54,11 +54,31 @@ class Dashboard extends Component
 
         // 4. Quick Links (Static for now, could be dynamic)
         $this->quickLinks = [
-            ['title' => 'My Transcript', 'url' => '#', 'icon' => 'document-text'], // Link to Phase E route
-            ['title' => 'Financials', 'url' => '/academic/finance', 'icon' => 'currency-dollar'],  // Link to Phase D route
-            ['title' => 'Library', 'url' => '#', 'icon' => 'book-open'],
-            ['title' => 'Exam Schedule', 'url' => '#', 'icon' => 'calendar'],
-            ['title' => 'Weekly Schedule', 'url' => '/academic/schedule', 'icon' => 'calendar'],
+            [
+                'title' => 'My Transcript', 
+                'url' => '/academic/transcript', 
+                'icon' => 'document-text'
+            ], // Link to Phase E route
+            [
+                'title' => 'Financials', 
+                'url' => '/academic/finance', 
+                'icon' => 'currency-dollar'
+            ],  // Link to Phase D route
+            [
+                'title' => 'Library', 
+                'url' => '#', 
+                'icon' => 'book-open'
+            ],
+            [
+                'title' => 'Exam Schedule', 
+                'url' => '#', 
+                'icon' => 'calendar'
+            ],
+            [
+                'title' => 'Weekly Schedule', 
+                'url' => '/academic/schedule', 
+                'icon' => 'calendar'
+            ],
         ];
 
         // 5. Activity Feed (Mockup - Real logic would query 'AuditLogs' or 'Notifications')

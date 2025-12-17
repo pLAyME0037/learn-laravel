@@ -20,9 +20,9 @@ class EnrollmentObserver
         $student = $enrollment->student;
 
         // Hybrid: Charge per credit based on Major's setting or System Default
-        $costPerCredit = 50.00; // Default
+        // $costPerCredit = 50.00; // Default
         // OR fetch from SystemConfig
-        // $costPerCredit = \App\Models\SystemConfig::get('cost_per_credit', 50);
+        $costPerCredit = SystemConfig::get('cost_per_credit', 50);
         
         // Calculate
         $amountToAdd = $course->credits * $costPerCredit;

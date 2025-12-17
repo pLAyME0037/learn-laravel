@@ -61,6 +61,7 @@
                 'type' => 'heading',
                 'label' => 'Main',
             ],
+
             // Dashboard (Layout Grid)
             [
                 'type' => 'link',
@@ -68,24 +69,6 @@
                 'icon' =>
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
                 'route' => 'dashboard',
-                'can' => null,
-            ],
-            // Academic Dashboard
-            [
-                'type' => 'link',
-                'label' => 'Academic Dashboard',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
-                'route' => 'academic.dashboard',
-                'can' => null,
-            ],
-            // Admin Dashboard
-            [
-                'type' => 'link',
-                'label' => 'Academic Dashboard',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
-                'route' => 'admin.dashboard',
                 'can' => null,
             ],
 
@@ -96,6 +79,15 @@
                 'can' => ['Admin'],
             ],
 
+            // Admin Dashboard
+            [
+                'type' => 'link',
+                'label' => 'Administrator Dashboard',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
+                'route' => 'admin.dashboard',
+                'can' => null,
+            ],
             // Attendance (Clipboard Check)
             [
                 'type' => 'link',
@@ -160,37 +152,15 @@
                         'route' => 'admin.academic.schedule',
                         'can' => ['view.faculties'],
                     ],
-                ],
-            ],
-
-            // Finance
-            [
-                'type' => 'dropdown',
-                'label' => 'Finance',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
-                'can' => ['view.faculties'],
-                'children' => [
-                    // Faculty
                     [
                         'type' => 'link',
-                        'label' => 'Invoice',
+                        'label' => 'Batch Enrollment',
                         'icon' =>
-                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
-                        'route' => 'admin.finance.invoices',
-                        'can' => ['view.faculties'],
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />',
+                        'route' => 'admin.academic.batch-enroll',
+                        'can' => 'view.academic-records',
                     ],
                 ],
-            ],
-
-            // Login History (Clock)
-            [
-                'type' => 'link',
-                'label' => 'Login History',
-                'icon' =>
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />',
-                'route' => 'admin.login-histories.index',
-                'can' => 'view.login-histories',
             ],
 
             // Roles & Permission (Shield Check)
@@ -304,14 +274,6 @@
                 'children' => [
                     [
                         'type' => 'link',
-                        'label' => 'Batch Enrollment',
-                        'icon' =>
-                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />',
-                        'route' => 'admin.academic.batch-enroll',
-                        'can' => 'view.academic-records',
-                    ],
-                    [
-                        'type' => 'link',
                         'label' => 'Dictionary',
                         'icon' =>
                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />',
@@ -326,7 +288,97 @@
                         'route' => 'admin.settings.system',
                         'can' => 'view.academic-records',
                     ],
+                    // Login History (Clock)
+                    [
+                        'type' => 'link',
+                        'label' => 'Login History',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />',
+                        'route' => 'admin.login-histories.index',
+                        'can' => 'view.login-histories',
+                    ],
                 ],
+            ],
+
+            // Finance Section
+            [
+                'type' => 'heading',
+                'label' => 'Finance',
+                'can' => null,
+            ],
+            
+            // Finance
+            [
+                'type' => 'dropdown',
+                'label' => 'Finance',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                'can' => ['view.faculties'],
+                'children' => [
+                    // Faculty
+                    [
+                        'type' => 'link',
+                        'label' => 'Invoice',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                        'route' => 'admin.finance.invoices',
+                        'can' => ['view.faculties'],
+                    ],
+                ],
+            ],
+
+            // Instructor Section
+            [
+                'type' => 'heading',
+                'label' => 'Instrutor',
+                'can' => null,
+            ],
+
+            // Instructor Dashboard
+            [
+                'type' => 'link',
+                'label' => 'Instructor Dashboard',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
+                'route' => 'instructor.dashboard',
+                'can' => null,
+            ],
+
+            // Instructor
+            [
+                'type' => 'dropdown',
+                'label' => 'Instructor',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                'can' => null,
+                'children' => [
+                    // PlaceHolder
+                    [
+                        'type' => 'link',
+                        'label' => 'PlaceHolder',
+                        'icon' =>
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />',
+                        'route' => 'instructor.dashboard',
+                        'can' => null,
+                    ],
+                ],
+            ],
+
+            // Student Section
+            [
+                'type' => 'heading',
+                'label' => 'Student',
+                'can' => null,
+            ],
+
+            // Student Dashboard
+            [
+                'type' => 'link',
+                'label' => 'Academic Dashboard',
+                'icon' =>
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />',
+                'route' => 'academic.dashboard',
+                'can' => null,
             ],
         ];
     @endphp

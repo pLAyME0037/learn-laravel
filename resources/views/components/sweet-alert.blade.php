@@ -41,18 +41,21 @@
             });
         });
 
-        Livewire.on('swal:confirm', (data) => {
+        Livewire.on('swal:confirm', (eventData) => {
+            // Livewire 3 wraps args in an array: eventData = [ { title: '...', method: 'runEnrollment' } ]
+            const data = eventData[0]; 
+
             Swal.fire({
-                ...getSwalConfig(),
-                title: data[0].title,
-                text: data[0].text,
+                title: data.title,
+                text: data.text,
                 icon: 'warning',
                 showCancelButton: true,
-                cancelButtonColor: '#ef4444', // Red for cancel/danger
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#ef4444',
                 confirmButtonText: 'Yes, proceed!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch(data[0].method); 
+                    Livewire.dispatch(data.method); 
                 }
             });
         });

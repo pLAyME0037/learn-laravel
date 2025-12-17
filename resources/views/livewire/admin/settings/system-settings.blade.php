@@ -1,4 +1,3 @@
-<div class="py-12">
     <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
         @if (session('success'))
@@ -69,6 +68,12 @@
             <!-- Sticky Save Button -->
             <div class="mt-8 flex justify-end sticky bottom-6">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border dark:border-gray-700">
+                    <a href="{{ url('/admin/dashboard') }}"
+                        class="inline-flex justify-center rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50">
+                        <span wire:loading.remove>Cancel</span>
+                    </a>
+                </div>
+                <div class="ml-3 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border dark:border-gray-700">
                     <button type="submit"
                         wire:loading.attr="disabled"
                         class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50">
@@ -79,4 +84,3 @@
             </div>
         </form>
     </div>
-</div>

@@ -26,11 +26,11 @@
 
                     <!-- Profile Picture Upload -->
                     <div class="md:col-span-2 flex items-center space-x-6">
-                        <x-profile-image class="border-blue-700"
+                        <x-profile-image class="border-blue-700 dark:border-blue-700"
                             wire:model="profile_pic"
-                            uploadable=true
-                            src="{{ $student?->$user->profile_picture_url }}"
-                            alt="{{ $student?->$user->name }}"
+                            uploadable="true"
+                            src="{{ $student?->user?->profile_picture_url ?? '' }}"
+                            alt="{{ $student?->user?->name ?? 'Student' }}"
                             size="md" />
                     </div>
 
@@ -110,12 +110,29 @@
                     </h3>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Department Filter -->
                     <div>
+                        <x-input-label for="department"
+                            value="Department" />
+                        <select id="department"
+                            wire:model.live="profile.department_id"
+                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm">
+                            <option value="">Select Department</option>
+                            @foreach ($departments as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Program (Filtered) -->
+                    <div class="md:col-span-2">
                         <x-input-label for="program"
                             value="Program" />
                         <select id="program"
                             wire:model="profile.program_id"
-                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 rounded-md shadow-sm"
+                            {{ empty($programs) ? 'disabled' : '' }}>
                             <option value="">Select Program</option>
                             @foreach ($programs as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -124,30 +141,56 @@
                         <x-input-error :messages="$errors->get('profile.program_id')"
                             class="mt-2" />
                     </div>
+
+                    <!-- Personal Info Row -->
+                    <div>
+                        <x-input-label for="dob"
+                            value="Date of Birth" />
+                        <x-date-picker id="dob"
+                            name="profile.dob"
+                            wire:model="profile.dob" />
+                        <x-input-error :messages="$errors->get('profile.dob')"
+                            class="mt-2" />
+                    </div>
+
                     <div>
                         <x-input-label for="gender"
                             value="Gender" />
                         <select id="gender"
                             wire:model="profile.gender"
-                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
                             <option value="">Select Gender</option>
                             @foreach ($genders as $key => $label)
-                                <option value="{{ $key }}">
-                                    {{ $label }}
-                                </option>
+                                <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('profile.gender')"
                             class="mt-2" />
                     </div>
+
                     <div>
-                        <x-input-label for="dob"
-                            value="Date of Birth" />
-                        <x-text-input id="dob"
-                            wire:model="profile.dob"
-                            type="date"
-                            class="block mt-1 w-full" />
+                        <x-input-label for="blood_group"
+                            value="Blood Group" />
+                        <select id="blood_group"
+                            wire:model="profile.blood_group"
+                            class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
+                            <option value="">Unknown</option>
+                            @foreach ($bloodGroups as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
                     </div>
+
+                    <div>
+                        <x-input-label for="nationality"
+                            value="Nationality" />
+                        <x-text-input id="nationality"
+                            wire:model="profile.nationality"
+                            class="block mt-1 w-full" />
+                        <x-input-error :messages="$errors->get('profile.nationality')"
+                            class="mt-2" />
+                    </div>
+
                 </div>
             </div>
 
@@ -181,7 +224,9 @@
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
                 <div
                     class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Contact Info</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        Contact Info
+                    </h3>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -194,11 +239,22 @@
                             class="mt-2" />
                     </div>
                     <div>
+                        <x-input-label for="emergency_name"
+                            value="Emergency Contact Name" />
+                        <x-text-input id="emergency_name"
+                            wire:model="contact.emergency_name"
+                            class="block mt-1 w-full" />
+                        <x-input-error :messages="$errors->get('contact.name')"
+                            class="mt-2" />
+                    </div>
+                    <div>
                         <x-input-label for="emergency_phone"
                             value="Emergency Contact Phone" />
                         <x-text-input id="emergency_phone"
                             wire:model="contact.emergency_phone"
                             class="block mt-1 w-full" />
+                        <x-input-error :messages="$errors->get('contact.emergency_phone')"
+                            class="mt-2" />
                     </div>
                 </div>
             </div>

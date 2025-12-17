@@ -18,7 +18,7 @@ class Dashboard extends Component
         // 1. Fetch Real Counts
         $this->stats = [
             'total_students' => Student::count(),
-            'total_staff'    => User::role('staff')->count(), // Assuming you use Spatie roles
+            'total_staff'    => User::role('staff')->count(),
             'departments'    => Department::count(),
             'new_this_month' => Student::where('created_at', '>=', now()->startOfMonth())->count(),
         ];
@@ -26,7 +26,7 @@ class Dashboard extends Component
         // 2. Fetch Recent Registrations
         $this->recentStudents = Student::with(['user', 'department'])
             ->latest()
-            ->take(5)
+            ->take(6)
             ->get();
 
         // 3. Mock System Notices

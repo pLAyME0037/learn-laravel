@@ -58,9 +58,12 @@
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                             <div class="flex items-center space-x-3">
                                                 <div
-                                                    class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold">
-                                                    {{ substr($student->user->name ?? 'U', 0, 1) }}
+                                                    class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold">
+                                                    {{ $loop->iteration }}
                                                 </div>
+                                                <x-profile-image size="xs"
+                                                    src="{{ $student->user->profile_picture_url }}"
+                                                    alt="{{ $student->user->username }}" />
                                                 <span>{{ $student->user->name ?? 'Unknown' }}</span>
                                             </div>
                                         </td>

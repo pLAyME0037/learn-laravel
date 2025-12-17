@@ -111,8 +111,9 @@ class BatchEnrollment extends Component
 
         $this->dispatch('swal:confirm', [
             'title' => 'Ready to Enroll?',
-            'text'  => "This batch are about to enroll {$studentCount} students into "
+            'text'  => "You are about to enroll {$studentCount} students into "
             . count($this->selectedClasses) . " classes.",
+            'method' => 'runEnrollment',
         ]);
     }
 

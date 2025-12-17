@@ -14,7 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                khmer: ['"Khmer OS BattamBang"', '"Khmer OS Siemreap"', '"Khmer OS"'],
+                khmer: ['"Khmer OS BattamBang"', '"Khmer OS Siemreap"', '"Khmer OS"', ...defaultTheme.fontFamily.sans],
             },
         },
     },

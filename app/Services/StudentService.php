@@ -35,6 +35,12 @@ class StudentService
             // Find dept from prog (Needed for ID Generation)
             $program = Program::with('major')
                 ->find($studentData['program_id']);
+            $attributes = [
+                'dob'         => $studentData['dob'],
+                'gender'      => $studentData['gender'],
+                'nationality' => $studentData['nationality'],
+                'blood_group' => $studentData['blood_group'],
+            ];
             $departmentId = $program?->major?->department_id ?? 0;
 
             // 2. Generate ID
@@ -44,10 +50,13 @@ class StudentService
             $__student = array_merge($studentData, [
                 'user_id'                 => $user->id,
                 'student_id'              => $studentId,
-                'cgpa'                    => 0.00,
-                'total_credits_earned'    => 0,
-                'has_outstanding_balance' => false,
+                'program_id'              => $studentData['program_id'],
+                'year_level'              => $studentData['year_level'],
                 'current_term'            => $studentData['current_term'] ?? 1,
+                'academic_status'         => 'active',
+                'attributes'              => $attributes,
+                'cgpa'                    => 0.00,
+                'has_outstanding_balance' => false,
             ]);
 
             $student = Student::create($__student);
@@ -95,6 +104,21 @@ class StudentService
             $contactData,
             $profilePic,
         ) {
+            $currentAttr = $student->attributes ?? [];
+            
+            $dob = $studentData['dob'] ?? $currentAttr['dob'] ?? null;
+            $gender = $studentData['gender'] ?? $currentAttr['gender'] ?? null;
+            $nationality = $studentData['nationality'] ?? $currentAttr['nationality'] ?? null;
+            $blood_group = $studentData['blood_group'] ?? $currentAttr['blood_group'] ?? null;
+
+            $newAttr     = array_merge($currentAttr, [
+                'dob'         => $dob,
+                'gender'      => $gender,
+                'nationality' => $nationality,
+                'blood_group' => $blood_group,
+            ]);
+
+            $studentData['attributes'] = $newAttr;
 
             // 1. Update User
             $updataUserData = Arr::only($userData, [
@@ -109,8 +133,15 @@ class StudentService
                 $updataUserData['profile_pic'] = $profilePic->store('profile-pictures', 'public');
             }
 
+            unset(
+                $studentData['dob'],
+                $studentData['gender'],
+                $studentData['nationality'],
+                $studentData['blood_group']
+            );
             $student->user->update($updataUserData);
             $cleanStudentData = Arr::except($studentData, ['student_id']);
+
             $student->update($cleanStudentData);
 
             if (! empty($contactData)) {
@@ -121,7 +152,6 @@ class StudentService
                     'current_address' => $addressData['current_address'] ?? null,
                     'postal_code'     => $addressData['postal_code'] ?? null,
                     'village_id'      => $addressData['village_id'] ?? null,
-
                 ]);
             }
 

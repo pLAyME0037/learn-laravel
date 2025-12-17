@@ -1,6 +1,7 @@
 <?php
 namespace App\Livewire\Admin\Students;
 
+use App\Models\Department;
 use App\Models\Dictionary;
 use App\Models\Program;
 use App\Models\Student;
@@ -28,9 +29,10 @@ class StudentForm extends Component
         'current_term'    => 1,
         'academic_status' => 'active',
         // Dynamic Attributes
+        'dob'             => '',
         'gender'          => '',
         'nationality'     => '',
-        'dob'             => '',
+        'blood_group'     => '',
     ];
     public $address = [
         'current_address' => '',
@@ -45,52 +47,63 @@ class StudentForm extends Component
     public $profile_pic;
 
     // --- Dropdowns ---
-    public $programs = [];
-    public $statuses = [];
-    public $genders  = [];
+    public $departments = [];
+    public $programs    = [];
+    public $statuses    = [];
+    public $genders     = [];
+    public $bloodGroups = [];
 
     public function mount($studentId = null)
     {
-        $this->programs = Program::pluck('name', 'id');
-        $this->statuses = Dictionary::options('academic_status');
-        $this->genders  = Dictionary::options('gender');
+        $this->departments = Department::orderby('name')->pluck('name', 'id');
+        $this->programs    = Program::orderby('name')->pluck('name', 'id');
+        $this->statuses    = Dictionary::options('academic_status');
+        $this->genders     = Dictionary::options('gender');
+        $this->bloodGroups = Dictionary::options('blood_group');
 
-        if ($studentId) {
-            $this->isEdit  = true;
-            $this->student = Student::with(['user', 'address', 'contactDetail'])
-                ->find($studentId);
-
-            // Hydrate Form
-            $this->user['name']     = $this->student->user->name;
-            $this->user['email']    = $this->student->user->email;
-            $this->user['username'] = $this->student->user->username;
-
-            $this->profile['program_id']      = $this->student->program_id;
-            $this->profile['year_level']      = $this->student->year_level;
-            $this->profile['current_term']    = $this->student->current_term;
-            $this->profile['academic_status'] = $this->student->academic_status;
-
-            // Load JSON attributes
-            $attrs                        = $this->student->attributes ?? [];
-            $this->profile['gender']      = $attrs['gender'] ?? '';
-            $this->profile['nationality'] = $attrs['nationality'] ?? '';
-            $this->profile['dob']         = $attrs['dob'] ?? '';
-
-            if ($this->student->address) {
-                $this->address = $this->student->address->only([
-                    'current_address',
-                    'postal_code',
-                    'village_id',
-                ]);
-            }
-            if ($this->student->contactDetail) {
-                $this->contact = $this->student->contactDetail->only([
-                    'phone',
-                    'emergency_name',
-                    'emergency_phone',
-                ]);
-            }
+        if (! $studentId) {
+            return;
         }
+        $this->isEdit  = true;
+        $this->student = Student::with(['user', 'address', 'contactDetail'])
+            ->find($studentId);
+
+        // Hydrate Form
+        $this->user['name']     = $this->student->user->name;
+        $this->user['email']    = $this->student->user->email;
+        $this->user['username'] = $this->student->user->username;
+
+        if ($this->student->program) {
+            $this->profile['department_id'] = $this->student->program->major->department_id;
+        }
+
+        $this->profile['program_id']      = $this->student->program_id;
+        $this->profile['year_level']      = $this->student->year_level;
+        $this->profile['current_term']    = $this->student->current_term;
+        $this->profile['academic_status'] = $this->student->academic_status;
+
+        // Load JSON attributes
+        $attrs                        = $this->student->attributes ?? [];
+        $this->profile['dob']         = $attrs['dob'] ?? '';
+        $this->profile['gender']      = $attrs['gender'] ?? '';
+        $this->profile['nationality'] = $attrs['nationality'] ?? '';
+        $this->profile['blood_group'] = $attrs['blood_group'] ?? '';
+
+        if ($this->student->address) {
+            $this->address = $this->student->address->only([
+                'current_address',
+                'postal_code',
+                'village_id',
+            ]);
+        }
+        if ($this->student->contactDetail) {
+            $this->contact = $this->student->contactDetail->only([
+                'phone',
+                'emergency_name',
+                'emergency_phone',
+            ]);
+        }
+        $this->updatedProfileDepartmentId($this->profile['department_id']);
     }
 
     public function generateUsername()
@@ -112,6 +125,24 @@ class StudentForm extends Component
         $this->user['username'] = $username;
     }
 
+    public function updatedProfileDepartmentId($value)
+    {
+        // Reset Program if department changes manually
+        if (! $this->isEdit && $value) {
+            $this->profile['program_id'] = '';
+        }
+
+        if ($value) {
+            // Load programs belonging to this department (via Major)
+            $this->programs = Program::whereHas('major', fn($q) =>
+                $q->where('department_id', $value))
+                ->pluck('name', 'id');
+        } else {
+            // Or load all if none selected (optional)
+            $this->programs = Program::orderBy('name')->pluck('name', 'id');
+        }
+    }
+
     #[On('location-selected')]
     public function setVillageId($village_id)
     {
@@ -121,14 +152,19 @@ class StudentForm extends Component
     public function save(StudentService $service)
     {
         $rules = [
-            'user.name'          => 'required|string|max:255',
-            'user.email'         => 'required|email|unique:users,email' . ($this->isEdit ? ',' . $this->student->user_id : ''),
-            'user.username'      => 'required|string|unique:users,username' . ($this->isEdit ? ',' . $this->student->user_id : ''),
-            'profile_pic'        => 'nullable|image|max:2048',
-            'profile.program_id' => 'required|exists:programs,id',
-            'profile.gender'     => 'required',
-            'contact.phone'      => 'required',
-            'address.village_id' => 'required', // Ensure location is picked
+            'user.name'           => 'required|string|max:255',
+            'user.email'          => 'required|email|unique:users,email'
+            . ($this->isEdit ? ',' . $this->student->user_id : ''),
+            'user.username'       => 'required|string|unique:users,username'
+            . ($this->isEdit ? ',' . $this->student->user_id : ''),
+            'profile_pic'         => 'nullable|image|max:2048',
+            'profile.program_id'  => 'required|exists:programs,id',
+            'profile.dob'         => 'required',
+            'profile.gender'      => 'required',
+            'profile.nationality' => 'required',
+            'profile.blood_group' => 'nullable',
+            'contact.phone'       => 'required',
+            'address.village_id'  => 'required', // Ensure location is picked
         ];
 
         if (! $this->isEdit) {
@@ -155,7 +191,9 @@ class StudentForm extends Component
                 $this->profile,
                 $this->address,
                 $this->contact,
-                $this->profile_pic instanceof UploadedFile ? $this->profile_pic : null,
+                $this->profile_pic instanceof UploadedFile 
+                ? $this->profile_pic 
+                : null,
             );
             return redirect()->route('admin.students.index')
                 ->with('success', 'Student created successfully.');
