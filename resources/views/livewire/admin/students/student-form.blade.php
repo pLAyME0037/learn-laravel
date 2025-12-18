@@ -1,4 +1,3 @@
-<div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
         <!-- Header -->
@@ -25,7 +24,7 @@
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <!-- Profile Picture Upload -->
-                    <div class="md:col-span-2 flex items-center space-x-6">
+                    <div class="flex items-center space-x-6">
                         <x-profile-image class="border-blue-700 dark:border-blue-700"
                             wire:model="profile_pic"
                             uploadable="true"
@@ -43,10 +42,8 @@
                             class="block mt-1 w-full" />
                         <x-input-error :messages="$errors->get('user.name')"
                             class="mt-2" />
-                    </div>
 
-                    <!-- Email -->
-                    <div>
+                        <!-- Email -->
                         <x-input-label for="email"
                             value="Email Address" />
                         <x-text-input id="email"
@@ -110,7 +107,6 @@
                     </h3>
                 </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-
                     <!-- Department Filter -->
                     <div>
                         <x-input-label for="department"
@@ -190,7 +186,53 @@
                         <x-input-error :messages="$errors->get('profile.nationality')"
                             class="mt-2" />
                     </div>
+                    @if ($this->isEdit)
+                        <div>
+                            <x-input-label for="academic_status"
+                                value="Academic Status" />
+                            <select id="academic_status"
+                                wire:model="profile.academic_status"
+                                class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
+                                <option value="active">Active</option>
+                                @foreach ($statuses as $key => $label)
+                                    <option value="{{ $key }}">
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
 
+                    <div class="flex items-center gap-2">
+                        <x-text-input id="has_disability"
+                            name="profile.has_disability"
+                            type="checkbox"
+                            id="has_disability"
+                            class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                            wire:model.live="profile.has_disability" />
+                        <x-input-label for="has_disability"
+                            value="Student has a disability / ask accommodation" />
+                        <x-input-error :messages="$errors->get('profile.has_disability')"
+                            class="mt-2" />
+                    </div>
+                </div>
+                <div class="p-6 md:col-span-2 gap-2"
+                    x-data="{ open: @entangle('profile.has_disability') }"
+                    x-show="open"
+                    x-transition.opacity.duration.300ms
+                    style="display: none;">
+                    <x-input-label for="disability_details"
+                        value="Disability Details / Accommodations Needed" />
+                    <x-textarea-input id="disability_details"
+                        name="profile.disability_details"
+                        wire:model="profile.disability_details"></x-textarea-input>
+                    <x-input-error :messages="$errors->get('profile.disability_details')"
+                        class="mt-2" />
+                    <p class="text-xs text-gray-500 mt-0">
+                        <span class="font-bold text-red-500">Privacy Note:</span>
+                        This information is sensitive. It will be stored securely and only shared with
+                        authorized staff.
+                    </p>
                 </div>
             </div>
 
@@ -202,8 +244,8 @@
                         Address
                     </h3>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="md:col-span-3">
                         <x-input-label for="current_address"
                             value="Street / House Number" />
                         <x-text-input id="current_address"
@@ -212,11 +254,21 @@
                         <x-input-error :messages="$errors->get('address.current_address')"
                             class="mt-2" />
                     </div>
-
+                    <div class="md:col-span-1">
+                        <x-input-label for="postal_code"
+                            value="Postal Code" />
+                        <x-text-input id="postal_code"
+                            wire:model="address.postal_code"
+                            class="block mt-1 w-full" />
+                        <x-input-error :messages="$errors->get('address.postal_code')"
+                            class="mt-2" />
+                    </div>
+                </div>
+                <div class="p-6 space-y-0">
                     <!-- Reusable Location Picker -->
-                    @livewire('forms.location-picker', ['selectedVillageId' => $address['village_id'] ?? null])
+                    <livewire:forms.location-picker :selectedVillageId="$address['village_id'] ?? null" />
                     <x-input-error :messages="$errors->get('address.village_id')"
-                        class="mt-2" />
+                        class="mt-0" />
                 </div>
             </div>
 
@@ -272,4 +324,3 @@
 
         </form>
     </div>
-</div>

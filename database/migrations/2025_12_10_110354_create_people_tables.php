@@ -19,9 +19,13 @@ return new class extends Migration
             $table->integer('year_level')->default(1);
             $table->integer('current_term')->default(1); // 1-8
             $table->decimal('cgpa', 3, 2)->default(0.00);
+            $table->integer('total_credits_earned')->default(0)->after('cgpa');
             // active, probation (Strings are safer than Enums for portability)
             $table->string('academic_status')->default('active'); 
             $table->boolean('has_outstanding_balance')->default(false)->after('academic_status');
+            // diability
+            $table->boolean('has_disability')->default(false);
+            $table->text('disability_details')->nullable()->after('has_disability');
 
             // This stores: { "blood_group": "A+", "passport": "...", "nationality": "..." }
             $table->json('attributes')->nullable();

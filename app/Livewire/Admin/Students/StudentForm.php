@@ -21,18 +21,21 @@ class StudentForm extends Component
     public $isEdit           = false;
 
     // --- Form State ---
-    public $user    = ['name' => '', 'email' => '', 'password' => ''];
+    public $user = ['name' => '', 'email' => '', 'password' => ''];
+    public $profile_pic;
     public $profile = [
-        'student_id'      => '', // Auto-generated usually
-        'program_id'      => '',
-        'year_level'      => 1,
-        'current_term'    => 1,
-        'academic_status' => 'active',
+        'student_id'         => '', // Auto-generated usually
+        'program_id'         => '',
+        'year_level'         => 1,
+        'current_term'       => 1,
+        'academic_status'    => 'active',
+        'has_disability'     => false,
+        'disability_details' => '',
         // Dynamic Attributes
-        'dob'             => '',
-        'gender'          => '',
-        'nationality'     => '',
-        'blood_group'     => '',
+        'dob'                => '',
+        'gender'             => '',
+        'nationality'        => '',
+        'blood_group'        => '',
     ];
     public $address = [
         'current_address' => '',
@@ -44,7 +47,6 @@ class StudentForm extends Component
         'emergency_name'  => '',
         'emergency_phone' => '',
     ];
-    public $profile_pic;
 
     // --- Dropdowns ---
     public $departments = [];
@@ -72,6 +74,9 @@ class StudentForm extends Component
         $this->user['name']     = $this->student->user->name;
         $this->user['email']    = $this->student->user->email;
         $this->user['username'] = $this->student->user->username;
+
+        $this->profile['has_disability']     = $this->student->user->student->has_disability;
+        $this->profile['disability_details'] = $this->student->user->student->disability_details;
 
         if ($this->student->program) {
             $this->profile['department_id'] = $this->student->program->major->department_id;
@@ -142,6 +147,14 @@ class StudentForm extends Component
             $this->programs = Program::orderBy('name')->pluck('name', 'id');
         }
     }
+    // Livewire Hook: Runs automatically when 'profile.has_disability' changes
+    public function updatedProfileHasDisability($value)
+    {
+        // Data Safety: If unchecked, wipe the sensitive detail immediately
+        if (! $value) {
+            $this->profile['disability_details'] = null;
+        }
+    }
 
     #[On('location-selected')]
     public function setVillageId($village_id)
@@ -163,6 +176,8 @@ class StudentForm extends Component
             'profile.gender'      => 'required',
             'profile.nationality' => 'required',
             'profile.blood_group' => 'nullable',
+            'profile.has_disability'      => 'nullable|boolean',
+            'profile.disability_details'  => 'nullable|string|required_if:profile.has_disability,true',
             'contact.phone'       => 'required',
             'address.village_id'  => 'required', // Ensure location is picked
         ];
@@ -191,9 +206,9 @@ class StudentForm extends Component
                 $this->profile,
                 $this->address,
                 $this->contact,
-                $this->profile_pic instanceof UploadedFile 
-                ? $this->profile_pic 
-                : null,
+                $this->profile_pic instanceof UploadedFile
+                    ? $this->profile_pic
+                    : null,
             );
             return redirect()->route('admin.students.index')
                 ->with('success', 'Student created successfully.');

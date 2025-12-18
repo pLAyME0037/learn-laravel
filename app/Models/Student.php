@@ -17,14 +17,22 @@ class Student extends Model
         'year_level',
         'current_term',
         'cgpa',
+        'total_credits_earned',
         'academic_status',
+        'has_outstanding_balance',
+        'has_disability',
+        'disability_details',
         'attributes',     // JSON: { blood_group, nationality, dob... }
         'sensitive_data', // Encrypted JSON: { id_card, passport... }
     ];
 
     protected $casts = [
-        'attributes' => 'array',
-        'cgpa'       => 'decimal:2',
+        'attributes'              => 'array',
+        'cgpa'                    => 'decimal:2',
+        'total_credits_earned'    => 'decimal:2',
+        'has_outstanding_balance' => 'boolean',
+        'has_disability'          => 'boolean',
+        'disability_details' => 'encrypted',
     ];
 
     // --- Relationships ---

@@ -72,7 +72,7 @@ class GradingService
     public function updateStudentCGPA(Student $student)
     {
         $enrollments = $student->enrollments()
-            ->whereIn('status', ['completed', 'failed']) // Include Fails in GPA? Usually yes.
+            ->whereIn('status', ['completed', 'failed'])
             ->whereNotNull('grade_points')
             ->with('classSession.course')
             ->get();
@@ -81,19 +81,30 @@ class GradingService
             return;
         }
 
-        $totalPoints  = 0;
-        $totalCredits = 0;
+        $totalPoints = 0;
+        $totalCreditsAttempted = 0; // For GPA calculation
+        $totalCreditsEarned = 0;    // For Graduation requirements
 
         foreach ($enrollments as $record) {
             $credits = $record->classSession->course->credits;
-
-            // Basic GPA Math
+            
+            // GPA Math
             $totalPoints += ($record->grade_points * $credits);
-            $totalCredits += $credits;
+            $totalCreditsAttempted += $credits;
+
+            // Earned Credits Logic: Only count if they passed (Grade Point > 0 or specific logic)
+            // Assuming 'F' = 0.00 points
+            if ($record->grade_points > 0) {
+                $totalCreditsEarned += $credits;
+            }
         }
 
-        $cgpa = $totalCredits > 0 ? round($totalPoints / $totalCredits, 2) : 0.00;
+        $cgpa = $totalCreditsAttempted > 0 ? round($totalPoints / $totalCreditsAttempted, 2) : 0.00;
 
-        $student->update(['cgpa' => $cgpa]);
+        // Update Student
+        $student->update([
+            'cgpa' => $cgpa,
+            'total_credits_earned' => $totalCreditsEarned // <--- Saving it here
+        ]);
     }
 }

@@ -53,6 +53,8 @@ class StudentService
                 'program_id'              => $studentData['program_id'],
                 'year_level'              => $studentData['year_level'],
                 'current_term'            => $studentData['current_term'] ?? 1,
+                'has_disability'          => $studentData['has_disability'],
+                'disability_details'      => $studentData['disability_details'],
                 'academic_status'         => 'active',
                 'attributes'              => $attributes,
                 'cgpa'                    => 0.00,
@@ -105,13 +107,13 @@ class StudentService
             $profilePic,
         ) {
             $currentAttr = $student->attributes ?? [];
-            
-            $dob = $studentData['dob'] ?? $currentAttr['dob'] ?? null;
-            $gender = $studentData['gender'] ?? $currentAttr['gender'] ?? null;
+
+            $dob         = $studentData['dob'] ?? $currentAttr['dob'] ?? null;
+            $gender      = $studentData['gender'] ?? $currentAttr['gender'] ?? null;
             $nationality = $studentData['nationality'] ?? $currentAttr['nationality'] ?? null;
             $blood_group = $studentData['blood_group'] ?? $currentAttr['blood_group'] ?? null;
 
-            $newAttr     = array_merge($currentAttr, [
+            $newAttr = array_merge($currentAttr, [
                 'dob'         => $dob,
                 'gender'      => $gender,
                 'nationality' => $nationality,
