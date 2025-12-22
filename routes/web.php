@@ -80,18 +80,13 @@ Route::middleware(['auth', 'verified'])
             DepartmentController::class, 'forceDelete',
         ])->name('departments.force-delete');
 
-        Route::resource('users', UserController::class)
-            ->except(['show']);
-        Route::get('users/{user}/show', [
-            UserController::class, 'show',
-        ])->name('users.show');
+        Route::resource('users', UserController::class);
         Route::get('users/{user}/edit-access', [
             UserController::class, 'editAccess',
         ])->name('users.edit-access');
         Route::put('users/{user}/update-access', [
             UserController::class, 'updateAccess',
         ])->name('users.update-access');
-
         Route::post('users/{user}/status', [
             UserController::class, 'updateStatus',
         ])->name('users.status');
@@ -194,9 +189,9 @@ Route::middleware(['auth', 'verified'])
         Route::get('/students/{studentId}/edit', StudentForm::class)
             ->name('students.edit');
         // Show (Controller -> Blade View)
-        Route::get('/students/{student}', [
-            StudentController::class, 'show',
-        ])->name('students.show');
+        Route::resource('students', StudentController::class)->only([
+            'show', 'destroy'
+        ]);
 
         // === INSTRUCTORS ===
         // List (Livewire)
@@ -206,12 +201,11 @@ Route::middleware(['auth', 'verified'])
         Route::get('/instructors/create', InstructorForm::class)
             ->name('instructors.create');
         // Edit
-        Route::get('/instructors/{instructorId}/edit', InstructorForm::class)
+        Route::get('/instructors/{instructor}/edit', InstructorForm::class)
             ->name('instructors.edit');
-        // Show
-        Route::get('/instructors/{instructor}', [
-            InstructorController::class, 'show',
-        ])->name('instructors.show');
+            
+        Route::resource('instructors', InstructorController::class)
+            ->only('show');
     });
 
 /*

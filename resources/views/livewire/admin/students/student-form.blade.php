@@ -230,14 +230,13 @@
                         class="mt-2" />
                     <p class="text-xs text-gray-500 mt-0">
                         <span class="font-bold text-red-500">Privacy Note:</span>
-                        This information is sensitive. It will be stored securely and only shared with
-                        authorized staff.
+                        This information is sensitive. It will be stored securely and only shared with authorized staff.
                     </p>
                 </div>
             </div>
 
             <!-- 3. Address (Using Child Component) -->
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div
                     class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">
@@ -316,7 +315,9 @@
                 <button type="submit"
                     wire:loading.attr="disabled"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center disabled:opacity-50">
-                    <span wire:loading.remove>{{ $isEdit ? 'Update Student' : 'Create Student' }}</span>
+                    <span wire:loading.remove>
+                        {{ $isEdit ? 'Update Student' : 'Create Student' }}
+                    </span>
                     <span wire:loading
                         class="ml-2">Saving...</span>
                 </button>

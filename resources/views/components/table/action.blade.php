@@ -20,10 +20,18 @@
     @case('link')
         <a href="{{ route($action['route'], $routeParams) }}"
             @class([
+                'inline-flex items-center',
                 'text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300',
                 $action['class'] ?? '',
             ])>
-            {{ $action['label'] }}
+            @if (!empty($action['icon']))
+                <span class="w-4 h-4 mr-1">
+                    {!! $action['icon'] !!}
+                </span>
+            @endif
+            @if (!empty($action['label']))
+                <span>{{ $action['label'] }}</span>
+            @endif
         </a>
     @break
 
@@ -36,10 +44,18 @@
             @method('DELETE')
             <button type="submit"
                 @class([
+                    'inline-flex items-center',
                     $action['class'] ?? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300',
                 ])
                 onclick="return confirm('Are you sure you want to delete this item?');">
-                {{ $action['label'] }}
+                @if (!empty($action['icon']))
+                    <span class="w-4 h-4 mr-1">
+                        {!! $action['icon'] !!}
+                    </span>
+                @endif
+                @if (!empty($action['label']))
+                    <span>{{ $action['label'] }}</span>
+                @endif
             </button>
         </form>
     @break
@@ -47,7 +63,7 @@
     {{-- Case for a form-based POST button --}}
     @case('post-button')
         <form action="{{ route($action['route'], $routeParams) }}"
-            method="POST" 
+            method="POST"
             class="inline">
             @csrf
             @if (isset($action['_method']))
@@ -55,9 +71,17 @@
             @endif
             <button type="submit"
                 @class([
+                    'inline-flex items-center',
                     $action['class'] ?? 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300',
                 ])>
-                {{ $action['label'] }}
+                @if (!empty($action['icon']))
+                    <span class="w-4 h-4 mr-1">
+                        {!! $action['icon'] !!}
+                    </span>
+                @endif
+                @if (!empty($action['label']))
+                    <span>{{ $action['label'] }}</span>
+                @endif
             </button>
         </form>
     @break
@@ -65,7 +89,17 @@
     {{-- Fallback case for a simple span or other custom types --}}
 
     @default
-        <span @class([$action['class'] ?? ''])>
-            {{ $action['label'] }}
+        <span @class([
+            'inline-flex items-center',
+            $action['class'] ?? '',
+        ])>
+            @if (!empty($action['icon']))
+                <span class="w-4 h-4 mr-1">
+                    {!! $action['icon'] !!}
+                </span>
+            @endif
+            @if (!empty($action['label']))
+                <span>{{ $action['label'] }}</span>
+            @endif
         </span>
 @endswitch

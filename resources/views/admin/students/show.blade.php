@@ -26,37 +26,43 @@
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6 flex items-start space-x-6">
                 <!-- Profile Pic -->
                 <div class="flex-shrink-0">
-                    @if ($student->user->profile_pic)
-                        <img src="{{ Storage::url($student->user->profile_pic) }}"
-                            class="h-24 w-24 rounded-full object-cover border-4 border-indigo-50 dark:border-gray-700">
-                    @else
-                        <div
-                            class="h-24 w-24 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-500 dark:text-indigo-300 text-3xl font-bold">
-                            {{ substr($student->user->name, 0, 1) }}
-                        </div>
-                    @endif
+                    <x-profile-image size="md"
+                        src="{{ $student->user->profile_picture_url }}"
+                        alt="{{ $student->user->username }}" />
                 </div>
 
                 <div class="flex-1">
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $student->user->name }}</h3>
-                    <p class="text-indigo-600 dark:text-indigo-400 font-medium font-mono">{{ $student->student_id }}</p>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ $student->user->name }}
+                    </h3>
+                    <p class="text-indigo-600 dark:text-indigo-400 font-medium font-mono">
+                        {{ $student->student_id }}
+                    </p>
 
                     <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border dark:border-gray-700">
                             <span
-                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Program</span>
+                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                                Program
+                            </span>
                             <div class="font-medium text-gray-900 dark:text-gray-200 mt-1">
-                                {{ $student->program->name ?? 'N/A' }}</div>
+                                {{ $student->program->name ?? 'N/A' }}
+                            </div>
                         </div>
                         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border dark:border-gray-700">
                             <span
-                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Department</span>
+                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                                Department
+                            </span>
                             <div class="font-medium text-gray-900 dark:text-gray-200 mt-1">
-                                {{ $student->program->major->department->name ?? 'N/A' }}</div>
+                                {{ $student->program->major->department->name ?? 'N/A' }}
+                            </div>
                         </div>
                         <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border dark:border-gray-700">
                             <span
-                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">Status</span>
+                                class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                                Status
+                            </span>
                             <div class="mt-1">
                                 <span
                                     class="px-2 py-1 text-xs font-bold rounded-full 
@@ -82,26 +88,34 @@
                         </div>
                         <div class="p-6 grid grid-cols-2 gap-y-4 gap-x-8">
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Current
-                                    Level</label>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Current Level
+                                </label>
                                 <p class="text-sm text-gray-900 dark:text-white mt-1">
-                                    Year {{ ceil($student->current_term / 2) }}, Semester
-                                    {{ $student->current_term % 2 == 0 ? 2 : 1 }}
+                                    Year {{ ceil($student->current_term / 2) }},
+                                    Semester {{ $student->current_term % 2 == 0 ? 2 : 1 }}
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Term</label>
-                                <p class="text-sm text-gray-900 dark:text-white mt-1">Term {{ $student->current_term }}
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Term
+                                </label>
+                                <p class="text-sm text-gray-900 dark:text-white mt-1">
+                                    Term {{ $student->current_term }}
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">CGPA</label>
-                                <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">{{ $student->cgpa }}
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    CGPA
+                                </label>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+                                    {{ $student->cgpa }}
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Financial
-                                    Status</label>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Financial Status
+                                </label>
                                 <p
                                     class="text-sm mt-1 {{ $student->has_outstanding_balance ? 'text-red-600' : 'text-green-600' }}">
                                     {{ $student->has_outstanding_balance ? 'Outstanding Balance' : 'Clear' }}
@@ -114,30 +128,41 @@
                     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
                         <div
                             class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Personal Details</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                Personal Details
+                            </h3>
                         </div>
                         <div class="p-6 grid grid-cols-2 gap-y-4 gap-x-8">
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Date of
-                                    Birth</label>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Date of Birth
+                                </label>
                                 <p class="text-sm text-gray-900 dark:text-white mt-1">
                                     {{ $student->attributes['dob'] ?? 'N/A' }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Gender</label>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Gender
+                                </label>
                                 <p class="text-sm text-gray-900 dark:text-white mt-1">
                                     {{ \App\Models\Dictionary::label('gender', $student->attributes['gender'] ?? '') }}
                                 </p>
                             </div>
                             <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</label>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Nationality
+                                </label>
                                 <p class="text-sm text-gray-900 dark:text-white mt-1">
-                                    {{ $student->attributes['nationality'] ?? 'N/A' }}</p>
+                                    {{ $student->attributes['nationality'] ?? 'N/A' }}
+                                </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
-                                <p class="text-sm text-gray-900 dark:text-white mt-1">{{ $student->user->email }}</p>
+                                <label class="block text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Email
+                                </label>
+                                <p class="text-sm text-gray-900 dark:text-white mt-1">
+                                    {{ $student->user->email }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -147,7 +172,9 @@
                         <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
                             <div
                                 class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Current Enrollments</h3>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                    Current Enrollments
+                                </h3>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-left">
@@ -196,15 +223,20 @@
                     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
                         <h4
                             class="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b pb-2 dark:border-gray-700">
-                            Contact</h4>
+                            Contact
+                        </h4>
                         <div class="space-y-4">
                             <div>
-                                <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Phone</label>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                    Phone
+                                </label>
                                 <p class="text-sm font-medium dark:text-white">
-                                    {{ $student->contactDetail->phone ?? 'N/A' }}</p>
+                                    {{ $student->contactDetail->phone ?? 'N/A' }}
+                                </p>
                             </div>
                             <div>
-                                <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">Emergency
+                                <label class="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                    Emergency
                                     Contact</label>
                                 <p class="text-sm font-medium dark:text-white mt-1">
                                     {{ $student->contactDetail->emergency_name ?? 'N/A' }}
@@ -226,21 +258,25 @@
                                 <p class="font-medium">{{ $student->address->current_address }}</p>
                                 @if ($student->address->village)
                                     <p class="mt-2 text-gray-600 dark:text-gray-400">
-                                        {{ $student->address->village->name_en }} <br>
-                                        {{ $student->address->village->commune->name_en }},
-                                        {{ $student->address->village->commune->district->name_en }} <br>
-                                        {{ $student->address->village->commune->district->province->name_en }}
+                                        {{ $student->address->village->name_kh }} <br>
+                                        {{ $student->address->village->commune->name_kh }},
+                                        {{ $student->address->village->commune->district->name_kh }} <br>
+                                        {{ $student->address->village->commune->district->province->name_kh }}
                                     </p>
                                 @endif
                             </div>
                         @else
-                            <p class="text-sm text-gray-500 italic">No address recorded.</p>
+                            <p class="text-sm text-gray-500 italic">
+                                No address recorded.
+                            </p>
                         @endif
                     </div>
 
                     <!-- 7. Quick Actions -->
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border dark:border-gray-700">
-                        <h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Admin Actions</h4>
+                        <h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">
+                            Admin Actions
+                        </h4>
                         <div class="space-y-2">
                             <!-- Delete Button (Only for admins) -->
                             @can('delete.students')

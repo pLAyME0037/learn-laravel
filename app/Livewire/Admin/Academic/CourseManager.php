@@ -55,8 +55,11 @@ class CourseManager extends Component
         $this->credits       = $course->credits;
         $this->department_id = $course->department_id;
         $this->description   = $course->description;
-        $this->prerequisites = $course->prerequisites->pluck('id')->map(fn($id) => (string) $id)->toArray();
-
+        $this->prerequisites = $course
+            ->prerequisites
+            ->pluck('id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
         $this->isEditing = true;
         $this->showModal = true;
     }
@@ -105,10 +108,15 @@ class CourseManager extends Component
     public function render()
     {
         $courses = Course::with('department')
-            ->when($this->search, fn($q) => $q->where('name', 'like', "%$this->search%")->orWhere('code', 'like', "%$this->search%"))
-            ->when($this->filterDepartment, fn($q) => $q->where('department_id', $this->filterDepartment))
+            ->when($this->search, fn($q) =>
+                $q->where('name', 'like', "%$this->search%")
+                    ->orWhere('code', 'like', "%$this->search%")
+            )
+            ->when($this->filterDepartment, fn($q) =>
+                $q->where('department_id', $this->filterDepartment)
+            )
             ->orderBy('code')
-            ->paginate(15);
+            ->paginate(20);
 
         $departments = Department::orderBy('name')->pluck('name', 'id');
 

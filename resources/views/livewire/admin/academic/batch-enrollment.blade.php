@@ -1,136 +1,284 @@
 <div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
-            <!-- LEFT: Select Cohort -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <h3 class="text-lg font-bold mb-4 dark:text-white">
-                    1. Select Student in Class
-                </h3>
-
-                <div class="space-y-4">
-                    <div>
-                        <x-input-label>Department</x-input-label>
-                        <select wire:model.live="department_id"
-                            class="w-full border-gray-300 rounded-md dark:bg-gray-900 dark:text-white">
-                            <option value="">All Departments</option>
-                            @foreach ($departments as $dept)
-                                <option value="{{ $dept->id }}">
-                                    {{ $dept->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <x-input-label>Program</x-input-label>
-                        <select wire:model.live="program_id"
-                            class="w-full border-gray-300 rounded-md dark:bg-gray-900 dark:text-white">
-                            <option value="">Select Program</option>
-                            @foreach ($programs as $prog)
-                                <option value="{{ $prog->id }}">
-                                    {{ $prog->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <x-input-label>Year Level</x-input-label>
-                        <select wire:model.live="year_level"
-                            class="w-full border-gray-300 rounded-md dark:bg-gray-900 dark:text-white">
-                            <option value="1">Year 1</option>
-                            <option value="2">Year 2</option>
-                            <option value="3">Year 3</option>
-                            <option value="4">Year 4</option>
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label>Term (Semester)</x-input-label>
-                        <select wire:model.live="term_number"
-                            class="w-full border-gray-300 rounded-md dark:bg-gray-900 dark:text-white">
-                            <option value="1">Semester 1</option>
-                            <option value="2">Semester 2</option>
-                        </select>
-                    </div>
-
-                    <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded text-sm text-gray-600 dark:text-gray-300">
-                        Targeting <strong>{{ $studentCount }}</strong> active students.
-                    </div>
-                </div>
+        <!-- STEP 1: CONTEXT HEADER -->
+        <div
+            class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border-l-4 border-indigo-500 flex justify-between items-center">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                    Batch Enrollment Wizard
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Select an Academic Period to begin.
+                </p>
             </div>
-
-            <!-- RIGHT: Select Classes -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <h3 class="text-lg font-bold mb-4 dark:text-white">
-                    2. Select Schedule Block
-                </h3>
-
-                <div class="mb-4">
-                    <x-input-label>Semester</x-input-label>
-                    <select wire:model.live="semester_id"
-                        class="w-full border-gray-300 rounded-md dark:bg-gray-900 dark:text-white">
-                        @foreach ($semesters as $sem)
-                            <option value="{{ $sem->id }}">
-                                {{ $sem->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="overflow-y-auto max-h-64 border rounded dark:border-gray-700">
-                    @if (count($availableClasses) > 0)
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="p-2"><input type="checkbox"></th>
-                                    <th class="p-2">Code</th>
-                                    <th class="p-2">Section</th>
-                                    <th class="p-2">Day/Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($availableClasses as $class)
-                                    <tr class="border-t dark:border-gray-700">
-                                        <td class="p-2">
-                                            <input type="checkbox"
-                                                wire:model="selectedClasses"
-                                                value="{{ $class->id }}">
-                                        </td>
-                                        <td class="p-2">{{ $class->course->code }}</td>
-                                        <td class="p-2">{{ $class->section_name }}</td>
-                                        <td class="p-2">{{ $class->day_of_week }}
-                                            {{ \Carbon\Carbon::parse($class->start_time)->format('H:i') }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <p class="p-4 text-gray-500">
-                            Select a program to view courses.
-                        </p>
-                    @endif
-                </div>
-
-                @error('selectedClasses')
-                    <span class="text-red-500 text-xs">{{ $message }}</span>
-                @enderror
+            <div class="w-72">
+                <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    Academic Period
+                </label>
+                <select wire:model.live="semester_id"
+                    class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md shadow-sm">
+                    @foreach ($semesters as $sem)
+                        <option value="{{ $sem['id'] }}">{{ $sem['label'] }}</option>
+                    @endforeach
+                </select>
             </div>
-
         </div>
 
-        <!-- Action Button -->
-        <div class="flex justify-end">
-            <button wire:click="confirmEnrollment"
-                {{-- wire:confirm="Are you sure you want to enroll {{ $studentCount }} students into {{ count($selectedClasses) }} classes?" --}}
-                class="px-6 py-3 bg-indigo-600 text-white font-bold rounded hover:bg-indigo-700 disabled:opacity-50"
-                @if ($studentCount == 0 || count($selectedClasses) == 0) disabled @endif>
-                Execute Batch Enrollment
-            </button>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- LEFT COLUMN: SELECTION LOGIC (Span 4) -->
+            <div class="lg:col-span-4 space-y-6">
+
+                <!-- Filter Panel -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 dark:border-gray-700">
+                        1.Target Group
+                    </h3>
+
+                    <div class="space-y-4">
+                        <!-- Department -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Department
+                            </label>
+                            <select wire:model.live="department_id"
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
+                                <option value="">All Departments</option>
+                                @foreach ($departments as $dept)
+                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Program (With Counts) -->
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program</label>
+                            <select wire:model.live="program_id"
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
+                                <option value="">Select Program</option>
+                                @foreach ($programs as $prog)
+                                    @php $count = $programCounts[$prog->id] ?? 0; @endphp
+                                    <option value="{{ $prog->id }}">
+                                        {{ $prog->name }} ({{ $count }} students)
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cohort Panel -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 dark:border-gray-700">
+                        2. Cohort Block
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Year Level
+                            </label>
+                            <select wire:model.live="year_level"
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
+                                @foreach ([1, 2, 3, 4] as $y)
+                                    @php
+                                        $t1 = ($y - 1) * 2 + 1;
+                                        $t2 = ($y - 1) * 2 + 2;
+                                        $count = ($cohortCounts[$t1] ?? 0) + ($cohortCounts[$t2] ?? 0);
+                                    @endphp
+                                    <option value="{{ $y }}">
+                                        Year {{ $y }} ({{ $count }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Term
+                            </label>
+                            <select wire:model.live="term_number"
+                                class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
+                                @foreach ([1, 2] as $t)
+                                    @php
+                                        $targetTerm = ($year_level - 1) * 2 + $t;
+                                        $count = $cohortCounts[$targetTerm] ?? 0;
+                                    @endphp
+                                    <option value="{{ $t }}">Semester {{ $t }}
+                                        ({{ $count }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Live Count Indicator -->
+                    <div
+                        class="mt-6 p-4 rounded-lg flex justify-between items-center {{ $targetStudentCount > 0 ? 'bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800' : 'bg-gray-100 dark:bg-gray-700' }}">
+                        <div>
+                            <span class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400">
+                                Target Students
+                            </span>
+                            @if ($targetStudentCount > 0)
+                                <span class="text-xs text-blue-600 dark:text-blue-400">
+                                    Ready to enroll
+                                </span>
+                            @else
+                                <span class="text-xs text-red-500">
+                                    No active students
+                                </span>
+                            @endif
+                        </div>
+                        <div class="text-3xl font-bold text-gray-800 dark:text-white">
+                            {{ $targetStudentCount }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: RESULTS (Span 8) -->
+            <div class="lg:col-span-8 space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-lg flex items-center">
+                            <span
+                                class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                            Recommended Schedule
+                        </h3>
+                        @if (count($availableClasses) > 0)
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                                {{ count($availableClasses) }} Classes Found
+                            </span>
+                        @endif
+                    </div>
+
+                    @if (count($availableClasses) > 0)
+                        <!-- Schedule Card Layout -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach ($availableClasses as $class)
+                                <label
+                                    class="relative flex items-start p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors {{ in_array($class->id, $selectedClasses) ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700' }}">
+                                    <div class="flex items-center h-5">
+                                        <input type="checkbox"
+                                            wire:model="selectedClasses"
+                                            value="{{ $class->id }}"
+                                            class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <div class="flex justify-between">
+                                            <span class="block text-sm font-bold text-gray-900 dark:text-white">
+                                                {{ $class->course->code }}
+                                            </span>
+                                            <span
+                                                class="text-xs font-mono text-gray-500 bg-white dark:bg-gray-800 border rounded px-1.5 py-0.5">
+                                                Sec {{ $class->section_name }}
+                                            </span>
+                                        </div>
+                                        <span
+                                            class="block text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $class->course->name }}</span>
+
+                                        <div class="mt-3 flex items-center justify-between text-xs">
+                                            <div
+                                                class="flex items-center text-indigo-600 dark:text-indigo-400 font-medium">
+                                                <svg class="w-3 h-3 mr-1"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                {{ $class->day_of_week }}
+                                                {{ \Carbon\Carbon::parse($class->start_time)->format('H:i') }}
+                                            </div>
+                                            <div class="text-gray-500">
+                                                {{ $class->instructor->name ?? 'Staff' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <!-- Execute Button Area -->
+                        <div class="mt-8 pt-6 border-t dark:border-gray-700 flex justify-end items-center gap-4">
+                            <div class="text-right text-sm text-gray-500">
+                                <p>Enroll <span
+                                        class="font-bold text-gray-900 dark:text-white">{{ $targetStudentCount }}</span>
+                                    students</p>
+                                <p>Into <span
+                                        class="font-bold text-gray-900 dark:text-white">{{ count($selectedClasses) }}</span>
+                                    classes</p>
+                            </div>
+                            <button wire:click="confirmEnrollment"
+                                @if ($targetStudentCount == 0 || count($selectedClasses) == 0) disabled @endif
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transform transition hover:scale-105">
+                                <svg class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Run Enrollment
+                            </button>
+                        </div>
+                    @elseif($program_id)
+                        <!-- Empty State (Program Selected but no classes) -->
+                        <div class="flex flex-col items-center justify-center h-full text-center p-8">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-full mb-4">
+                                <svg class="w-10 h-10 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Classes Scheduled</h3>
+                            <p class="text-sm text-gray-500 mt-2 max-w-sm">
+                                We couldn't find any class sessions for <strong>Year {{ $year_level }}, Sem
+                                    {{ $term_number }}</strong> of this program in the selected semester.
+                            </p>
+                            <div class="mt-6 flex gap-3">
+                                <a href="{{ route('admin.academic.schedule') }}"
+                                    class="text-indigo-600 hover:underline text-sm">Check Schedule</a>
+                                <span class="text-gray-300">|</span>
+                                <a href="#"
+                                    class="text-indigo-600 hover:underline text-sm">Check Roadmap</a>
+                            </div>
+                        </div>
+                    @else
+                        <!-- Initial State -->
+                        <div class="flex flex-col items-center justify-center h-full text-center opacity-50">
+                            <svg class="w-16 h-16 text-gray-300 mb-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <p class="text-gray-500">Select a Program and Cohort on the left to begin.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+
 @push('scripts')
     <x-sweet-alert />
 @endpush

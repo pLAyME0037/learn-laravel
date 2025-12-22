@@ -24,7 +24,7 @@ class StudentForm extends Component
     public $user = ['name' => '', 'email' => '', 'password' => ''];
     public $profile_pic;
     public $profile = [
-        'student_id'         => '', // Auto-generated usually
+        'student_id'         => '', // Auto-generated
         'program_id'         => '',
         'year_level'         => 1,
         'current_term'       => 1,
@@ -165,21 +165,21 @@ class StudentForm extends Component
     public function save(StudentService $service)
     {
         $rules = [
-            'user.name'           => 'required|string|max:255',
-            'user.email'          => 'required|email|unique:users,email'
+            'user.name'                  => 'required|string|max:255',
+            'user.email'                 => 'required|email|unique:users,email'
             . ($this->isEdit ? ',' . $this->student->user_id : ''),
-            'user.username'       => 'required|string|unique:users,username'
+            'user.username'              => 'required|string|unique:users,username'
             . ($this->isEdit ? ',' . $this->student->user_id : ''),
-            'profile_pic'         => 'nullable|image|max:2048',
-            'profile.program_id'  => 'required|exists:programs,id',
-            'profile.dob'         => 'required',
-            'profile.gender'      => 'required',
-            'profile.nationality' => 'required',
-            'profile.blood_group' => 'nullable',
-            'profile.has_disability'      => 'nullable|boolean',
-            'profile.disability_details'  => 'nullable|string|required_if:profile.has_disability,true',
-            'contact.phone'       => 'required',
-            'address.village_id'  => 'required', // Ensure location is picked
+            'profile_pic'                => 'nullable|image|max:2048',
+            'profile.program_id'         => 'required|exists:programs,id',
+            'profile.dob'                => 'required',
+            'profile.gender'             => 'required',
+            'profile.nationality'        => 'required',
+            'profile.blood_group'        => 'nullable',
+            'profile.has_disability'     => 'nullable|boolean',
+            'profile.disability_details' => 'nullable|string|required_if:profile.has_disability,true',
+            'contact.phone'              => 'required',
+            'address.village_id'         => 'required', // Ensure location is picked
         ];
 
         if (! $this->isEdit) {
@@ -190,7 +190,7 @@ class StudentForm extends Component
 
         // Delegate heavy lifting to Service
         if ($this->isEdit) {
-            $service->updateStudent(
+            $newStudent = $service->updateStudent(
                 $this->student,
                 $this->user,
                 $this->profile,
@@ -199,7 +199,8 @@ class StudentForm extends Component
                 $this->profile_pic,
             );
             return redirect()->route('admin.students.index')
-                ->with('success', 'Student updated successfully.');
+                ->session()
+                ->flash('success', "Student {$newStudent->student_id} created successfully!");;
         } else {
             $service->registerStudent(
                 $this->user,

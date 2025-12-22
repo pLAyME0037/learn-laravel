@@ -30,6 +30,9 @@
                     <tr>
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            No</th>
+                        <th
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                             Code</th>
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -48,13 +51,18 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @forelse($courses as $course)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                {{ $courses->firstItem() + $loop->index }}
+                            </td>
                             <td class="px-6 py-4 font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">
                                 {{ $course->code }}
                             </td>
                             <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                 {{ $course->name }}
                                 @if ($course->description)
-                                    <p class="text-xs text-gray-500 truncate w-64">{{ $course->description }}</p>
+                                    <p class="text-xs text-gray-500 truncate w-64">
+                                        {{ $course->description }}
+                                    </p>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
@@ -65,16 +73,22 @@
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
                                 <button wire:click="edit({{ $course->id }})"
-                                    class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 mr-3">Edit</button>
+                                    class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400 mr-3">
+                                    Edit
+                                </button>
                                 <button wire:click="delete({{ $course->id }})"
                                     wire:confirm="Delete this course?"
-                                    class="text-red-600 hover:text-red-900 dark:hover:text-red-400">Delete</button>
+                                    class="text-red-600 hover:text-red-900 dark:hover:text-red-400">
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="5"
-                                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">No courses found.</td>
+                                class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                No courses found.
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -92,7 +106,8 @@
                 aria-modal="true">
                 <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                        wire:click="$set('showModal', false)"></div>
+                        wire:click="$set('showModal', false)">
+                    </div>
                     <div
                         class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
                         <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -104,56 +119,71 @@
                                 <!-- Code -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course
-                                        Code</label>
+                                        Code
+                                    </label>
                                     <input type="text"
                                         wire:model="code"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"
                                         placeholder="e.g. CS101">
                                     @error('code')
-                                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                                        <span class="text-red-500 text-xs">
+                                            {{ $message }}
+                                        </span>
                                     @enderror
                                 </div>
                                 <!-- Credits -->
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Credits</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Credits
+                                    </label>
                                     <input type="number"
                                         wire:model="credits"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('credits')
-                                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                                        <span class="text-red-500 text-xs">
+                                            {{ $message }}
+                                        </span>
                                     @enderror
                                 </div>
                                 <!-- Name -->
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course
-                                        Name</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Course Name
+                                    </label>
                                     <input type="text"
                                         wire:model="name"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('name')
-                                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                                        <span class="text-red-500 text-xs">
+                                            {{ $message }}
+                                        </span>
                                     @enderror
                                 </div>
                                 <!-- Department -->
                                 <div class="md:col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Department
+                                    </label>
                                     <select wire:model="department_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Department</option>
                                         @foreach ($departments as $id => $deptName)
-                                            <option value="{{ $id }}">{{ $deptName }}</option>
+                                            <option value="{{ $id }}">
+                                                {{ $deptName }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('department_id')
-                                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                                        <span class="text-red-500 text-xs">
+                                            {{ $message }}
+                                        </span>
                                     @enderror
                                 </div>
                                 <!-- Prerequisites (Multi-select) -->
                                 <div class="md:col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prerequisites</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Prerequisites
+                                    </label>
                                     <select wire:model="prerequisites"
                                         multiple
                                         class="mt-1 block w-full h-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
@@ -162,13 +192,15 @@
                                                 {{ $c->name }}</option>
                                         @endforeach
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select
-                                        multiple.</p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        Hold Ctrl (Windows) or Cmd (Mac) to select multiple.
+                                    </p>
                                 </div>
                                 <!-- Description -->
                                 <div class="md:col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Description
+                                    </label>
                                     <textarea wire:model="description"
                                         rows="3"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600"></textarea>

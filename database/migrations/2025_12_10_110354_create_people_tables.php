@@ -73,6 +73,7 @@ return new class extends Migration
             $table->string('emergency_phone')->nullable();
             $table->string('emergency_relation')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -25,7 +25,9 @@
             {{ empty($districts) ? 'disabled' : '' }}>
             <option value="">Select District</option>
             @foreach ($districts as $dist)
-                <option value="{{ $dist->dist_id }}">{{ $dist->name_en }} ({{ $dist->name_kh }})</option>
+                <option value="{{ $dist->dist_id }}">
+                    {{ $dist->name_en }} ({{ $dist->name_kh }})
+                </option>
             @endforeach
         </select>
     </div>
@@ -40,7 +42,9 @@
             {{ empty($communes) ? 'disabled' : '' }}>
             <option value="">Select Commune</option>
             @foreach ($communes as $comm)
-                <option value="{{ $comm->comm_id }}">{{ $comm->name_en }} ({{ $comm->name_kh }})</option>
+                <option value="{{ $comm->comm_id }}">
+                    {{ $comm->name_en }} ({{ $comm->name_kh }})
+                </option>
             @endforeach
         </select>
     </div>
@@ -55,7 +59,9 @@
             {{ empty($villages) ? 'disabled' : '' }}>
             <option value="">Select Village</option>
             @foreach ($villages as $vill)
-                <option value="{{ $vill->id }}">{{ $vill->name_en }} ({{ $vill->name_kh }})</option>
+                <option value="{{ $vill->id }}">
+                    {{ $vill->name_en }} ({{ $vill->name_kh }})
+                </option>
             @endforeach
         </select>
     </div>

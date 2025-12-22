@@ -42,7 +42,6 @@
         });
 
         Livewire.on('swal:confirm', (eventData) => {
-            // Livewire 3 wraps args in an array: eventData = [ { title: '...', method: 'runEnrollment' } ]
             const data = eventData[0]; 
 
             Swal.fire({

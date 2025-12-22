@@ -111,7 +111,7 @@
                             ];
                         @endphp
 
-                        <x-select-table name="class_schedule_id"
+                        <x-grid-select name="class_schedule_id"
                             label="Class Schedule"
                             :options="$classSchedules"
                             :selected="old('class_schedule_id', $enrollment->class_schedule_id)"

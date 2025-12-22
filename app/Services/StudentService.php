@@ -29,22 +29,38 @@ class StudentService
             $contactData,
             $profilePic,
         ) {
+            $__userData = [
+                'name'      => $userData['name'],
+                'email'     => $userData['email'],
+                'username'  => $userData['username'],
+                'password'  => Hash::make($userData['password']),
+                'is_active' => true,
+            ];
+
+            if ($profilePic) {
+                $__userData['profile_pic'] = $profilePic->store('profile-pictures', 'public');
+            }
+
             // 1. Create User
-            $user = $this->createUser($userData, $profilePic);
+            $user = User::create($__userData);
+
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('student');
+            }
 
             // Find dept from prog (Needed for ID Generation)
             $program = Program::with('major')
                 ->find($studentData['program_id']);
+            $departmentId = $program?->major?->department_id ?? 0;
+            // 2. Generate ID
+            $studentId = $this->generateUniqueStudentId((int) $departmentId);
+
             $attributes = [
                 'dob'         => $studentData['dob'],
                 'gender'      => $studentData['gender'],
                 'nationality' => $studentData['nationality'],
                 'blood_group' => $studentData['blood_group'],
             ];
-            $departmentId = $program?->major?->department_id ?? 0;
-
-            // 2. Generate ID
-            $studentId = $this->generateUniqueStudentId((int) $departmentId);
 
             // 3. Create Student
             $__student = array_merge($studentData, [
@@ -147,8 +163,13 @@ class StudentService
             $student->update($cleanStudentData);
 
             if (! empty($contactData)) {
-                $this->handleContactUpdate($student, $contactData);
+                $student->contactDetail()->updateOrCreate([
+                    'phone'           => $contactData['phone'] ?? null,
+                    'emergency_name'  => $contactData['emergency_name'] ?? null,
+                    'emergency_phone' => $contactData['emergency_phone'] ?? null,
+                ]);
             }
+
             if (! empty($addressData)) {
                 $student->address()->updateOrCreate([], [
                     'current_address' => $addressData['current_address'] ?? null,
@@ -159,40 +180,6 @@ class StudentService
 
             return $student;
         });
-    }
-
-    /**
-     * Handle Contact Update with Self-Healing logic using Early Returns.
-     */
-    private function handleContactUpdate(Student $student, array $data): void
-    {
-        $student->contactDetail()->updateOrCreate([
-            'phone'           => $data['phone'] ?? null,
-            'emergency_name'  => $data['emergency_name'] ?? null,
-            'emergency_phone' => $data['emergency_phone'] ?? null,
-        ]);
-    }
-
-    private function createUser(array $data, ?UploadedFile $profilePic): User
-    {
-        $userData = [
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'username'  => $data['username'],
-            'password'  => Hash::make($data['password']),
-            'is_active' => true,
-        ];
-
-        if ($profilePic) {
-            $userData['profile_pic'] = $profilePic->store('profile-pictures', 'public');
-        }
-
-        $user = User::create($userData);
-        if (method_exists($user, 'assignRole')) {
-            $user->assignRole('student');
-        }
-
-        return $user;
     }
 
     private function generateUniqueStudentId(int $departmentId): string

@@ -1,10 +1,9 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -42,7 +41,35 @@ class StudentController extends Controller
     {
         return view('admin.students.edit', compact('student'));
     }
-    
+
+    /**
+     * Delete (Soft Delete) the student.
+     */
+    public function destroy(Student $student)
+    {
+        DB::transaction(function () use ($student) {
+            $student->delete();
+        });
+
+        return back()->with('success', 'Student moved to trash.');
+    }
+
+    public function restore($id)
+    {
+        $student = Student::withTrashed()->findOrFail($id);
+        $student->restore();
+        return back()->with('success', 'Student restored.');
+    }
+
+    public function forceDelete($id)
+    {
+        $student = Student::withTrashed()->findOrFail($id);
+        $student->user()->forceDelete();
+        $student->forceDelete();
+
+        return back()->with('success', 'Student permanently deleted.');
+    }
+
     /**
      * Generate ID Card PDF (Example Action).
      */

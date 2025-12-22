@@ -21,10 +21,7 @@ class DatabaseSeeder extends Seeder
             InstructorSeeder::class,
             StudentManagementSeeder::class,
             ClassroomSeeder::class,
-            CoursePrerequisiteSeeder::class,
-            ClassScheduleSeeder::class,
             EnrollmentSeeder::class,
-            CourseSeeder::class,
         ]);
     }
 }

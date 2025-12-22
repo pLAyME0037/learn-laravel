@@ -9,12 +9,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                            role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
 
                     <h3 class="text-lg font-semibold mb-4">User Information</h3>
                     <p><strong>Name:</strong> {{ $user->name }}</p>
@@ -58,7 +52,6 @@
                                 {{ __('Update Roles') }}
                             </x-primary-button>
                         </div>
-
 
                         {{-- Permission Assignment Section (Direct) --}}
                         <h3 class="text-lg font-semibold mt-8 mb-4">

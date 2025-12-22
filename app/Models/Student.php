@@ -32,7 +32,7 @@ class Student extends Model
         'total_credits_earned'    => 'decimal:2',
         'has_outstanding_balance' => 'boolean',
         'has_disability'          => 'boolean',
-        'disability_details' => 'encrypted',
+        'disability_details'      => 'encrypted',
     ];
 
     // --- Relationships ---
@@ -82,7 +82,13 @@ class Student extends Model
     public function scopeApplyFilters($query, array $filters)
     {
         // 1. Eager Load
-        $query->with(['user', 'program.major.department', 'address.village']);
+        $query->with([
+            'user'          => fn($q)          => $q->withTrashed(),
+            'program.major.department',
+            'address'       => fn($q)       => $q->withTrashed()
+                ->with('village'),
+            'contactDetail' => fn($q) => $q->withTrashed(),
+        ]);
 
         // 2. Status / Trash
         $query->when($filters['academic_status'] ?? null, function ($q, $status) {
@@ -95,11 +101,13 @@ class Student extends Model
 
         // 3. Department (New Schema: Student -> Program -> Major -> Department)
         $query->when($filters['department_id'] ?? null, function ($q, $deptId) {
-            $q->whereHas('program.major', fn($m) => $m->where('department_id', $deptId));
+            $q->whereHas('program.major', fn($m) =>
+                $m->where('department_id', $deptId));
         });
 
         // 4. Program
-        $query->when($filters['program_id'] ?? null, fn($q, $id) => $q->where('program_id', $id));
+        $query->when($filters['program_id'] ?? null, fn($q, $id) =>
+            $q->where('program_id', $id));
 
         // 5. Search
         $query->when($filters['search'] ?? null, function ($q, $search) {

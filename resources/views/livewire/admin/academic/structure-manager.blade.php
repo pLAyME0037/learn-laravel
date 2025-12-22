@@ -14,7 +14,9 @@
 
     <!-- Action Bar -->
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-white">{{ ucfirst($activeTab) }} List</h2>
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white">
+            {{ ucfirst($activeTab) }} List
+        </h2>
         <button wire:click="create"
             class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
             <span class="mr-2">+</span> Add New
@@ -26,6 +28,10 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        No
+                    </th>
                     <th
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Name
@@ -76,6 +82,9 @@
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($data as $item)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                            {{ $data->firstItem() + $loop->index }}
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                             {{ $item->name }}
                         </td>
@@ -138,6 +147,9 @@
                 @endforelse
             </tbody>
         </table>
+        <div class="p-4 border-t dark:border-gray-700">
+            {{ $data->links() }}
+        </div>
     </div>
 
     <!-- Modal Form -->
@@ -148,7 +160,8 @@
             aria-modal="true">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                    wire:click="$set('showModal', false)"></div>
+                    wire:click="$set('showModal', false)">
+                </div>
 
                 <div
                     class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
@@ -219,8 +232,7 @@
                             <!-- Fields for MAJORS -->
                             @if ($activeTab === 'majors')
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Department
                                     </label>
                                     <select wire:model="formData.department_id"
@@ -250,8 +262,7 @@
                                     @enderror
                                 </div>
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Name
                                     </label>
                                     <input type="text"
@@ -277,8 +288,7 @@
                             <!-- Fields for PROGRAMS -->
                             @if ($activeTab === 'programs')
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Major
                                     </label>
                                     <select wire:model.live="formData.major_id"

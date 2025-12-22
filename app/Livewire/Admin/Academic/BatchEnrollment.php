@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Admin\Academic;
 
 use App\Models\ClassSession;
@@ -15,165 +16,190 @@ use Livewire\Component;
 class BatchEnrollment extends Component
 {
     // --- Filters ---
+    public $semester_id   = ''; // Represents Calendar (Year + Sem)
     public $department_id = '';
     public $program_id    = '';
-    public $semester_id   = '';
-
+    
     // --- Cohort Selection ---
     public $year_level = 1;
-    public $semester   = 1;
+    public $term_number = 1; // 1 or 2
 
     // --- Data ---
     public $availableClasses = [];
     public $selectedClasses  = [];
 
+    // --- Counts (For Dropdowns) ---
+    public $programCounts = [];
+    public $cohortCounts = []; // Stores counts for Year/Term combos
+
     public function mount()
     {
+        // Default to active semester
         $this->semester_id = Semester::where('is_active', true)->value('id');
+        $this->calculateCounts();
     }
 
-    // --- Lifecycle Hooks (Auto-Load when dropdowns change) ---
-    public function updatedProgramId()
-    {$this->loadRecommendedClasses();}
-    public function updatedYearLevel()
-    {$this->loadRecommendedClasses();}
-    public function updatedTermNumber()
-    {$this->loadRecommendedClasses();}
-    public function updatedSemesterId()
-    {$this->loadRecommendedClasses();}
+    public function updatedDepartmentId() 
+    { 
+        $this->program_id = ''; // Reset Program if Dept changes
+        $this->calculateCounts(); 
+    }
+    
+    public function updatedProgramId() { 
+        $this->calculateCounts(); 
+        $this->loadRecommendedClasses(); 
+    }
+    public function updatedYearLevel() { $this->loadRecommendedClasses(); }
+    public function updatedTermNumber() { $this->loadRecommendedClasses(); }
+    public function updatedSemesterId() { $this->loadRecommendedClasses(); }
 
     /**
-     * The Logic Engine:
-     * 1. Looks at 'program_structures' to see what courses are required for Year X / Term Y.
-     * 2. Looks at 'class_sessions' to find the scheduled instances of those courses.
+     * Calculate student counts for dropdowns to show context
+     */
+    public function calculateCounts()
+    {
+        // 1. Program Counts (Existing)
+        $query = Student::select('program_id', DB::raw('count(*) as total'))
+            ->where('academic_status', 'active')
+            ->groupBy('program_id');
+            
+        if ($this->department_id) {
+            $query->whereHas('program.major', fn($q) => $q->where('department_id', $this->department_id));
+        }
+        $this->programCounts = $query->pluck('total', 'program_id')->toArray();
+
+        // 2. Cohort Counts (NEW: Breakdown by Term for the selected Program)
+        $this->cohortCounts = [];
+        if ($this->program_id) {
+            $this->cohortCounts = Student::select('current_term', DB::raw('count(*) as total'))
+                ->where('program_id', $this->program_id)
+                ->where('academic_status', 'active')
+                ->groupBy('current_term')
+                ->pluck('total', 'current_term')
+                ->toArray();
+        }
+    }
+    
+    /**
+     * Main Logic: Find classes based on Roadmap + Schedule
      */
     public function loadRecommendedClasses()
     {
-        // Reset
         $this->availableClasses = [];
         $this->selectedClasses  = [];
 
-        if (! $this->program_id || ! $this->semester_id) {
-            return;
-        }
+        if (!$this->program_id || !$this->semester_id) return;
 
-        // 1. Get Course IDs from the Roadmap (program_structures)
+        // 1. Get Course IDs from Roadmap
         $courseIds = DB::table('program_structures')
             ->where('program_id', $this->program_id)
             ->where('recommended_year', $this->year_level)
-            ->where('recommended_term', $this->semester)
+            ->where('recommended_term', $this->term_number)
             ->pluck('course_id');
 
-        if ($courseIds->isEmpty()) {
-            return;
-        }
+        if ($courseIds->isEmpty()) return;
 
-        // 2. Find Scheduled Classes for these Courses in the selected Calendar Semester
+        // 2. Find Scheduled Classes
         $this->availableClasses = ClassSession::with(['course', 'instructor'])
             ->where('semester_id', $this->semester_id)
             ->whereIn('course_id', $courseIds)
             ->where('status', 'open')
             ->get();
 
-        // 3. Auto-Select all found classes by default
+        // 3. Auto-Select
         foreach ($this->availableClasses as $class) {
             $this->selectedClasses[] = (string) $class->id;
         }
     }
 
-    /**
-     * The trigger (Click Button)
-     */
     public function confirmEnrollment()
     {
         $this->validate([
-            'program_id'      => 'required',
-            'semester_id'     => 'required',
+            'program_id' => 'required',
+            'semester_id' => 'required',
             'selectedClasses' => 'required|array|min:1',
         ]);
 
-        // 1. Calculate the Student Term (1-8)
-        // Formula: Year 1/Sem 1 = Term 1. Year 2/Sem 1 = Term 3.
-        $targetTerm = ($this->year_level - 1) * 2 + $this->semester;
-
-        $studentCount = Student::query()
-            ->where('program_id', $this->program_id)
-            ->where('current_term', $targetTerm) // Using the new Integer column
+        $targetTerm = ($this->year_level - 1) * 2 + $this->term_number;
+        
+        $studentCount = Student::where('program_id', $this->program_id)
+            ->where('current_term', $targetTerm)
             ->where('academic_status', 'active')
             ->count();
 
         if ($studentCount === 0) {
-            $this->dispatch('swal:error', [
-                'message' => 'No active student students found for this batch.',
-            ]);
+            $this->dispatch('swal:error', ['message' => 'No active students found in this block.']);
             return;
         }
 
         $this->dispatch('swal:confirm', [
-            'title' => 'Ready to Enroll?',
-            'text'  => "You are about to enroll {$studentCount} students into "
-            . count($this->selectedClasses) . " classes.",
-            'method' => 'runEnrollment',
+            'title' => 'Confirm Enrollment',
+            'text' => "Enroll {$studentCount} students into " . count($this->selectedClasses) . " classes?",
+            'method' => 'runEnrollment' 
         ]);
     }
 
-    #[On('runEnrollment')]
+    #[On('runEnrollment')] 
     public function runEnrollment(BatchEnrollmentService $service)
     {
         try {
-            $targetTerm = ($this->year_level - 1) * 2 + $this->semester;
-
-            $students = Student::query()
-                ->where('program_id', $this->program_id)
-                ->where('current_term', $targetTerm) // Using the new Integer column
+            $targetTerm = ($this->year_level - 1) * 2 + $this->term_number;
+            
+            $students = Student::where('program_id', $this->program_id)
+                ->where('current_term', $targetTerm)
                 ->where('academic_status', 'active')
                 ->get();
 
-            $classes = ClassSession::whereIn('id', $this->selectedClasses)
-                ->get();
-
+            $classes = ClassSession::whereIn('id', $this->selectedClasses)->get();
+            
             $count = $service->enrollCohort($students, $classes);
-            $this->dispatch('swal:success', [
-                'message' => "Batch Complete! {$count} enrollment created.",
-            ]);
+
+            $this->dispatch('swal:success', ['message' => "Success! {$count} records created."]);
+            
         } catch (\Exception $e) {
-            $this->dispatch('swal:error', [
-                'message' => "Batch failed: " . $e->getMessage(),
-            ]);
+            $this->dispatch('swal:error', ['message' => $e->getMessage()]);
         }
     }
 
     #[Layout('layouts.app', ['header' => 'Batch Class Enrollment'])]
     public function render()
     {
-        // Dropdown Data
+        // 1. Semesters Grouped by Year (Calendar Context)
+        $semesters = Semester::with('academicYear')
+            ->orderByDesc('start_date')
+            ->get()
+            ->map(function($sem) {
+                return [
+                    'id' => $sem->id,
+                    'label' => "{$sem->academicYear->name} - {$sem->name} " . ($sem->is_active ? '(Active)' : '')
+                ];
+            });
+
+        // 2. Departments
         $departments = Department::orderBy('name')->get();
 
-        $programs = Program::query()
-            ->when($this->department_id, fn($q) =>
-                $q->whereHas('major', fn($m) =>
-                    $m->where('department_id', $this->department_id)))
-            ->orderBy('name')
-            ->get();
+        // 3. Programs (Filtered)
+        $programsQuery = Program::query();
+        if ($this->department_id) {
+            $programsQuery->whereHas('major', fn($q) => $q->where('department_id', $this->department_id));
+        }
+        $programs = $programsQuery->orderBy('name')->get();
 
-        $semesters = Semester::orderByDesc('start_date')->get();
-
-        // Calculate Student Count for UI preview
-        $targetTerm = ($this->year_level - 1) * 2 + $this->semester;
-
-        $studentCount = 0;
+        // 4. Calculate Specific Cohort Count (Target Students)
+        $targetTerm = ($this->year_level - 1) * 2 + $this->term_number;
+        $activeStudentCount = 0;
         if ($this->program_id) {
-            $studentCount = Student::where('program_id', $this->program_id)
+            $activeStudentCount = Student::where('program_id', $this->program_id)
                 ->where('current_term', $targetTerm)
                 ->where('academic_status', 'active')
                 ->count();
         }
 
         return view('livewire.admin.academic.batch-enrollment', [
-            'departments'  => $departments,
-            'programs'     => $programs,
-            'semesters'    => $semesters,
-            'studentCount' => $studentCount,
+            'semesters' => $semesters,
+            'departments' => $departments,
+            'programs' => $programs,
+            'targetStudentCount' => $activeStudentCount
         ]);
     }
 }
