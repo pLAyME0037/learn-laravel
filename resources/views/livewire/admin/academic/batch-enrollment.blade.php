@@ -53,8 +53,8 @@
 
                         <!-- Program (With Counts) -->
                         <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Program</label>
                             <select wire:model.live="program_id"
                                 class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
                                 <option value="">Select Program</option>
@@ -140,11 +140,49 @@
 
             <!-- RIGHT COLUMN: RESULTS (Span 8) -->
             <div class="lg:col-span-8 space-y-6">
+                {{-- MISSING COURSES WARNING --}}
+                @if (count($missingCourses) > 0)
+                    <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    Scheduling Gap Detected
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>
+                                        The Roadmap requires these courses, but they are 
+                                        <strong>not scheduled</strong>
+                                        for this semester:
+                                    </p>
+                                    <ul class="list-disc list-inside mt-1">
+                                        @foreach ($missingCourses as $missing)
+                                            <li>{{ $missing->code }} - {{ $missing->name }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <a href="{{ route('admin.academic.schedule') }}"
+                                        class="block mt-2 font-bold underline">
+                                        Go to Schedule Manager to fix this
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm min-h-[500px]">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-bold text-gray-900 dark:text-white text-lg flex items-center">
                             <span
-                                class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                                class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
+                                3</span>
                             Recommended Schedule
                         </h3>
                         @if (count($availableClasses) > 0)
@@ -176,8 +214,9 @@
                                                 Sec {{ $class->section_name }}
                                             </span>
                                         </div>
-                                        <span
-                                            class="block text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $class->course->name }}</span>
+                                        <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            {{ $class->course->name }}
+                                        </span>
 
                                         <div class="mt-3 flex items-center justify-between text-xs">
                                             <div
@@ -189,7 +228,8 @@
                                                     <path stroke-linecap="round"
                                                         stroke-linejoin="round"
                                                         stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                    </path>
                                                 </svg>
                                                 {{ $class->day_of_week }}
                                                 {{ \Carbon\Carbon::parse($class->start_time)->format('H:i') }}
@@ -206,12 +246,20 @@
                         <!-- Execute Button Area -->
                         <div class="mt-8 pt-6 border-t dark:border-gray-700 flex justify-end items-center gap-4">
                             <div class="text-right text-sm text-gray-500">
-                                <p>Enroll <span
-                                        class="font-bold text-gray-900 dark:text-white">{{ $targetStudentCount }}</span>
-                                    students</p>
-                                <p>Into <span
-                                        class="font-bold text-gray-900 dark:text-white">{{ count($selectedClasses) }}</span>
-                                    classes</p>
+                                <p>
+                                    Enroll
+                                    <span class="font-bold text-gray-900 dark:text-white">
+                                        {{ $targetStudentCount }}
+                                    </span>
+                                    students
+                                </p>
+                                <p>
+                                    Into
+                                    <span class="font-bold text-gray-900 dark:text-white">
+                                        {{ count($selectedClasses) }}
+                                    </span>
+                                    classes
+                                </p>
                             </div>
                             <button wire:click="confirmEnrollment"
                                 @if ($targetStudentCount == 0 || count($selectedClasses) == 0) disabled @endif
@@ -223,7 +271,8 @@
                                     <path stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                                    </path>
                                 </svg>
                                 Run Enrollment
                             </button>
@@ -243,17 +292,26 @@
                                     </path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Classes Scheduled</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                No Classes Scheduled
+                            </h3>
                             <p class="text-sm text-gray-500 mt-2 max-w-sm">
-                                We couldn't find any class sessions for <strong>Year {{ $year_level }}, Sem
-                                    {{ $term_number }}</strong> of this program in the selected semester.
+                                We couldn't find any class sessions for
+                                <strong>
+                                    Year {{ $year_level }}, Sem {{ $term_number }}
+                                </strong>
+                                of this program in the selected semester.
                             </p>
                             <div class="mt-6 flex gap-3">
                                 <a href="{{ route('admin.academic.schedule') }}"
-                                    class="text-indigo-600 hover:underline text-sm">Check Schedule</a>
+                                    class="text-indigo-600 hover:underline text-sm">
+                                    Check Schedule
+                                </a>
                                 <span class="text-gray-300">|</span>
-                                <a href="#"
-                                    class="text-indigo-600 hover:underline text-sm">Check Roadmap</a>
+                                <a href="{{ route('admin.programs.curriculum', $program->id) }}"
+                                    class="text-indigo-600 hover:underline text-sm">
+                                    Check Roadmap
+                                </a>
                             </div>
                         </div>
                     @else
@@ -269,7 +327,9 @@
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            <p class="text-gray-500">Select a Program and Cohort on the left to begin.</p>
+                            <p class="text-gray-500">
+                                Select a Program and Cohort on the left to begin.
+                            </p>
                         </div>
                     @endif
                 </div>

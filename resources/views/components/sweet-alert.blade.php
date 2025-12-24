@@ -7,8 +7,9 @@
         
         // Helper: Check if Dark Mode is active
         const isDarkMode = () => {
-            return document.documentElement.classList.contains('dark') || 
-                   (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            return document.documentElement.classList.contains('dark') 
+            || (window.matchMedia 
+            && window.matchMedia('(prefers-color-scheme: dark)').matches);
         };
 
         // Helper: Get Base Config with Dynamic Colors
@@ -43,15 +44,23 @@
 
         Livewire.on('swal:confirm', (eventData) => {
             const data = eventData[0]; 
+            const config = getSwalConfig();
 
             Swal.fire({
+                ...config,
                 title: data.title,
                 text: data.text,
-                icon: 'warning',
+                icon: data.icon || 'warning',
+                
                 showCancelButton: true,
-                confirmButtonColor: '#4f46e5',
-                cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Yes, proceed!'
+                
+                // Allow PHP to override text
+                confirmButtonText: data.confirmButtonText || 'Yes, proceed!',
+                cancelButtonText: data.cancelButtonText || 'Cancel',
+
+                // Allow PHP to override colors
+                confirmButtonColor: data.confirmButtonColor || config.confirmButtonColor,
+                cancelButtonColor: data.cancelButtonColor || '#ef4444', 
             }).then((result) => {
                 if (result.isConfirmed) {
                     Livewire.dispatch(data.method); 

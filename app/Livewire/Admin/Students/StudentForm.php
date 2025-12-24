@@ -199,8 +199,7 @@ class StudentForm extends Component
                 $this->profile_pic,
             );
             return redirect()->route('admin.students.index')
-                ->session()
-                ->flash('success', "Student {$newStudent->student_id} created successfully!");;
+                ->with('success', "Student {$newStudent->student_id} created successfully!");;
         } else {
             $service->registerStudent(
                 $this->user,

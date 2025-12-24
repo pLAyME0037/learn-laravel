@@ -234,4 +234,35 @@ class StudentService
 
         $student->update(['cgpa' => round($cgpa, 2)]);
     }
+    
+    /**
+     * Promote all active students to the next term.
+     */
+    public function promoteAllStudents()
+    {
+        return DB::transaction(function () {
+            $count = 0;
+            
+            // Chunking for performance with large datasets
+            Student::where('academic_status', 'active')
+                ->chunkById(100, function ($students) use (&$count) {
+                    foreach ($students as $student) {
+                        $newTerm = $student->current_term + 1;
+                        
+                        // Assuming 4-year degree (8 terms)
+                        if ($newTerm > 8) {
+                            $student->update(['academic_status' => 'graduated']);
+                        } else {
+                            $student->update([
+                                'current_term' => $newTerm,
+                                'year_level' => ceil($newTerm / 2)
+                            ]);
+                        }
+                        $count++;
+                    }
+                });
+                
+            return $count;
+        });
+    }
 }

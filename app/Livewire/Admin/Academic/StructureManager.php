@@ -80,6 +80,7 @@ class StructureManager extends Component
             $this->formData['department_id'] = '';
             $this->formData['degree_id']     = '';
         }
+        
         if ($this->activeTab === 'programs') {
             $this->formData['major_id']  = '';
             $this->formData['degree_id'] = '';
@@ -191,31 +192,31 @@ class StructureManager extends Component
         // Load data based on active tab with eager loading
         if ($this->activeTab === 'faculties') {
             $data = Faculty::withCount('departments')
-            ->orderBy('name')
-            ->paginate(20);
+                ->orderBy('name')
+                ->paginate(20);
         }
 
         if ($this->activeTab === 'degrees') {
             $data = Degree::orderBy('name')
-            ->paginate(20);
+                ->paginate(20);
         }
 
         if ($this->activeTab === 'departments') {
             $data = Department::with('faculty')
-            ->orderBy('name')
-            ->paginate(20);
+                ->orderBy('name')
+                ->paginate(20);
         }
 
         if ($this->activeTab === 'majors') {
             $data = Major::with(['department', 'degree'])
-            ->orderBy('name')
-            ->paginate(20);
+                ->orderBy('name')
+                ->paginate(20);
         }
 
         if ($this->activeTab === 'programs') {
             $data = Program::with(['major', 'degree'])
-            ->orderBy('name')
-            ->paginate(20);
+                ->orderBy('name')
+                ->paginate(20);
         }
 
         return view('livewire.admin.academic.structure-manager', [

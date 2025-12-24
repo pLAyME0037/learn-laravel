@@ -11,7 +11,8 @@
                 <path stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                </path>
             </svg>
             New Academic Year
         </button>
@@ -36,7 +37,9 @@
                     <h3 class="font-bold text-lg dark:text-white {{ $year->is_current ? 'text-green-600' : '' }}">
                         {{ $year->name }}
                         @if ($year->is_current)
-                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-2">Current</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded ml-2">
+                                Current
+                            </span>
                         @endif
                     </h3>
                     <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -79,7 +82,9 @@
             <!-- Semesters List -->
             <div class="p-4">
                 <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-medium text-gray-700 dark:text-gray-300">Semesters</h4>
+                    <h4 class="font-medium text-gray-700 dark:text-gray-300">
+                        Semesters
+                    </h4>
                     <button wire:click="createSemester({{ $year->id }})"
                         class="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1 rounded border border-indigo-200">
                         + Add Semester
@@ -91,13 +96,20 @@
                         <li
                             class="flex justify-between items-center p-3 rounded-lg {{ $sem->is_active ? 'bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-gray-50 border border-gray-100 dark:bg-gray-900/50 dark:border-gray-700' }}">
                             <div class="flex items-center gap-3">
-                                <span class="font-medium dark:text-white">{{ $sem->name }}</span>
+                                <span class="font-medium dark:text-white">
+                                    {{ $sem->name }}
+                                </span>
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ $sem->start_date->format('M d') }} - {{ $sem->end_date->format('M d') }}
                                 </span>
                                 @if ($sem->is_active)
-                                    <span
-                                        class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded">ACTIVE</span>
+                                    <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded">
+                                        ACTIVE
+                                    </span>
+                                    <button wire:click="confirmCloseSemester"
+                                        class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded border border-red-200 font-bold transition-colors">
+                                        Close Term & Promote
+                                    </button>
                                 @endif
                             </div>
 
@@ -109,15 +121,21 @@
                                     </button>
                                 @endif
                                 <button wire:click="editSemester({{ $sem->id }})"
-                                    class="text-blue-500 hover:text-blue-700 text-sm">Edit</button>
+                                    class="text-blue-500 hover:text-blue-700 text-sm">
+                                    Edit
+                                </button>
                                 <button wire:click="deleteSemester({{ $sem->id }})"
                                     wire:confirm="Delete {{ $sem->name }}?"
-                                    class="text-red-500 hover:text-red-700 text-sm">Del</button>
+                                    class="text-red-500 hover:text-red-700 text-sm">
+                                    Delete
+                                </button>
                             </div>
                         </li>
                     @endforeach
                     @if ($year->semesters->isEmpty())
-                        <li class="text-sm text-gray-400 italic text-center py-2">No semesters added yet.</li>
+                        <li class="text-sm text-gray-400 italic text-center py-2">
+                            No semesters added yet.
+                        </li>
                     @endif
                 </ul>
             </div>
@@ -134,7 +152,8 @@
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
                     wire:click="$set('showModal', false)"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen"
-                    aria-hidden="true">&#8203;</span>
+                    aria-hidden="true">&#8203;
+                </span>
 
                 <div
                     class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
@@ -146,7 +165,9 @@
 
                         <div class="mt-4 space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Name
+                                </label>
                                 <input type="text"
                                     wire:model="form.name"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
@@ -156,8 +177,9 @@
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start
-                                        Date</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Start Date
+                                    </label>
                                     <input type="date"
                                         wire:model="form.start_date"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
@@ -166,8 +188,9 @@
                                     @enderror
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End
-                                        Date</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        End Date
+                                    </label>
                                     <input type="date"
                                         wire:model="form.end_date"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
@@ -195,3 +218,6 @@
         </div>
     @endif
 </div>
+@push('scripts')
+    <x-sweet-alert />
+@endpush

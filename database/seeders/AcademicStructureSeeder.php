@@ -231,20 +231,25 @@ class AcademicStructureSeeder extends Seeder
                         // 2. Schedule Class (Active Semester Only)
                         // To avoid clutter, we only schedule "Year 1" classes in the Active Semester for the demo
                         // Or you can schedule everything if you want massive data.
+                        // 2. Schedule Class
                         if ($year === 1) {
-                            ClassSession::create([
+                            $startTime = $times[array_rand($times)];
+                            // Add 1 hour 30 mins (5400 seconds)
+                            $endTime = date('H:i:s', strtotime($startTime) + 5400);
+
+                            ClassSession::updateOrCreate([
                                 'course_id'     => $course->id,
                                 'semester_id'   => $activeSemesterId,
-                                'instructor_id' => $instructor->id,
                                 'section_name'  => 'A',
+                            ],
+                            [
+                                'instructor_id' => $instructor->id,
                                 'capacity'      => 40,
-                                'day_of_week'   => $days[array_rand($days)],   // Random Day
-                                'start_time'    => $times[array_rand($times)], // Random Time
-                                'end_time'      => '00:00:00',                 // Placeholder, fix logic below if strict
+                                'day_of_week'   => $days[array_rand($days)],
+                                'start_time'    => $startTime, // Use variable
+                                'end_time'      => $endTime,   // Use calculated time
                                 'status'        => 'open',
                             ]);
-                            // Fix End Time Logic (Start + 1.5 hours)
-                            // (Doing it in SQL or Carbon is cleaner but for seeder bulk insert this is fast enough if ignored or fixed later)
                         }
 
                         // 3. Add to Roadmap

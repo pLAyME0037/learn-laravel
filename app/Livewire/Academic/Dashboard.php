@@ -30,10 +30,15 @@ class Dashboard extends Component
         $today = Carbon::now()->format('D');
 
         $this->todaysClasses = $this->student->enrollments()
-            ->whereHas('classSession', fn($q) => $q->where('day_of_week', $today))
-            ->with(['classSession.course', 'classSession.instructor', 'classSession.classroom'])
+            ->whereHas('classSession', fn($q) =>
+                $q->where('day_of_week', $today))
+            ->with([
+                'classSession.course',
+                'classSession.instructor',
+                'classSession.classroom',
+            ])
             ->get();
-
+// dd($today, $this->student->enrollments()->get()->pluck('classSession.day_of_week'));
         // 3. Calculate Semester Progress
         $activeSemester = Semester::where('is_active', true)->first();
         if ($activeSemester) {
@@ -55,36 +60,46 @@ class Dashboard extends Component
         // 4. Quick Links (Static for now, could be dynamic)
         $this->quickLinks = [
             [
-                'title' => 'My Transcript', 
-                'url' => '/academic/transcript', 
-                'icon' => 'document-text'
+                'title' => 'My Transcript',
+                'url'   => '/academic/transcript',
+                'icon'  => 'document-text',
             ], // Link to Phase E route
             [
-                'title' => 'Financials', 
-                'url' => '/academic/finance', 
-                'icon' => 'currency-dollar'
-            ],  // Link to Phase D route
+                'title' => 'Financials',
+                'url'   => '/academic/finance',
+                'icon'  => 'currency-dollar',
+            ], // Link to Phase D route
             [
-                'title' => 'Library', 
-                'url' => '#', 
-                'icon' => 'book-open'
+                'title' => 'Library',
+                'url'   => '#',
+                'icon'  => 'book-open',
             ],
             [
-                'title' => 'Exam Schedule', 
-                'url' => '#', 
-                'icon' => 'calendar'
+                'title' => 'Exam Schedule',
+                'url'   => '#',
+                'icon'  => 'calendar',
             ],
             [
-                'title' => 'Weekly Schedule', 
-                'url' => '/academic/schedule', 
-                'icon' => 'calendar'
+                'title' => 'Weekly Schedule',
+                'url'   => '/academic/schedule',
+                'icon'  => 'calendar',
             ],
         ];
 
         // 5. Activity Feed (Mockup - Real logic would query 'AuditLogs' or 'Notifications')
         $this->activities = [
-            ['title' => 'Semester Started', 'desc' => 'Spring 2026 began', 'date' => '2 days ago', 'type' => 'info'],
-            ['title' => 'Enrollment Confirmed', 'desc' => 'Registered for 5 classes', 'date' => '1 week ago', 'type' => 'success'],
+            [
+                'title' => 'Semester Started', 
+                'desc' => 'Spring 2026 began', 
+                'date' => '2 days ago', 
+                'type' => 'info'
+            ],
+            [
+                'title' => 'Enrollment Confirmed', 
+                'desc' => 'Registered for 5 classes', 
+                'date' => '1 week ago', 
+                'type' => 'success'
+            ],
         ];
 
         if ($this->student->has_outstanding_balance) {

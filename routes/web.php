@@ -4,8 +4,6 @@ use App\Http\Controllers\Admin\InstructorController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StudentController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
@@ -35,6 +33,7 @@ use App\Livewire\Admin\Settings\SystemSettings;
 use App\Livewire\Admin\Students\StudentForm;
 use App\Livewire\Admin\Students\StudentList;
 use App\Livewire\Admin\UserManagement;
+use App\Livewire\Instructor\AttendanceTaker;
 use App\Livewire\Instructor\Dashboard as InstructorDashboard;
 use App\Livewire\Instructor\Gradebook;
 use Illuminate\Support\Facades\Route;
@@ -109,8 +108,6 @@ Route::middleware(['auth', 'verified'])
 
         Route::resource('attendances', AttendanceController::class);
 
-        Route::resource('audit-logs', AuditLogController::class);
-
         Route::resource('classrooms', ClassroomController::class);
 
         Route::resource('roles', RoleController::class);
@@ -126,7 +123,8 @@ Route::middleware(['auth', 'verified'])
 
         Route::resource('transaction-ledgers', TransactionLedgerController::class);
 
-        Route::resource('permissions', PermissionController::class)->except(['show']);
+        Route::resource('permissions', PermissionController::class)
+        ->except(['show']);
 
         // Notification Sending
         // Route::post('send-notification', [
@@ -240,8 +238,11 @@ Route::middleware(['auth', 'verified'])
 
 Route::get('/dashboard', InstructorDashboard::class)->name('dashboard');
 Route::get('/gradebook/{classSessionId}', Gradebook::class)->name('gradebook');
-
+// Attendence
+Route::get('/attendance/{classSessionId}', AttendanceTaker::class)
+    ->name('attendance');
 });
+
 /*
 |--------------------------------------------------------------------------
 | Theme Routes

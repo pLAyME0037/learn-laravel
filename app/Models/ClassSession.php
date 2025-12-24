@@ -56,7 +56,9 @@ class ClassSession extends Model
 
     public function getEnrolledCountAttribute()
     {
-        return $this->enrollments()->where('status', 'enrolled')->count();
+        return $this->enrollments()
+        ->where('status', ['enrolled', 'completed', 'graded', 'failed'])
+        ->count();
     }
 
     public function getIsFullAttribute()

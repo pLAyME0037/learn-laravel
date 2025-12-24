@@ -17,6 +17,14 @@
     <title>{{ $title ?? 'Dashboard' }} - {{ config('app.name', 'Schul SYS') }}</title>
     <link rel="icon"
         href="{{ asset('favicon.ico') }}">
+    <!-- Fonts -->
+    <link rel="preconnect"
+        href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap"
+        rel="stylesheet">
 
     {{-- Alpine Cloak --}}
     <style>
@@ -63,7 +71,8 @@
                 :class="sidebarCollapsed ? 'w-16' : 'w-64'">
                 @include('layouts.sidebar')
             </aside>
-            <main class="flex-1 overflow-y-auto focus:outline-none bg-gray-100 dark:bg-gray-900 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+            <main
+                class="flex-1 overflow-y-auto focus:outline-none bg-gray-100 dark:bg-gray-900 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
 
                 {{-- Flash Messages --}}
                 @if (session('success'))
