@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class SuperAdminMiddleware
+class InstructorMiddleware
 {
     use HandlesAccessDenial;
     /**
@@ -23,8 +23,8 @@ class SuperAdminMiddleware
         }
 
         // 2. Guard: Check Authorization
-        if (! Auth::user()->isAdmin()) {
-            return $this->denyAccess($request,  'Restricted to Super Administrators only.');
+        if (! Auth::user()->isStudent()) {
+            return $this->denyAccess($request,  'This page preserve only for student.');
         }
 
         return $next($request);

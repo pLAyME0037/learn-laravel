@@ -79,14 +79,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the audit logs for the user.
-     */
-    public function auditLogs(): HasMany
-    {
-        return $this->hasMany(AuditLog::class);
-    }
-
-    /**
      * Get the transaction ledgers for the user.
      */
     public function transactionLedgers(): HasMany
@@ -135,15 +127,21 @@ class User extends Authenticatable
         return "https://ui-avatars.com/api/?name={$name}&color=7F9CF5&background=EBF4FF&bold=true";
     }
 
-    // Custom permission checks
+    /**
+     * Check if user has Super Admin privileges.
+     */
     public function isSuperUser(): bool
     {
         return $this->hasRole('Super Administrator');
     }
 
+    /**
+     * Check if user has Admin privileges.
+     */
     public function isAdmin(): bool
     {
-        return $this->hasRole('admin');
+        // Optimization: A Super Admin is implicitly an Admin
+        return $this->isSuperUser() || $this->hasRole('admin');
     }
 
     public function isStaff(): bool
@@ -153,7 +151,7 @@ class User extends Authenticatable
             'admin',
             'registrar',
             'hod',
-            'professor',
+            'instructor',
             'staff',
         ]);
     }
@@ -169,11 +167,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Checks if the user has the 'professor' role.
+     * Checks if the user has the 'instructor' role.
      */
-    public function isProfessor(): bool
+    public function isInstructor(): bool
     {
-        return $this->hasRole('professor');
+        return $this->hasRole('instructor');
     }
 
     /**
@@ -192,7 +190,7 @@ class User extends Authenticatable
     public function scopeStaff(Builder $query): void
     {
         $query->whereHas('roles', function ($q) {
-            $q->whereIn('name', ['super_user', 'admin', 'registrar', 'hod', 'professor', 'staff']);
+            $q->whereIn('name', ['super_user', 'admin', 'registrar', 'hod', 'instructor', 'staff']);
         });
     }
     public function scopeStudents(Builder $query): void
@@ -206,9 +204,9 @@ class User extends Authenticatable
         $query->where('department_id', $departmentId);
     }
 
-    /**
-     * Scope a query to filter users by a specific role.
-     */
+/**
+ * Scope a query to filter users by a specific role.
+ */
     public function scopeByRole(Builder $query, string $roleName): void
     {
         $query->whereHas('roles', function ($q) use ($roleName) {
@@ -216,28 +214,28 @@ class User extends Authenticatable
         });
     }
 
-    /**
-     * Scope a query to filter users who last logged in before a certain date.
-     */
+/**
+ * Scope a query to filter users who last logged in before a certain date.
+ */
     public function scopeLastLoggedInBefore(Builder $query, string $date): void
     {
         $query->where('last_login_at', '<', Carbon::parse($date)->startOfDay());
     }
 
-    /**
-     * Apply dynamic filters to the user query.
-     *
-     * @param array $filters ['search' => string, 'role' => string, 'status' => string, 'orderby' => string]
-     */
+/**
+ * Apply dynamic filters to the user query.
+ *
+ * @param array $filters ['search' => string, 'role' => string, 'status' => string, 'orderby' => string]
+ */
     public function scopeApplyFilters(Builder $query, array $filters): Builder
     {
         // Apply status filter first to narrow down the dataset (withTrashed, onlyTrashed, etc.)
         $query->when($filters['status'] ?? null, function ($q, $status) {
             switch ($status) {
-            case 'active':return $q->where('is_active', true)->withoutTrashed();
-            case 'inactive':return $q->where('is_active', false)->withoutTrashed();
-            case 'trashed':return $q->onlyTrashed();
-            default: return $q->withoutTrashed();
+                case 'active':return $q->where('is_active', true)->withoutTrashed();
+                case 'inactive':return $q->where('is_active', false)->withoutTrashed();
+                case 'trashed':return $q->onlyTrashed();
+                default: return $q->withoutTrashed();
             }
         },
             function ($q) {
@@ -248,9 +246,9 @@ class User extends Authenticatable
         // Apply search filter
         $query->when($filters['search'] ?? null, function ($q, $search) {
             $q->where(fn($subQuery) => $subQuery
-                ->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('username', 'like', "%{$search}%")
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
             );
         });
 
@@ -265,10 +263,10 @@ class User extends Authenticatable
         // Apply ordering
         $query->when($filters['orderby'] ?? 'newest', function ($q, $orderby) {
             match ($orderby) {
-            'a_to_z' => $q->orderBy('name', 'asc'),
-            'z_to_a' => $q->orderBy('name', 'desc'),
-            'oldest' => $q->orderBy('created_at', 'asc'),
-            default  => $q->orderBy('created_at', 'desc'), // 'newest' and default
+                'a_to_z' => $q->orderBy('name', 'asc'),
+                'z_to_a' => $q->orderBy('name', 'desc'),
+                'oldest' => $q->orderBy('created_at', 'asc'),
+                default  => $q->orderBy('created_at', 'desc'), // 'newest' and default
             };
         });
 

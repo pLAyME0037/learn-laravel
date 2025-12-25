@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Middleware;
 
+use App\Http\Traits\HandlesAccessDenial;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -8,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
+    use HandlesAccessDenial;
     /**
      * Handle an incoming request.
      *
@@ -15,13 +17,16 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::check() || ! Auth::user()->hasRole(['super_user', 'admin'])) {
-            if (request()->acceptsJson()) {
-                return response()->json(['error' => 'Unauthorized access.'], 403);
-            }
-            return redirect()->route('dashboard')
-                ->with('error', 'You do not have permission to access this page.');
+        // 1. Guard: Check Authentication
+        if (! Auth::check()) {
+            return $this->denyAccess($request);
         }
+
+        // 2. Guard: Check Authorization
+        if (! Auth::user()->isAdmin()) {
+            return $this->denyAccess($request,  'You do not have permission to access this page.');
+        }
+
         return $next($request);
     }
 }

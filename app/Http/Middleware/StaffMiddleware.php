@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Middleware;
 
+use App\Http\Traits\HandlesAccessDenial;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -8,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StaffMiddleware
 {
+    use HandlesAccessDenial;
     /**
      * Handle an incoming request.
      *
@@ -15,22 +17,16 @@ class StaffMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (
-            ! Auth::check()
-            || ! Auth::user()->hasAnyRole([
-                'super_user',
-                'admin',
-                'register',
-                'hod',
-                'professor',
-            ])
-        ) {
-            if (request()->acceptsJson()) {
-                return response()->json(['error' => 'Unauthorized access.'], 403);
-            }
-            return redirect()->route('dashboard')
-                ->with('error', 'You do not have permission to access this page.');
+        // 1. Guard: Check Authentication
+        if (! Auth::check()) {
+            return $this->denyAccess($request);
         }
+
+        // 2. Guard: Check Authorization
+        if (! Auth::user()->isStaff()) {
+            return $this->denyAccess($request,  'This page preserve only for staff.');
+        }
+
         return $next($request);
     }
 }

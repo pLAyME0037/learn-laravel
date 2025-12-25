@@ -9,7 +9,7 @@ class Attendance extends Model
     protected $fillable = ['enrollment_id', 'date', 'status', 'remarks'];
 
     protected $casts = [
-        'date' => 'date'
+        'date' => 'date:Y-m-d',
     ];
 
     public function enrollment()

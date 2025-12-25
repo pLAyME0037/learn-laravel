@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 | Admin / Staff Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])
+Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -106,8 +106,6 @@ Route::middleware(['auth', 'verified'])
         Route::get('/academic/batch-enroll', BatchEnrollment::class)
             ->name('academic.batch-enroll');
 
-        Route::resource('attendances', AttendanceController::class);
-
         Route::resource('classrooms', ClassroomController::class);
 
         Route::resource('roles', RoleController::class);
@@ -124,7 +122,7 @@ Route::middleware(['auth', 'verified'])
         Route::resource('transaction-ledgers', TransactionLedgerController::class);
 
         Route::resource('permissions', PermissionController::class)
-        ->except(['show']);
+            ->except(['show']);
 
         // Notification Sending
         // Route::post('send-notification', [
@@ -188,7 +186,7 @@ Route::middleware(['auth', 'verified'])
             ->name('students.edit');
         // Show (Controller -> Blade View)
         Route::resource('students', StudentController::class)->only([
-            'show', 'destroy'
+            'show', 'destroy',
         ]);
 
         // === INSTRUCTORS ===
@@ -201,7 +199,7 @@ Route::middleware(['auth', 'verified'])
         // Edit
         Route::get('/instructors/{instructor}/edit', InstructorForm::class)
             ->name('instructors.edit');
-            
+
         Route::resource('instructors', InstructorController::class)
             ->only('show');
     });
@@ -211,37 +209,37 @@ Route::middleware(['auth', 'verified'])
 | Student / Academic Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])
-->prefix('academic')
-->name('academic.')
-->group(function () {
+Route::middleware(['auth', 'verified', 'role:student'])
+    ->prefix('academic')
+    ->name('academic.')
+    ->group(function () {
 
-Route::get('/dashboard', AcademicDashboard::class)->name('dashboard');
-// Weekly Schedule
-Route::get('/schedule', ScheduleViewer::class)->name('schedule');
+        Route::get('/dashboard', AcademicDashboard::class)->name('dashboard');
+        // Weekly Schedule
+        Route::get('/schedule', ScheduleViewer::class)->name('schedule');
 
-Route::get('/finance', StudentFinancials::class)->name('finance');
+        Route::get('/finance', StudentFinancials::class)->name('finance');
 
-Route::get('/transcript', TranscriptViewer::class)->name('transcript');
+        Route::get('/transcript', TranscriptViewer::class)->name('transcript');
 
-});
+    });
 
 /*
 |--------------------------------------------------------------------------
 | Instructor Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])
-->prefix('instructor')
-->name('instructor.')
-->group(function () {
+Route::middleware(['auth', 'verified', 'role:instructor'])
+    ->prefix('instructor')
+    ->name('instructor.')
+    ->group(function () {
 
-Route::get('/dashboard', InstructorDashboard::class)->name('dashboard');
-Route::get('/gradebook/{classSessionId}', Gradebook::class)->name('gradebook');
+        Route::get('/dashboard', InstructorDashboard::class)->name('dashboard');
+        Route::get('/gradebook/{classSessionId}', Gradebook::class)->name('gradebook');
 // Attendence
-Route::get('/attendance/{classSessionId}', AttendanceTaker::class)
-    ->name('attendance');
-});
+        Route::get('/attendance/{classSessionId}', AttendanceTaker::class)
+            ->name('attendance');
+    });
 
 /*
 |--------------------------------------------------------------------------

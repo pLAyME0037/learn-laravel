@@ -48,8 +48,8 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         $user = $request->user();
-        $level1 = $user->hasRole(['Super Administrator', 'admin']);
-        $level2 = $user->hasRole(['instructor', 'profressor']);
+        $level1 = $user->hasAnyRole(['Super Administrator', 'admin']);
+        $level2 = $user->hasAnyRole(['instructor', 'profressor', 'staff']);
         $level3 = $user->hasRole('student');
 
         switch ($user) {
