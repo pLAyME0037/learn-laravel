@@ -41,6 +41,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/programs', function () {
+    $faculties = \App\Models\Faculty::with('departments.majors.programs')->get();
+    return view('public.programs', compact('faculties'));
+})->name('public.programs');
 
 Route::get('dashboard', function () {
     return view('dashboard');
@@ -155,8 +159,8 @@ Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
         Route::get('/manager/structure', StructureManager::class)
             ->name('manager.structure');
 
-        Route::get('/manager/calender', CalendarManager::class)
-            ->name('manager.calender');
+        Route::get('/manager/calendar', CalendarManager::class)
+            ->name('manager.calendar');
 
         // Course Catalog
         Route::get('/courses', CourseManager::class)

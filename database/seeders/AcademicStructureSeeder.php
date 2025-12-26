@@ -2,6 +2,7 @@
 namespace Database\Seeders;
 
 use App\Models\AcademicYear;
+use App\Models\Classroom;
 use App\Models\ClassSession;
 use App\Models\Course;
 use App\Models\Degree;
@@ -236,6 +237,7 @@ class AcademicStructureSeeder extends Seeder
                             $startTime = $times[array_rand($times)];
                             // Add 1 hour 30 mins (5400 seconds)
                             $endTime = date('H:i:s', strtotime($startTime) + 5400);
+                            $classroom = Classroom::inRandomOrder()->value('id');
 
                             ClassSession::updateOrCreate([
                                 'course_id'     => $course->id,
@@ -244,6 +246,7 @@ class AcademicStructureSeeder extends Seeder
                             ],
                             [
                                 'instructor_id' => $instructor->id,
+                                'classroom_id' => $classroom,
                                 'capacity'      => 40,
                                 'day_of_week'   => $days[array_rand($days)],
                                 'start_time'    => $startTime, // Use variable

@@ -1,134 +1,154 @@
 @props(['title' => 'Dashboard'])
 
-<header class="bg-white dark:bg-gray-800 shadow-sm">
-    <div class="flex items-center justify-between px-6 py-4">
-        <div class="flex items-start gap-3 overflow-hidden">
-            <x-application-logo class="w-8 h-8 text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span
-                class="font-bold text-xl text-gray-800 dark:text-white whitespace-nowrap transition-opacity duration-200">
-                Schul SYS
-            </span>
-        </div>
-        <div class="flex items-center">
+<header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
+    <div class="flex items-center justify-between px-4 py-3">
+
+        <!-- LEFT: Toggle & Logo & Title -->
+        <div class="flex items-center gap-4">
+
+            {{-- TOGGLE BUTTON (Moves Sidebar State) --}}
+            <button @click="sidebarCollapsed = !sidebarCollapsed"
+                class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <svg class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <!-- Logo (Optional if Sidebar has one, but good for Mobile) -->
+            <div class="hidden md:flex items-center gap-2">
+                <x-application-logo class="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                <span class="font-bold text-xl text-gray-800 dark:text-white tracking-tight">
+                    Schul SYS
+                </span>
+            </div>
+
+            <!-- Vertical Separator -->
+            <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2 hidden md:block"></div>
+
+            <!-- Dynamic Page Title -->
             @php
                 $currentRouteName = request()->route()?->getName();
-                $autoTitle = 'Dashboard'; // Default title
+                $autoTitle = $title; // Default to prop
 
-                if ($currentRouteName) {
+                if ($currentRouteName && $title === 'Dashboard') {
+                    // Smart Title Logic
                     $segments = explode('.', $currentRouteName);
-                    $lastSegment = array_pop($segments);
+                    $action = end($segments);
+                    $resource = prev($segments); // e.g. 'students'
 
-                    if ($lastSegment === 'index') {
-                        $baseName = ucfirst(str_replace(['-', '_'], ' ', implode(' ', $segments)));
-                        $autoTitle = !empty($baseName) ? $baseName . ' Management' : 'Dashboard';
-                    } elseif ($lastSegment === 'create') {
-                        $autoTitle = ucfirst(str_replace(['-', '_'], ' ', implode(' ', $segments))) . ' Create';
-                    } elseif ($lastSegment === 'edit') {
-                        $autoTitle = ucfirst(str_replace(['-', '_'], ' ', implode(' ', $segments))) . ' Edit';
-                    } elseif ($lastSegment === 'show') {
-                        $autoTitle = ucfirst(str_replace(['-', '_'], ' ', implode(' ', $segments))) . ' Details';
-                    } else {
-                        $autoTitle = ucfirst(str_replace(['-', '_'], ' ', $currentRouteName));
-                    }
+                    if (in_array($action, ['index', 'show', 'create', 'edit'])) {
+                        $resourceName = ucfirst(str_replace(['-', '_'], ' ', $resource));
+                        $actionName = ucfirst($action);
 
-                    if ($currentRouteName === 'dashboard') {
-                        $autoTitle = 'Dashboard';
-                    } elseif ($currentRouteName === 'profile.edit') {
-                        $autoTitle = 'Profile Settings';
+                        if ($action === 'index') {
+                            $autoTitle = "$resourceName Management";
+                        } elseif ($action === 'show') {
+                            $autoTitle = "$resourceName Details";
+                        } else {
+                            $autoTitle = "$actionName $resourceName";
+                        }
                     }
                 }
             @endphp
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ $autoTitle }}</h2>
+            <h1 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
+                {{ $autoTitle }}
+            </h1>
         </div>
 
-        <div class="flex items-center space-x-4">
+        <!-- RIGHT: Actions -->
+        <div class="flex items-center space-x-3">
+
             <!-- Theme Toggle -->
-            <div class="relative"
-                x-data="{ open: false }">
+            <div x-data="{ open: false }"
+                class="relative">
                 <button @click="open = !open"
-                    class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                    <svg class="w-6 h-6"
+                    class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors">
+                    <!-- Sun/Moon Icon based on state (Simplified generic icon here) -->
+                    <svg class="w-5 h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
                     </svg>
                 </button>
-
+                <!-- Theme Dropdown (Keep your existing logic) -->
                 <div x-show="open"
                     @click.away="open = false"
-                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
+                    style="display: none;"
+                    class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 border dark:border-gray-600 z-50">
                     <button onclick="window.themeController.setTheme('light')"
-                        class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Light Mode
-                    </button>
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Light</button>
                     <button onclick="window.themeController.setTheme('dark')"
-                        class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Dark Mode
-                    </button>
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Dark</button>
                     <button onclick="window.themeController.setTheme('device')"
-                        class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Device Setting
-                    </button>
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">System</button>
                 </div>
             </div>
 
-            <!-- User Menu -->
-            <div class="relative"
-                x-data="{ open: false }">
+            <!-- Profile Dropdown -->
+            <div x-data="{ open: false }"
+                class="relative">
                 <button @click="open = !open"
-                    class="flex p-2 rounded-lg bg-slate-100 dark:bg-slate-700 items-center space-x-2 focus:outline-none">
+                    class="flex items-center gap-2 p-1 pr-3 rounded-full border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <x-profile-image src="{{ Auth::user()->profile_picture_url }}"
-                        alt="{{ Auth::user()->username }}"
-                        size="xs" />
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ auth()->user()->name ?? 'Guest' }}
+                        alt="{{ Auth::user()->name }}"
+                        size="xs"
+                        class="h-8 w-8" />
+                    <span
+                        class="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        {{ Auth::user()->name }}
                     </span>
-                    <svg :class="{ 'rotate-180': open }"
-                        class="w-4 h-4 transition-transform"
+                    <svg class="w-4 h-4 text-gray-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M19 9l-7 7-7-7" />
+                            d="M19 9l-7 7-7-7">
+                        </path>
                     </svg>
                 </button>
 
                 <div x-show="open"
                     @click.away="open = false"
-                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
+                    style="display: none;"
+                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-1 border dark:border-gray-700 z-50">
+                    <div class="px-4 py-2 border-b dark:border-gray-700">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            Signed in as
+                        </p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                            {{ Auth::user()->email }}
+                        </p>
+                    </div>
+
                     <a href="{{ route('profile.edit') }}"
-                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Edit Profile
-                    </a>
-                    <a href="#"
-                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Profile
                         Settings
                     </a>
-                    <div class="border-t dark:border-gray-600"></div>
-                    <a href="{{ route('register') }}"
-                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Register new Accout
-                    </a>
-                    <a href="{{ route('login') }}"
-                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                        Login
-                    </a>
+
                     <form method="POST"
                         action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Logout
+                            class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Sign Out
                         </button>
                     </form>
                 </div>
             </div>
+
         </div>
     </div>
 </header>

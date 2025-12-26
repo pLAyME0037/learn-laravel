@@ -19,9 +19,36 @@ class StructureManager extends Component
     public $isEditing = false;
     public $itemId;
 
+    // Filters
+    public $search           = '';
+    public $filterFaculty    = '';
+    public $filterDepartment = '';
+    public $filterDegree     = '';
+
     // Generic Form Bucket
     public $formData = [];
 
+    public function updatedActiveTab()
+    {
+        $this->resetPage();    // <-- CRITICAL: Reset to Page 1 when tab changes
+        $this->resetFilters();
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters()
+    {
+        $this->reset([
+            'search',
+            'filterFaculty',
+            'filterDepartment',
+            'filterDegree',
+        ]);
+        $this->resetPage();
+    }
     // --- Validation Rules ---
     protected function rules()
     {
@@ -80,7 +107,7 @@ class StructureManager extends Component
             $this->formData['department_id'] = '';
             $this->formData['degree_id']     = '';
         }
-        
+
         if ($this->activeTab === 'programs') {
             $this->formData['major_id']  = '';
             $this->formData['degree_id'] = '';
@@ -174,14 +201,15 @@ class StructureManager extends Component
     // When Major changes in Program form, auto-select Degree
     public function updatedFormDataMajorId($value)
     {
-        if ($this->activeTab === 'programs' && $value) {
-            $major = Major::find($value);
-            if ($major) {
-                $this->formData['degree_id'] = $major->degree_id;
-                // Auto-suggest name
-                $degreeName             = Degree::find($major->degree_id)->name;
-                $this->formData['name'] = "{$degreeName} of {$major->name}";
-            }
+        if (! $this->activeTab === 'programs' && ! $value) {
+            return;
+        }
+        $major = Major::find($value);
+        if ($major) {
+            $this->formData['degree_id'] = $major->degree_id;
+            // Auto-suggest name
+            $degreeName             = Degree::find($major->degree_id)->name;
+            $this->formData['name'] = "{$degreeName} of {$major->name}";
         }
     }
 
@@ -192,39 +220,78 @@ class StructureManager extends Component
         // Load data based on active tab with eager loading
         if ($this->activeTab === 'faculties') {
             $data = Faculty::withCount('departments')
+                ->when($this->search, fn($q) =>
+                    $q->where('name', 'like', "%$this->search%"))
                 ->orderBy('name')
-                ->paginate(20);
-        }
-
-        if ($this->activeTab === 'degrees') {
-            $data = Degree::orderBy('name')
                 ->paginate(20);
         }
 
         if ($this->activeTab === 'departments') {
             $data = Department::with('faculty')
+                ->withCount('majors')
+                ->when(
+                    $this->search,
+                    fn($q) => $q->where('name', 'like', "%$this->search%")
+                        ->orWhere('code', 'like', "%$this->search%")
+                )
+                ->when(
+                    $this->filterFaculty,
+                    fn($q) => $q->where('faculty_id', $this->filterFaculty)
+                )
                 ->orderBy('name')
                 ->paginate(20);
         }
 
         if ($this->activeTab === 'majors') {
-            $data = Major::with(['department', 'degree'])
+            $data = Major::with(['department.faculty', 'degree'])
+                ->when(
+                    $this->search,
+                    fn($q) => $q->where('name', 'like', "%$this->search%")
+                )
+                ->when(
+                    $this->filterDepartment,
+                    fn($q) => $q->where('department_id', $this->filterDepartment)
+                )
+                ->when(
+                    $this->filterDegree,
+                    fn($q) => $q->where('degree_id', $this->filterDegree)
+                )
                 ->orderBy('name')
                 ->paginate(20);
         }
 
         if ($this->activeTab === 'programs') {
-            $data = Program::with(['major', 'degree'])
+            $data = Program::with(['major.department', 'degree'])
+                ->when(
+                    $this->search,
+                    fn($q) => $q->where('name', 'like', "%$this->search%"))
+                ->when(
+                    $this->filterDepartment, fn($q) =>
+                    $q->whereHas('major', fn($m) =>
+                        $m->where('department_id', $this->filterDepartment)
+                    )
+                )
+                ->orderBy('name')
+                ->paginate(20);
+        }
+
+        if ($this->activeTab === 'degrees') {
+            $data = Degree::when(
+                $this->search,
+                fn($q) => $q->where('name', 'like', "%$this->search%")
+            )
                 ->orderBy('name')
                 ->paginate(20);
         }
 
         return view('livewire.admin.academic.structure-manager', [
             'data'             => $data,
-            'faculties_list'   => Faculty::orderBy('name')->pluck('name', 'id'),
-            'departments_list' => Department::orderBy('name')->pluck('name', 'id'),
-            'degrees_list'     => Degree::pluck('name', 'id'),
-            'majors_list'      => Major::orderBy('name')->pluck('name', 'id'),
+            'faculties_list'   => Faculty::orderBy('name')->get(),
+            'departments_list' => Department::orderBy('name')->get(),
+            'degrees_list'     => Degree::orderBy('name')->get(),
+            'majors_list'      => $this->showModal
+                ? Major::orderBy('name')->pluck('name', 'id')
+                : [],
         ]);
     }
 }

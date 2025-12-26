@@ -113,10 +113,10 @@
 
                         {{-- CHECKBOX --}}
                         <x-table.cell class="w-4">
-                            <input type="checkbox"
-                                value="{{ $user->id }}"
-                                x-model="selected"
-                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600">
+                            <div
+                                class="h-6 w-6 rounded-full bg-indigo-100 shadow-md flex items-center justify-center text-indigo-700 font-bold text-sm">
+                                {{ $users->firstItem() + $loop->index }}
+                            </div>
                         </x-table.cell>
 
                         {{-- USER INFO --}}

@@ -44,9 +44,23 @@
 
             // Table Columns Definition
             $columns = [
-                ['key' => 'student_id', 'label' => 'Student Identity', 'align' => 'left'],
-                ['key' => 'department', 'label' => 'Program / Department', 'align' => 'center', 'width' => 'w-1/4'],
-                ['key' => 'address', 'label' => 'Address', 'align' => 'left', 'width' => 'w-1/4'],
+                [
+                    'key' => 'student_id',
+                    'label' => 'Student Identity',
+                    'align' => 'left',
+                ],
+                [
+                    'key' => 'department',
+                    'label' => 'Program / Department',
+                    'align' => 'center',
+                    'width' => 'w-1/4',
+                ],
+                [
+                    'key' => 'address',
+                    'label' => 'Address',
+                    'align' => 'left',
+                    'width' => 'w-1/4',
+                ],
                 ['key' => 'status', 'label' => 'Status', 'align' => 'center'],
                 ['key' => 'term', 'label' => 'Progress', 'align' => 'center'],
             ];
@@ -69,9 +83,7 @@
 
                         {{-- CHECKBOX --}}
                         <x-table.cell class="w-4">
-                            <input type="checkbox"
-                                value="{{ $student->id }}"
-                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600">
+                            c
                         </x-table.cell>
 
                         {{-- 1. IDENTITY --}}

@@ -20,7 +20,6 @@ class Classroom extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'capacity',
         'room_number',
         'building_name',

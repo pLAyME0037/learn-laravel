@@ -1,25 +1,70 @@
-<div class="py-6">
+<div class="py-0 max-w-7xl mx-auto sm:px-6 lg:px-8">
     <!-- Tabs Navigation -->
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-6 flex overflow-x-auto">
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6 flex overflow-x-auto space-x-1">
         @foreach (['faculties', 'departments', 'degrees', 'majors', 'programs'] as $tab)
             <button wire:click="$set('activeTab', '{{ $tab }}')"
                 class="px-6 py-3 font-medium text-sm focus:outline-none transition-colors 
                 {{ $activeTab === $tab
-                    ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200' }}">
+                    ? 'bg-white dark:bg-gray-800 border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
                 {{ ucfirst($tab) }}
             </button>
         @endforeach
     </div>
 
-    <!-- Action Bar -->
-    <div class="flex justify-between items-center mb-6">
+    <!-- FILTER SECTION (Dynamic based on Tab) -->
+    @php
+        $filtersConfig = [
+            [
+                'type' => 'text',
+                'name' => 'search',
+                'label' => 'Search Name',
+                'placeholder' => 'Type to search...',
+            ],
+        ];
+
+        // Add Specific Filters per Tab
+        if ($activeTab === 'departments') {
+            $filtersConfig[] = [
+                'type' => 'select',
+                'name' => 'filterFaculty',
+                'label' => 'Faculty',
+                'options' => $faculties_list->map(fn($f) => ['value' => $f->id, 'text' => $f->name])->toArray(),
+                'defaultOptionText' => 'All Faculties',
+            ];
+        }
+
+        if (in_array($activeTab, ['majors', 'programs'])) {
+            $filtersConfig[] = [
+                'type' => 'select',
+                'name' => 'filterDepartment',
+                'label' => 'Department',
+                'options' => $departments_list->map(fn($d) => ['value' => $d->id, 'text' => $d->name])->toArray(),
+                'defaultOptionText' => 'All Departments',
+            ];
+        }
+
+        if (in_array($activeTab, ['majors', 'programs'])) {
+            $filtersConfig[] = [
+                'type' => 'select',
+                'name' => 'filterDegree',
+                'label' => 'Degree Level',
+                'options' => $degrees_list->map(fn($d) => ['value' => $d->id, 'text' => $d->name])->toArray(),
+                'defaultOptionText' => 'All Levels',
+            ];
+        }
+    @endphp
+
+    <x-filter-live :filters="$filtersConfig" />
+
+    <!-- Action Bar (Create Button) -->
+    <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800 dark:text-white">
             {{ ucfirst($activeTab) }} List
         </h2>
-        <button wire:click="create"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
-            <span class="mr-2">+</span> Add New
+        <button wire:click="create" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+            <span class="mr-2 text-lg">+</span>
+             Add {{ ucfirst(substr($activeTab, 0, -1)) }}
         </button>
     </div>
 
@@ -29,54 +74,55 @@
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                         No
                     </th>
                     <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                         Name
                     </th>
 
                     @if ($activeTab === 'departments')
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Code
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Faculty
                         </th>
                     @endif
 
                     @if ($activeTab === 'majors')
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Department
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Degree
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Cost
                         </th>
                     @endif
 
                     @if ($activeTab === 'programs')
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Major
                         </th>
                         <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Degree
                         </th>
                     @endif
 
                     <th
-                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Actions</th>
+                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        Actions
+                    </th>
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">

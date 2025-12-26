@@ -52,12 +52,12 @@ class AuthenticatedSessionController extends Controller
         $level2 = $user->hasAnyRole(['instructor', 'profressor', 'staff']);
         $level3 = $user->hasRole('student');
 
-        switch ($user) {
-        case $level1: return redirect()->intended(route('admin.dashboard'));
-        case $level2: return redirect()->intended(route('instructor.dashboard'));
-        case $level3: return redirect()->intended(route('academic.dashboard'));
-        default: return redirect()->intended(route('dashboard', absolute: false));
-        }
+        return match(true) {
+            $level1 => redirect()->intended(route('admin.dashboard')),
+            $level2 => redirect()->intended(route('instructor.dashboard')),
+            $level3 => redirect()->intended(route('academic.dashboard')),
+            default => redirect()->intended(route('dashboard')),
+        };
     }
 
     /**

@@ -7,7 +7,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 3. Custom CSS THIRD */
-.font-battambang {
-    font-family: 'Battambang', sans-serif;
+/* 3. Custom CSS & Scrollbars */
+@layer base {
+    .font-battambang {
+        font-family: 'Battambang', sans-serif;
+    }
+
+    /* === MINIMAL SCROLLBAR (Chrome, Safari, Edge) === */
+    ::-webkit-scrollbar {
+        width: 6px;  /* Very thin vertical */
+        height: 6px; /* Very thin horizontal */
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent; /* Invisible track so content floats */
+    }
+
+    ::-webkit-scrollbar-thumb {
+        /* Light mode: Subtle gray */
+        background-color: theme('colors.gray.300'); 
+        border-radius: 9999px; /* Pill shape */
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        /* Hover: Slightly darker */
+        background-color: theme('colors.gray.400'); 
+    }
+
+    /* Dark Mode Scrollbar Overrides */
+    .dark ::-webkit-scrollbar-thumb {
+        background-color: theme('colors.gray.700');
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: theme('colors.gray.600');
+    }
+
+    /* === FIREFOX === */
+    * {
+        scrollbar-width: thin;
+        /* thumb color | track color */
+        scrollbar-color: theme('colors.gray.300') transparent;
+    }
+
+    .dark * {
+        scrollbar-color: theme('colors.gray.700') transparent;
+    }
 }

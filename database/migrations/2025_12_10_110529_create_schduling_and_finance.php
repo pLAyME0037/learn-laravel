@@ -8,12 +8,28 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('classrooms', function (Blueprint $table) {
+            $table->id();
+            $table->string('room_number')->unique(); // A-101
+            $table->string('building_name')->nullable();
+            $table->string('type')->default('Lecture Hall'); // Lab, Hall, etc.
+            $table->integer('capacity')->default(40);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         // The Instance (Specific Class time)
         Schema::create('class_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('instructor_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('instructor_id')->nullable()->constrained('users')
+                ->nullOnDelete();
+            $table->foreignId('classroom_id')
+                ->nullable()
+                ->after('instructor_id')
+                ->constrained('classrooms')
+                ->nullOnDelete();
 
             $table->string('section_name')->default('A');
             $table->integer('capacity')->default(40);
@@ -76,5 +92,6 @@ return new class extends Migration
         Schema::dropIfExists('enrollments');
         Schema::dropIfExists('class_sessions');
         Schema::dropIfExists('attendances');
+        Schema::dropIfExists('classrooms');
     }
 };
