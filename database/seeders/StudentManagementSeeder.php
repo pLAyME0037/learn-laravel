@@ -1,12 +1,10 @@
 <?php
-
 namespace Database\Seeders;
 
 use App\Models\Dictionary; // Or Gender model if you kept it
-use App\Models\Program;
-use App\Models\Role;
-use App\Models\Student;
 use App\Models\Location\Village;
+use App\Models\Program;
+use App\Models\Student;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +12,13 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentManagementSeeder extends Seeder
 {
+
     public function run(): void
     {
-        $faker        = Faker::create();
-        $now          = now();
+        Student::truncate();
+
+        $faker = Faker::create();
+        $now   = now();
         // Pre-hash password for performance
         $passwordHash = Hash::make('password');
         $studentCount = 50;
@@ -25,10 +26,10 @@ class StudentManagementSeeder extends Seeder
         // 1. Fetch Dependencies
         // Use Dictionary keys if using that system, or IDs if using Tables
         // Assuming Dictionary based on your recent code:
-        $genders = ['male', 'female']; 
+        $genders = ['male', 'female'];
         // If using Gender Table: $genders = \App\Models\Gender::pluck('id')->toArray();
 
-        $programs = Program::with('major.department')->get();
+        $programs   = Program::with('major.department')->get();
         $villageIds = Village::inRandomOrder()->limit(100)->pluck('id')->toArray();
 
         if ($programs->isEmpty()) {
@@ -40,14 +41,14 @@ class StudentManagementSeeder extends Seeder
         $studentRoleId = DB::table('roles')->where('name', 'student')->value('id');
 
         $bloodGroups = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-        
+
         DB::beginTransaction();
 
         for ($i = 0; $i < $studentCount; $i++) {
             $program = $programs->random();
-            
-            // Calculate Progress
-            $currentTerm = rand(1, 8); // Term 1-8
+
+                                                   // Calculate Progress
+            $currentTerm = rand(1, 8);             // Term 1-8
             $yearLevel   = ceil($currentTerm / 2); // 1-4
 
             // User Data
@@ -87,26 +88,26 @@ class StudentManagementSeeder extends Seeder
 
             // Encrypt Sensitive Data (if your schema requires it, otherwise nullable)
             // Here we skip encryption for seeder speed unless strictly enforced by Model Accessor
-            
+
             $studentIdStr = 'STU-' . $now->year . '-' . str_pad((string) rand(1, 99999), 5, '0', STR_PAD_LEFT);
 
             $student = Student::create([
                 'user_id'                 => $userId,
                 'program_id'              => $program->id,
                 'student_id'              => $studentIdStr,
-                
+
                 // Academic Progress
                 'year_level'              => $yearLevel,
                 'current_term'            => $currentTerm,
                 'academic_status'         => 'active',
-                
+
                 // Store JSON Attributes
                 'attributes'              => $attributes,
-                
+
                 // Others (if columns exist in your specific migration version)
                 'cgpa'                    => $faker->randomFloat(2, 2.0, 4.0),
-                'has_outstanding_balance' => (bool)rand(0, 1),
-                
+                'has_outstanding_balance' => (bool) rand(0, 1),
+
                 'created_at'              => $now,
                 'updated_at'              => $now,
             ]);
@@ -123,10 +124,81 @@ class StudentManagementSeeder extends Seeder
             $student->address()->create([
                 'current_address' => $faker->streetAddress,
                 'postal_code'     => $faker->postcode,
-                'village_id'      => !empty($villageIds) ? $villageIds[array_rand($villageIds)] : null,
+                'village_id'      => ! empty($villageIds) ? $villageIds[array_rand($villageIds)] : null,
             ]);
         }
 
         DB::commit();
     }
 }
+
+// use App\Models\User;
+// use App\Models\Student;
+// use App\Models\Address;
+// use App\Models\Location\Village;
+// use App\Models\ContactDetail;
+// use Illuminate\Support\Facades\Hash;
+// use Faker\Factory as Faker;
+
+// $faker = Faker::create();
+// $now = now();
+// $programId = 1;
+
+// if (class_exists(\Spatie\Permission\Models\Role::class)) {
+//     \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'student']);
+//     echo "Role 'student' ensured.\n";
+// }
+
+// $villageIds = Village::pluck('id')->toArray();
+// if (empty($villageIds)) {
+//     echo "Warning: No villages found. Addresses will have village_id = null.\n";
+// }
+
+// for ($i = 1; $i <= 20; $i++) {
+//     $firstName = $faker->firstName;
+//     $lastName  = $faker->lastName;
+//     $name      = "$firstName $lastName";
+//     $username  = strtolower($firstName . '.' . $lastName . $i);
+
+//     $user = User::create([
+//         'name'      => $name,
+//         'email'     => $faker->unique()->safeEmail,
+//         'username'  => $username,
+//         'password'  => Hash::make('password'),
+//         'is_active' => true,
+//     ]);
+
+//     if (method_exists($user, 'assignRole')) {
+//         $user->assignRole('student');
+//     }
+
+//     $student = Student::create([
+//         'user_id'         => $user->id,
+//         'student_id'      => 'STU' . $now->year . str_pad($i + 1000, 5, '0', STR_PAD_LEFT),
+//         'program_id'      => $programId,
+//         'academic_status' => 'active',
+//         'current_term'    => 1,
+//         'year_level'      => 1,
+//         'attributes'      => json_encode([
+//             'gender' => $faker->randomElement(['male', 'female']),
+//             'dob'    => $faker->date('Y-m-d', '2005-01-01'),
+//         ]),
+//     ]);
+
+//     $student->address()->create([
+//         'current_address' => $faker->streetAddress,
+//         'postal_code'     => $faker->postcode,
+//         'village_id'      => $villageIds ? $villageIds[array_rand($villageIds)] : null,
+//     ]);
+
+//     $student->contactDetail()->create([
+//         'phone'              => $faker->phoneNumber,
+//         'emergency_name'     => "Parent of $firstName",
+//         'emergency_phone'    => $faker->phoneNumber,
+//         'emergency_relation' => 'Parent',
+//     ]);
+
+//     echo "Created student {$i}/20: {$name} ({$student->student_id})\n";
+// }
+
+// echo "Done! 20 students created and enrolled in program ID {$programId}.\n";

@@ -68,7 +68,12 @@ class CourseManager extends Component
     {
         $this->validate([
             'name'          => 'required|string|max:255',
-            'code'          => ['required', 'string', 'max:20', Rule::unique('courses', 'code')->ignore($this->courseId)],
+            'code'          => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('courses', 'code')->ignore($this->courseId),
+            ],
             'credits'       => 'required|integer|min:0|max:10',
             'department_id' => 'required|exists:departments,id',
             'description'   => 'nullable|string',

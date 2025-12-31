@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Observers\EnrollmentObserver;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('database.default') === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON;');
+        }
+        
         // Admin-only directive
         Blade::if('admin', function () {
             $user = auth()->user();

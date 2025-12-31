@@ -32,8 +32,17 @@ class CurriculumBuilder extends Component
     public function loadCourses()
     {
         // Exclude courses already in the curriculum
-        $usedIds          = $this->program->programStructures()->pluck('course_id');
-        $this->allCourses = Course::whereNotIn('id', $usedIds)->orderBy('code')->get();
+        $usedIds          = $this->program
+        ->programStructures()
+        ->pluck('course_id');
+        $this->allCourses = Course::whereNotIn('id', $usedIds)
+        ->orderBy('code')
+        ->get()
+        ->map(fn($c) => [
+            'id'    => $c->id,
+            'label' => "{$c->name}",
+            'sub' => "Cap: {$c->code} • {$c->credits} (credits)",
+        ]);
     }
 
     public function addCourse()

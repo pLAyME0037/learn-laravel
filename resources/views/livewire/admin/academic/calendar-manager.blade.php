@@ -18,14 +18,6 @@
         </button>
     </div>
 
-    <!-- Notifications -->
-    @if (session('success'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4"
-            role="alert">
-            <p>{{ session('success') }}</p>
-        </div>
-    @endif
-
     <!-- List Years -->
     @foreach ($years as $year)
         <div class="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow overflow-hidden mb-6">

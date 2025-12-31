@@ -22,10 +22,11 @@ class EnrollmentObserver
         // Hybrid: Charge per credit based on Major's setting or System Default
         // $costPerCredit = 50.00; // Default
         // OR fetch from SystemConfig
-        $costPerCredit = SystemConfig::get('cost_per_credit', 50);
+        // $costPerCredit = SystemConfig::get('cost_per_credit', 50);
+        $rate = $student->program->major->cost_per_term ?? 50;
         
         // Calculate
-        $amountToAdd = $course->credits * $costPerCredit;
+        $amountToAdd = $course->credits * $rate;
 
         // 3. Find or Create Invoice for THIS Semester
         $invoice = Invoice::firstOrCreate(

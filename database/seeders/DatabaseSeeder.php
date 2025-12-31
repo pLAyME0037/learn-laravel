@@ -15,12 +15,13 @@ class DatabaseSeeder extends Seeder
             // CamGeoSeeder::class,
             // LocationSeeder::class,
             DictionarySeeder::class,
-            // AcademicStructureSeeder::class,
+            AcademicStructureSeeder::class,
             AdminSeeder::class,
             SystemConfigSeeder::class,
             InstructorSeeder::class,
             StudentManagementSeeder::class,
             ClassroomSeeder::class,
+            ClassSessionSeeder::class,
         ]);
     }
 }

@@ -32,6 +32,16 @@
                 </select>
             </div>
 
+            <!-- Instructor Filter -->
+            <div class="w-1/4">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+                    Instructor
+                </label>
+                <x-autocomplete-select :items="$instructors"
+                    wire-model="filterInst"
+                    placeholder="Type instructor name..." />
+            </div>
+
             <!-- Search -->
             <div class="flex-1">
                 <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
@@ -242,7 +252,8 @@
             aria-modal="true">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                    wire:click="$set('showModal', false)"></div>
+                    wire:click="$set('showModal', false)">
+                </div>
 
                 <div
                     class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
@@ -402,3 +413,6 @@
     @endif
 
 </div>
+@push('scripts')
+    <x-sweet-alert />
+@endpush

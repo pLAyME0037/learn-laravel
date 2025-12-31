@@ -243,8 +243,8 @@
                                     <select wire:model="formData.faculty_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Faculty</option>
-                                        @foreach ($faculties_list as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @foreach ($faculties_list as $faculty)
+                                            <option value="{{ $faculty->id }}">{{ $faculty->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('formData.faculty_id')
@@ -284,8 +284,8 @@
                                     <select wire:model="formData.department_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Department</option>
-                                        @foreach ($departments_list as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @foreach ($departments_list as $department)
+                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('formData.department_id')
@@ -299,8 +299,8 @@
                                     <select wire:model="formData.degree_id"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Degree</option>
-                                        @foreach ($degrees_list as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @foreach ($degrees_list as $degree)
+                                            <option value="{{ $degree->id }}">{{ $degree->name }}</option>
                                         @endforeach
                                     </select>
                                     @error('formData.degree_id')
@@ -385,3 +385,6 @@
         </div>
     @endif
 </div>
+@push('scripts')
+    <x-sweet-alert />
+@endpush

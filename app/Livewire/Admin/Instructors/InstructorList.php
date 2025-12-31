@@ -1,6 +1,7 @@
 <?php
 namespace App\Livewire\Admin\Instructors;
 
+use App\Models\Department;
 use App\Models\Instructor;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -10,7 +11,13 @@ class InstructorList extends Component
 {
     use WithPagination;
 
-    public $search = '';
+    public $search           = '';
+    public $filterDepartment = '';
+
+    public function updatedFilterDepartment()
+    {
+        $this->resetPage();
+    }
 
     public function delete($id)
     {
@@ -25,15 +32,22 @@ class InstructorList extends Component
     #[Layout('layouts.app', ['header' => 'Instructors'])]
     public function render()
     {
-        $instructors = Instructor::with(['user', 'department'])
-            ->whereHas('user', function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%');
-            })
-            ->orderBy('id')
-            ->paginate(10);
+        $query = Instructor::with(['user', 'department'])
+            ->whereHas('user', fn($q) =>
+                $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('email', 'like', "%{$this->search}%")
+            );
+
+        if ($this->filterDepartment) {
+            $query->where('department_id', $this->filterDepartment);
+        }
+
+        $instructors = $query->orderBy('id')->paginate(10);
+        $departments = Department::orderBy('name')->pluck('name', 'id');
 
         return view('livewire.admin.instructors.instructor-list', [
             'instructors' => $instructors,
+            'departments' => $departments,
         ]);
     }
 }

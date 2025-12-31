@@ -191,7 +191,7 @@ class UserController extends Controller
             return redirect()->route('admin.users.index')
                 ->with($key, $value);
         }
-        return null; // Return null if no redirection is needed
+        return null;
     }
 
     /**

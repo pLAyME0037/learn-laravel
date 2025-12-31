@@ -50,14 +50,16 @@ class ClassSession extends Model
 
     public function getScheduleLabelAttribute()
     {
-        return "{$this->day_of_week} " . 
-               substr($this->start_time, 0, 5) . '-' . substr($this->end_time, 0, 5);
+        return "{$this->day_of_week} " 
+        . substr($this->start_time, 0, 5) 
+        . '-' 
+        . substr($this->end_time, 0, 5);
     }
 
     public function getEnrolledCountAttribute()
     {
         return $this->enrollments()
-        ->where('status', ['enrolled', 'completed', 'graded', 'failed'])
+        ->whereIn('status', ['enrolled', 'completed', 'failed'])
         ->count();
     }
 

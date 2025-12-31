@@ -67,8 +67,12 @@ class StudentForm extends Component
             return;
         }
         $this->isEdit  = true;
-        $this->student = Student::with(['user', 'address', 'contactDetail'])
-            ->find($studentId);
+        $this->student = Student::with([
+            'user',
+            'address',
+            'contactDetail',
+            'program.major',
+        ])->find($studentId);
 
         // Hydrate Form
         $this->user['name']     = $this->student->user->name;
@@ -78,7 +82,7 @@ class StudentForm extends Component
         $this->profile['has_disability']     = $this->student->user->student->has_disability;
         $this->profile['disability_details'] = $this->student->user->student->disability_details;
 
-        if ($this->student->program) {
+        if ($this->student->program?->major) {
             $this->profile['department_id'] = $this->student->program->major->department_id;
         }
 
@@ -199,7 +203,7 @@ class StudentForm extends Component
                 $this->profile_pic,
             );
             return redirect()->route('admin.students.index')
-                ->with('success', "Student {$newStudent->student_id} created successfully!");;
+                ->with('success', "Student {$newStudent->student_id} created successfully!");
         } else {
             $service->registerStudent(
                 $this->user,

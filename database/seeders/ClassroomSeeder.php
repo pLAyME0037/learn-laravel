@@ -25,7 +25,7 @@ class ClassroomSeeder extends Seeder
             for ($floor = 1; $floor <= $info['floors']; $floor++) {
                 for ($room = 1; $room <= $info['rooms_per_floor']; $room++) {
                     
-                    // Room Number Logic: A-101, B-205
+                    // Room Number Logic: A-101
                     $roomNum = sprintf("%s-%d%02d", $code, $floor, $room);
                     
                     // Type Logic
@@ -33,10 +33,10 @@ class ClassroomSeeder extends Seeder
                     $capacity = 60;
 
                     if ($code === 'B' && $room > 4) {
-                        $type = 'Laboratory'; // Science labs at end of hall
+                        $type = 'Laboratory';
                         $capacity = 30;
                     } elseif ($code === 'C' && $floor === 1) {
-                        $type = 'Workshop'; // Engineering workshops on ground floor
+                        $type = 'Workshop';
                         $capacity = 40;
                     }
 
