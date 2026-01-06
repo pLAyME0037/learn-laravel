@@ -39,7 +39,8 @@
                 </label>
                 <x-autocomplete-select :items="$instructors"
                     wire-model="filterInst"
-                    placeholder="Type instructor name..." />
+                    placeholder="Type instructor name..."
+                    wire:key="autocomplete-instructor" />
             </div>
 
             <!-- Search -->
@@ -271,7 +272,8 @@
                                 </label>
                                 <x-autocomplete-select :items="$courses"
                                     wire-model="course_id"
-                                    placeholder="Type course code or name..." />
+                                    placeholder="Type course code or name..."
+                                    wire:key="autocomplete-course" />
                                 @error('course_id')
                                     <span class="text-red-500 text-xs">{{ $message }}</span>
                                 @enderror

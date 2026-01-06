@@ -9,13 +9,14 @@
     search: '',
     selectedId: null,
     selectedLabel: '',
-    items: @js($items),
+    items: @js($items ?? []),
 
     get filteredItems() {
+        if (! Array.isArray(this.items)) return [];
         if (this.search === '') return this.items;
         return this.items.filter(item =>
-            item.label.toLowerCase().includes(this.search.toLowerCase()) ||
-            (item.sub && item.sub.toLowerCase().includes(this.search.toLowerCase()))
+            item.label && String(item.label).toLowerCase().includes(this.search.toLowerCase()) 
+            {{-- || (item.sub && item.sub.toLowerCase().includes(this.search.toLowerCase())) --}}
         );
     },
 
@@ -109,11 +110,11 @@
     <!-- Dropdown -->
     <div x-show="open"
         x-transition.opacity.duration.200ms
-        class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-700 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+        class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-700 shadow-lg max-h-64 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
         style="display: none;">
 
-        <template x-for="item in filteredItems"
-            :key="item.id">
+        <template x-for="(item, index) in filteredItems"
+            :key="item.id + '-' + index">
             <div @click="selectItem(item.id, item.label)"
                 class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-600/50 hover:text-white text-gray-900 dark:text-gray-200"
                 :class="{ 'bg-indigo-600 text-white': selectedId == item.id }">

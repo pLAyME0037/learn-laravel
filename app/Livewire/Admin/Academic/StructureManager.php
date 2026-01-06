@@ -25,12 +25,10 @@ class StructureManager extends Component
     public $filterFaculty    = '';
     public $filterDepartment = '';
     public $filterDegree     = '';
-
     // Generic Form Bucket
     public $formData = [];
 
     // --- Hooks ---
-
     public function updatedActiveTab()
     {
         $this->resetPage();
@@ -70,7 +68,6 @@ class StructureManager extends Component
     }
 
     // --- Actions ---
-
     public function create()
     {
         $this->reset(['formData', 'itemId', 'isEditing']);
@@ -80,23 +77,66 @@ class StructureManager extends Component
 
     public function edit($id)
     {
+        $this->resetValidation();
+        $this->reset(['formData', 'itemId', 'isEditing']);
+
+        $modelClass = $this->getModelClass();
+        $model      = $modelClass::find($id);
+        if (! $model) {
+            $this->dispatch('swal:error', [
+                'message' => 'Record not found.',
+            ]);
+            return;
+        }
+
         $this->itemId    = $id;
         $this->isEditing = true;
-        $this->formData  = $this->getModelClass()::find($id)->toArray();
+        $this->formData  = $model->toArray();
+
+        if ($this->activeTab === 'programs' && $model->major_id) {
+            $this->updatedFormDataMajorId($model->major_id);
+        }
+
+        if (isset($this->formData['faculty_id'])) {
+            $this->formData['faculty_id'] = (string) $this->formData['faculty_id'];
+        }
+        if (isset($this->formData['department_id'])) {
+            $this->formData['department_id'] = (string) $this->formData['department_id'];
+        }
+        if (isset($this->formData['major_id'])) {
+            $this->formData['major_id'] = (string) $this->formData['major_id'];
+        }
+        if (isset($this->formData['degree_id'])) {
+            $this->formData['degree_id'] = (string) $this->formData['degree_id'];
+        }
+
         $this->showModal = true;
+        // dd($this->formData);
     }
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
 
-        $model = $this->getModelClass();
-        $model::updateOrCreate(['id' => $this->itemId], $this->formData);
+            $model = $this->getModelClass();
+            if ($this->isEditing && $this->itemId) {
+                $instance = $model::findOrFail($this->itemId);
+                $instance->update($this->formData);
+            } else {
+                $model::create($this->formData);
+            }
 
-        $this->showModal = false;
-        $this->dispatch('swal:success', [
-            'message' => ucfirst($this->activeTab) . ' saved.',
-        ]);
+            $this->showModal = false;
+            $this->dispatch('swal:success', [
+                'message' => ucfirst($this->activeTab) . ' saved.',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('swal:error', [
+                'message' => $e->validator->errors()->first(),
+            ]);
+            throw $e;
+        }
     }
 
     public function delete($id)
@@ -176,7 +216,8 @@ class StructureManager extends Component
                 ->orderBy('name')
                 ->paginate(20),
 
-            'departments' => Department::with('faculty')->withCount('majors')
+            'departments' => Department::with('faculty')
+                ->withCount('majors')
                 ->when($this->search, fn($q) =>
                     $q->where('name', 'like', "%{$this->search}%")
                         ->orWhere('code', 'like', "%{$this->search}%")
@@ -221,13 +262,30 @@ class StructureManager extends Component
 
         return view('livewire.admin.academic.structure-manager', [
             'data'             => $data,
-            'faculties_list'   => Faculty::orderBy('name')->get(),
-            'departments_list' => Department::orderBy('name')->get(),
-            'degrees_list'     => Degree::orderBy('name')->get(),
-            // Ensure this is always loaded if we are editing/creating a Program
-            'majors_list'      => ($this->showModal && $this->activeTab === 'programs')
-                ? Major::orderBy('name')->pluck('name', 'id')
-                : [],
+            'faculties_list'   => Faculty::orderBy('name')
+                ->get()
+                ->map(fn($f) => [
+                    'id'    => $f->id,
+                    'label' => $f->name,
+                ])->toArray(),
+            'departments_list' => Department::orderBy('name')
+                ->get()
+                ->map(fn($f) => [
+                    'id'    => $f->id,
+                    'label' => $f->name,
+                ])->toArray(),
+            'degrees_list'     => Degree::orderBy('name')
+                ->get()
+                ->map(fn($f) => [
+                    'id'    => $f->id,
+                    'label' => $f->name,
+                ])->toArray(),
+            'majors_list'      => Major::orderBy('name')->select('id', 'name')
+                ->get()
+                ->map(fn($f) => [
+                    'id'    => $f->id,
+                    'label' => $f->name,
+                ])->toArray(),
         ]);
     }
 }

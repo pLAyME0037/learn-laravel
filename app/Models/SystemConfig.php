@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -16,8 +15,8 @@ class SystemConfig extends Model
      */
     protected static function booted()
     {
-        static::saved(fn () => Cache::forget(self::CACHE_KEY));
-        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
+        static::saved(fn() => Cache::forget(self::CACHE_KEY));
+        static::deleted(fn() => Cache::forget(self::CACHE_KEY));
     }
 
     /**
@@ -44,11 +43,11 @@ class SystemConfig extends Model
             ['value' => $value]
         );
     }
-    
+
     /**
      * Helper checks for boolean values stored as text.
      */
-    public static function isTrue(string $key): bool 
+    public static function isTrue(string $key): bool
     {
         $val = self::get($key);
         return $val === '1' || $val === 'true' || $val === true;

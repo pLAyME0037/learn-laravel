@@ -160,9 +160,9 @@ class ScheduleManager extends Component
             ->sortBy('user.name')
             ->map(fn($inst) => [
                 'id'    => $inst->user_id,
-                'label' => $inst->user->name,
-                'sub'   => "{$inst->staff_id} • {$inst->department->name}",
-            ]);
+                'label' => $inst->user->name ?? 'Unknown',
+                'sub'   => "{$inst->staff_id} • {$inst->department->name}" ?? "N/A • N/A",
+            ])->values();
 
         // Courses Dropdown
         $courses = Course::orderBy('code')
@@ -172,7 +172,7 @@ class ScheduleManager extends Component
                 'id'    => $c->id,
                 'label' => "{$c->name}",
                 'sub'   => "{$c->code} - ({$c->credits} Credits)",
-            ]);
+            ])->values();
 
         // Classrooms Dropdown
         $classrooms = Classroom::orderBy('building_name')
@@ -182,7 +182,7 @@ class ScheduleManager extends Component
                 'id'    => $c->id,
                 'label' => "{$c->room_number} ({$c->type})",
                 'sub' => "Cap: {$c->capacity} • {$c->building_name}",
-            ]);
+            ])->values();
 
         return view('livewire.admin.academic.schedule-manager', [
             'sessions'    => $sessions,

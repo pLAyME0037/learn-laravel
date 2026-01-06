@@ -130,7 +130,7 @@ class AcademicStructureSeeder extends Seeder
                             'name'          => $majorName,
                             'department_id' => $deptId,
                             'degree_id'     => $degreeMap['Bachelor'],
-                            'cost_per_term' => 1500.00,
+                            'cost_per_term' => 500.00,
                             'created_at'    => $now,
                             'updated_at'    => $now,
                         ];

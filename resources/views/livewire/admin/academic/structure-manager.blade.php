@@ -29,7 +29,7 @@
                 'type' => 'select',
                 'name' => 'filterFaculty',
                 'label' => 'Faculty',
-                'options' => $faculties_list->map(fn($f) => ['value' => $f->id, 'text' => $f->name])->toArray(),
+                'options' => $faculties_list,
                 'defaultOptionText' => 'All Faculties',
             ];
         }
@@ -39,7 +39,7 @@
                 'type' => 'select',
                 'name' => 'filterDepartment',
                 'label' => 'Department',
-                'options' => $departments_list->map(fn($d) => ['value' => $d->id, 'text' => $d->name])->toArray(),
+                'options' => $departments_list,
                 'defaultOptionText' => 'All Departments',
             ];
         }
@@ -49,13 +49,15 @@
                 'type' => 'select',
                 'name' => 'filterDegree',
                 'label' => 'Degree Level',
-                'options' => $degrees_list->map(fn($d) => ['value' => $d->id, 'text' => $d->name])->toArray(),
+                'options' => $degrees_list,
                 'defaultOptionText' => 'All Levels',
             ];
         }
     @endphp
 
-    <x-filter-live :filters="$filtersConfig" />
+    <x-filter-live 
+    wire:key="filters-{{ $activeTab }}"
+    :filters="$filtersConfig" />
 
     <!-- Action Bar (Create Button) -->
     <div class="flex justify-between items-center mb-4">
@@ -104,7 +106,7 @@
                         </th>
                         <th
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                            Cost
+                            Cost per credit
                         </th>
                     @endif
 
@@ -227,6 +229,7 @@
                                     </label>
                                     <input type="text"
                                         wire:model="formData.name"
+                                        wire:key="fd-name-{{ $activeTab }}-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('formData.name')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -241,6 +244,7 @@
                                         Faculty
                                     </label>
                                     <select wire:model="formData.faculty_id"
+                                        wire:key="dept-faculty-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Faculty</option>
                                         @foreach ($faculties_list as $faculty)
@@ -257,6 +261,7 @@
                                     </label>
                                     <input type="text"
                                         wire:model="formData.name"
+                                        wire:key="dept-name-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('formData.name')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -268,6 +273,7 @@
                                     </label>
                                     <input type="text"
                                         wire:model="formData.code"
+                                        wire:key="dept-code-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('formData.code')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -282,10 +288,13 @@
                                         Department
                                     </label>
                                     <select wire:model="formData.department_id"
+                                        wire:key="major-dept-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Department</option>
                                         @foreach ($departments_list as $department)
-                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                            <option value="{{ $department->id }}">
+                                                {{ $department->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('formData.department_id')
@@ -297,10 +306,13 @@
                                         Degree Level
                                     </label>
                                     <select wire:model="formData.degree_id"
+                                        wire:key="major-degree-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Degree</option>
                                         @foreach ($degrees_list as $degree)
-                                            <option value="{{ $degree->id }}">{{ $degree->name }}</option>
+                                            <option value="{{ $degree->id }}">
+                                                {{ $degree->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('formData.degree_id')
@@ -313,6 +325,7 @@
                                     </label>
                                     <input type="text"
                                         wire:model="formData.name"
+                                        wire:key="major-name-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('formData.name')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -324,6 +337,7 @@
                                     </label>
                                     <input type="number"
                                         wire:model="formData.cost_per_term"
+                                        wire:key="major-cost-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @error('formData.cost_per_term')
                                         <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -338,10 +352,13 @@
                                         Major
                                     </label>
                                     <select wire:model.live="formData.major_id"
+                                        wire:key="prog-major-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                         <option value="">Select Major</option>
-                                        @foreach ($majors_list as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @foreach ($majors_list as $major)
+                                            <option value="{{ $major->id }}">
+                                                {{ $major->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('formData.major_id')
@@ -354,6 +371,7 @@
                                     </label>
                                     <input type="text"
                                         wire:model="formData.name"
+                                        wire:key="prog-name-{{ $itemId ?? 'new' }}"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     <p class="text-xs text-gray-500 mt-1">
                                         Full official name (e.g. Bachelor of Science in CS)
