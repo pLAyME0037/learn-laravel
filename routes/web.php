@@ -201,7 +201,7 @@ Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
         Route::get('/instructors/create', InstructorForm::class)
             ->name('instructors.create');
         // Edit
-        Route::get('/instructors/{instructor}/edit', InstructorForm::class)
+        Route::get('/instructors/{instructorId}/edit', InstructorForm::class)
             ->name('instructors.edit');
 
         Route::resource('instructors', InstructorController::class)

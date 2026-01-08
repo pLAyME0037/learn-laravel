@@ -46,4 +46,12 @@ class Instructor extends Model
     {
         return $this->morphOne(ContactDetail::class, 'contactable');
     }
+    
+    public function getOfficeHoursAttribute()
+    {
+        // Collect all class times
+        return $this->classSessions->map(function($session) {
+            return "{$session->day_of_week} {$session->start_time}-{$session->end_time}";
+        })->join(', ');
+    }
 }

@@ -169,46 +169,46 @@ class StudentList extends Component
         }
 
         switch ($action) {
-            case 'delete':
-                $student->delete();
-                $student->user()->delete();
-                $student->address()->delete();
-                $student->contactDetail()->delete();
-                $msg = 'Student and User account moved to trash.';
-                break;
+        case 'delete':
+            $student->delete();
+            $student->user()->delete();
+            $student->address()->delete();
+            $student->contactDetail()->delete();
+            $msg = 'Student and User account moved to trash.';
+            break;
 
-            case 'restore':
-                $student->restore();
+        case 'restore':
+            $student->restore();
 
-                // Fetch the Trashed User Model
-                $user = $student->user()->withTrashed()->first();
-                if ($user && $user->trashed()) {
-                    $user->restore();
-                }
+            // Fetch the Trashed User Model
+            $user = $student->user()->withTrashed()->first();
+            if ($user && $user->trashed()) {
+                $user->restore();
+            }
 
-                // Fetch Trashed Address
-                $address = $student->address()->withTrashed()->first();
-                if ($address && $address->trashed()) {
-                    $address->restore();
-                }
+            // Fetch Trashed Address
+            $address = $student->address()->withTrashed()->first();
+            if ($address && $address->trashed()) {
+                $address->restore();
+            }
 
-                // Fetch Trashed Contact
-                $contact = $student->contactDetail()->withTrashed()->first();
-                if ($contact && $contact->trashed()) {
-                    $contact->restore();
-                }
+            // Fetch Trashed Contact
+            $contact = $student->contactDetail()->withTrashed()->first();
+            if ($contact && $contact->trashed()) {
+                $contact->restore();
+            }
 
-                $msg = 'Student record restored.';
-                break;
+            $msg = 'Student record restored.';
+            break;
 
-            case 'force_delete':
-                if ($student->user) {
-                    $student->user()->forceDelete();
-                }
+        case 'force_delete':
+            if ($student->user) {
+                $student->user()->forceDelete();
+            }
 
-                $student->forceDelete();
-                $msg = 'Student permanently deleted.';
-                break;
+            $student->forceDelete();
+            $msg = 'Student permanently deleted.';
+            break;
         }
 
         $this->dispatch('swal:success', ['message' => $msg]);

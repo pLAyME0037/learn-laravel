@@ -83,10 +83,9 @@ class Student extends Model
     {
         // 1. Eager Load
         $query->with([
-            'user'          => fn($q)          => $q->withTrashed(),
+            'user'          => fn($q) => $q->withTrashed(),
             'program.major.department',
-            'address'       => fn($q)       => $q->withTrashed()
-                ->with('village'),
+            'address'       => fn($q) => $q->withTrashed()->with('village'),
             'contactDetail' => fn($q) => $q->withTrashed(),
         ]);
 

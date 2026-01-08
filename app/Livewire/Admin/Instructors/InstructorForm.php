@@ -5,6 +5,7 @@ use App\Models\Department;
 use App\Models\Instructor;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -23,9 +24,10 @@ class InstructorForm extends Component
         'confirm_password' => '',
     ];
     public $profile = [
-        'staff_id'      => '',
-        'department_id' => '',
-        'payscale'      => 1,
+        'staff_id'       => '', // should be auto-generate
+        'department_id'  => '',
+        // dynamic attribute
+        'specialization' => '',
     ];
     public $address = [
         'current_address' => '',
@@ -43,11 +45,16 @@ class InstructorForm extends Component
 
     public function mount($instructorId = null)
     {
+        // dd($this->instructor->toArray(), $this->user, $this->contact, $this->address);
         $this->departments = Department::pluck('name', 'id');
 
         if ($instructorId) {
             $this->isEdit     = true;
-            $this->instructor = Instructor::with(['user', 'address', 'contactDetail'])->find($instructorId);
+            $this->instructor = Instructor::with([
+                'user',
+                'address',
+                'contactDetail',
+            ])->find($instructorId);
 
             // Hydrate
             $this->user['name']             = $this->instructor->user->name;
@@ -55,7 +62,10 @@ class InstructorForm extends Component
             $this->user['email']            = $this->instructor->user->email;
             $this->profile['staff_id']      = $this->instructor->staff_id;
             $this->profile['department_id'] = $this->instructor->department_id;
-            // $this->profile['payscale'] = $this->instructor->payscale; // If you use this
+
+            // Load json attribute
+            $attr                            = $this->instructor->attributes ?? [];
+            $this->profile['specialization'] = $attr['specialization'] ?? '';
 
             if ($this->instructor->address) {
                 $this->address = $this->instructor->address->only(['current_address', 'postal_code', 'village_id']);
@@ -63,6 +73,10 @@ class InstructorForm extends Component
             if ($this->instructor->contactDetail) {
                 $this->contact = $this->instructor->contactDetail->only(['phone', 'emergency_name', 'emergency_phone']);
             }
+        }
+
+        if (! $instructorId) {
+            $this->profile['staff_id'] = "STF-" . now()->year . '-' . str_pad((string) rand(1, 9999), 4, "0", STR_PAD_LEFT);
         }
     }
 
@@ -99,12 +113,29 @@ class InstructorForm extends Component
     public function save()
     {
         $rules = [
-            'user.name'             => 'required|string|max:255',
-            'user.email'            => 'required|email|unique:users,email' . ($this->isEdit ? ',' . $this->instructor->user_id : ''),
-            'user.username' => 'required|string|max:50|unique:users,username' . ($this->isEdit ? ',' . $this->instructor->user_id : ''),
-            'profile.department_id' => 'required|exists:departments,id',
-            'profile.staff_id'      => 'required|string|unique:instructors,staff_id' . ($this->isEdit ? ',' . $this->instructor->id : ''),
-            'contact.phone'         => 'required',
+            'user.name'              => 'required|string|max:255',
+            'user.email'             => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')
+                    ->ignore($this->isEdit ? $this->instructor->user_id : null),
+            ],
+            'user.username'          => [
+                'required',
+                'string',
+                'max:50', Rule::unique('users', 'username')
+                    ->ignore($this->isEdit ? $this->instructor->user_id : null),
+            ],
+            'profile.department_id'  => 'required|exists:departments,id',
+            'profile.staff_id'       => [
+                'nullable',
+                'string',
+                Rule::unique('instructors', 'staff_id')
+                    ->ignore($this->isEdit ? $this->instructor->id : null),
+            ],
+            'profile.specialization' => 'required|string|max:125',
+            'profile.office_hours'   => 'nullable',
+            'contact.phone'          => 'required',
         ];
 
         if (! $this->isEdit) {
@@ -113,32 +144,45 @@ class InstructorForm extends Component
 
         $this->validate($rules);
 
-        // Logic here (Or extract to InstructorService)
-        // For brevity, I'll put basic logic here, but you should use a Service like StudentService
         DB::transaction(function () {
             // 1. User
             if ($this->isEdit) {
-                $this->instructor->user->update([
-                    'name'  => $this->user['name'],
-                    'email' => $this->user['email'],
+                $userData = [
+                    'name'     => $this->user['name'],
+                    'email'    => $this->user['email'],
                     'username' => $this->user['username'],
-                ]);
+                ];
+                $this->instructor->user->update($userData);
+                if (! empty($this->user['password'])) {
+                    $userData['password'] = bcrypt($this->user['password']);
+                }
                 $user = $this->instructor->user;
             } else {
                 $user = User::create([
                     'name'      => $this->user['name'],
                     'email'     => $this->user['email'],
-                    'username' => $this->user['username'],
+                    'username'  => $this->user['username'],
                     'password'  => bcrypt($this->user['password']),
                     'is_active' => true,
                 ]);
-                $user->assignRole('staff'); // Spatie Role
+                $user->assignRole('instructor'); // Spatie Role
             }
 
             // 2. Instructor Profile
+            $attribute = [
+                'specialization' => $this->profile['specialization'],
+                // 'office_hours' => $this->profile['office_hours'],
+            ];
+
+            $staffId = $this->profile['staff_id'];
+            if (empty($staffId)) {
+                $staffId = "STF-" . now()->year . '-' . str_pad((string) rand(1, 9999), 4, "0", STR_PAD_LEFT);
+            }
+
             $instructorData = [
                 'department_id' => $this->profile['department_id'],
-                'staff_id'      => $this->profile['staff_id'],
+                'staff_id'      => $staffId,
+                'attributes'    => $attribute,
             ];
 
             if ($this->isEdit) {
@@ -148,13 +192,22 @@ class InstructorForm extends Component
                 $instructor = Instructor::create(array_merge(['user_id' => $user->id], $instructorData));
             }
 
-            // 3. Polymorphic Relations
-            $instructor->contactDetail()->updateOrCreate([], $this->contact);
-            $instructor->address()->updateOrCreate([], $this->address);
+            // 3. Relations
+            $instructor->contactDetail()->updateOrCreate([], [
+                'phone'           => $this->contact['phone'],
+                'emergency_name'  => $this->contact['emergency_name'] ?? null,
+                'emergency_phone' => $this->contact['emergency_phone'] ?? null,
+            ]);
+
+            $instructor->address()->updateOrCreate([], [
+                'current_address' => $this->address['current_address'] ?? null,
+                'postal_code'     => $this->address['postal_code'] ?? null,
+                'village_id'      => $this->address['village_id'] ?? null,
+            ]);
         });
 
-        session()->flash('success', 'Instructor saved successfully.');
-        return redirect()->route('admin.instructors.index');
+        return redirect()->route('admin.instructors.index')
+            ->with('success', 'Instructor saved successfully.');
     }
 
     #[Layout('layouts.app', ['header' => 'Instructor Management'])]

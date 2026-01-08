@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire\Admin\Academic;
 
 use App\Models\Degree;
@@ -25,6 +26,7 @@ class StructureManager extends Component
     public $filterFaculty    = '';
     public $filterDepartment = '';
     public $filterDegree     = '';
+
     // Generic Form Bucket
     public $formData = [];
 
@@ -88,30 +90,11 @@ class StructureManager extends Component
             ]);
             return;
         }
+        $this->formData = $model->toArray();
 
         $this->itemId    = $id;
         $this->isEditing = true;
-        $this->formData  = $model->toArray();
-
-        if ($this->activeTab === 'programs' && $model->major_id) {
-            $this->updatedFormDataMajorId($model->major_id);
-        }
-
-        if (isset($this->formData['faculty_id'])) {
-            $this->formData['faculty_id'] = (string) $this->formData['faculty_id'];
-        }
-        if (isset($this->formData['department_id'])) {
-            $this->formData['department_id'] = (string) $this->formData['department_id'];
-        }
-        if (isset($this->formData['major_id'])) {
-            $this->formData['major_id'] = (string) $this->formData['major_id'];
-        }
-        if (isset($this->formData['degree_id'])) {
-            $this->formData['degree_id'] = (string) $this->formData['degree_id'];
-        }
-
         $this->showModal = true;
-        // dd($this->formData);
     }
 
     public function save()
@@ -133,7 +116,7 @@ class StructureManager extends Component
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->dispatch('swal:error', [
-                'message' => $e->validator->errors()->first(),
+                'message' => $e->validator->errors()->first()
             ]);
             throw $e;
         }
@@ -210,7 +193,9 @@ class StructureManager extends Component
     {
         $data = match ($this->activeTab) {
             'faculties' => Faculty::withCount('departments')
-                ->when($this->search, fn($q) =>
+                ->when(
+                    $this->search,
+                    fn ($q) =>
                     $q->where('name', 'like', "%{$this->search}%")
                 )
                 ->orderBy('name')
@@ -218,42 +203,60 @@ class StructureManager extends Component
 
             'departments' => Department::with('faculty')
                 ->withCount('majors')
-                ->when($this->search, fn($q) =>
+                ->when(
+                    $this->search,
+                    fn ($q) =>
                     $q->where('name', 'like', "%{$this->search}%")
                         ->orWhere('code', 'like', "%{$this->search}%")
                 )
-                ->when($this->filterFaculty, fn($q) =>
+                ->when(
+                    $this->filterFaculty,
+                    fn ($q) =>
                     $q->where('faculty_id', $this->filterFaculty)
                 )
                 ->orderBy('name')
                 ->paginate(20),
 
             'majors' => Major::with(['department.faculty', 'degree'])
-                ->when($this->search, fn($q) =>
+                ->when(
+                    $this->search,
+                    fn ($q) =>
                     $q->where('name', 'like', "%{$this->search}%")
                 )
-                ->when($this->filterDepartment, fn($q) =>
+                ->when(
+                    $this->filterDepartment,
+                    fn ($q) =>
                     $q->where('department_id', $this->filterDepartment)
                 )
-                ->when($this->filterDegree, fn($q) =>
+                ->when(
+                    $this->filterDegree,
+                    fn ($q) =>
                     $q->where('degree_id', $this->filterDegree)
                 )
                 ->orderBy('name')
                 ->paginate(20),
 
             'programs' => Program::with(['major.department', 'degree'])
-                ->when($this->search, fn($q) =>
+                ->when(
+                    $this->search,
+                    fn ($q) =>
                     $q->where('name', 'like', "%{$this->search}%")
                 )
-                ->when($this->filterDepartment, fn($q) =>
-                    $q->whereHas('major', fn($m) =>
+                ->when(
+                    $this->filterDepartment,
+                    fn ($q) =>
+                    $q->whereHas(
+                        'major',
+                        fn ($m) =>
                         $m->where('department_id', $this->filterDepartment)
                     )
                 )
                 ->orderBy('name')
                 ->paginate(20),
 
-            'degrees' => Degree::when($this->search, fn($q) =>
+            'degrees' => Degree::when(
+                $this->search,
+                fn ($q) =>
                 $q->where('name', 'like', "%{$this->search}%")
             )
                 ->orderBy('name')
@@ -262,30 +265,12 @@ class StructureManager extends Component
 
         return view('livewire.admin.academic.structure-manager', [
             'data'             => $data,
-            'faculties_list'   => Faculty::orderBy('name')
-                ->get()
-                ->map(fn($f) => [
-                    'id'    => $f->id,
-                    'label' => $f->name,
-                ])->toArray(),
-            'departments_list' => Department::orderBy('name')
-                ->get()
-                ->map(fn($f) => [
-                    'id'    => $f->id,
-                    'label' => $f->name,
-                ])->toArray(),
-            'degrees_list'     => Degree::orderBy('name')
-                ->get()
-                ->map(fn($f) => [
-                    'id'    => $f->id,
-                    'label' => $f->name,
-                ])->toArray(),
-            'majors_list'      => Major::orderBy('name')->select('id', 'name')
-                ->get()
-                ->map(fn($f) => [
-                    'id'    => $f->id,
-                    'label' => $f->name,
-                ])->toArray(),
+            'faculties_list'   => Faculty::orderBy('name')->get(),
+            'departments_list' => Department::orderBy('name')->get(),
+            'degrees_list'     => Degree::orderBy('name')->get(),
+            'majors_list'      => ($this->showModal && $this->activeTab === 'programs')
+                ? Major::orderBy('name')->select('id', 'name')->get()
+                : [],
         ]);
     }
 }

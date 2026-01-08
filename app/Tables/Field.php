@@ -84,6 +84,12 @@ class Field
         return $instance;
     }
 
+    public function label(string $label): self
+    {
+        $this->label = $label;
+        return $this;
+    }
+
     public function css(string $classes): self
     {
         $this->css = $classes;
@@ -130,6 +136,9 @@ class Field
             return 'N/A';
         }
 
+        if ($this->label && $value && $value !== 'N/A') {
+            return $this->label . $value;
+        }
         return $value;
     }
 }
