@@ -21,7 +21,7 @@
                 icon="academic-cap"
                 color="indigo" />
             <x-academic.stat-card title="Current Term"
-                value="{{ auth()->user()->student->getAcademicProgressAttribute() ?? 'N/A' }}"
+                value="{{ auth()->user()->student->academic_progress ?? 'N/A' }}"
                 icon="book-open"
                 color="emerald" />
             <x-academic.stat-card title="Status"

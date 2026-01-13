@@ -8,66 +8,12 @@ use Illuminate\Support\Facades\DB;
 class StudentController extends Controller
 {
     /**
-     * Display list of students.
-     * Logic handled by Livewire Table component.
-     */
-    public function index()
-    {
-        return view('admin.students.index');
-    }
-
-    /**
-     * Show form to create new student.
-     * Logic handled by Livewire Form component.
-     */
-    public function create()
-    {
-        return view('admin.students.create');
-    }
-
-    /**
      * Display specific student profile (ReadOnly).
      */
     public function show(Student $student)
     {
         $student->load(['user', 'program.major', 'address', 'contactDetail', 'enrollments']);
         return view('admin.students.show', compact('student'));
-    }
-
-    /**
-     * Show form to edit student.
-     */
-    public function edit(Student $student)
-    {
-        return view('admin.students.edit', compact('student'));
-    }
-
-    /**
-     * Delete (Soft Delete) the student.
-     */
-    public function destroy(Student $student)
-    {
-        DB::transaction(function () use ($student) {
-            $student->delete();
-        });
-
-        return back()->with('success', 'Student moved to trash.');
-    }
-
-    public function restore($id)
-    {
-        $student = Student::withTrashed()->findOrFail($id);
-        $student->restore();
-        return back()->with('success', 'Student restored.');
-    }
-
-    public function forceDelete($id)
-    {
-        $student = Student::withTrashed()->findOrFail($id);
-        $student->user()->forceDelete();
-        $student->forceDelete();
-
-        return back()->with('success', 'Student permanently deleted.');
     }
 
     /**

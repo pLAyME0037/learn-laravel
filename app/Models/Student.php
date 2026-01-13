@@ -127,4 +127,16 @@ class Student extends Model
     {
         return $this->program?->major?->department;
     }
+
+    protected function academicProgress(): Attribute
+    {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $term = $attributes['current_term'] ?? 1;
+                $year = ceil($term / 2);
+                $sem = ($term % 2 == 0) ? 2 : 1;
+                return "Year {$year}, Semester {$sem}";
+            }
+        );
+    }
 }

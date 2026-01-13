@@ -56,7 +56,7 @@
                                             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                             {{ $permission->name }}
                                         </td>
-                                        <td class="px-6 py-4">{{ $permission->group_name ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4">{{ $permission->group ?? 'N/A' }}</td>
                                         <td class="px-6 py-4">{{ $permission->description ?? 'N/A' }}</td>
                                         <td class="px-6 py-4">
                                             @forelse ($permission->roles as $role)
@@ -71,11 +71,14 @@
                                         <td><a href="{{ route('admin.permissions.edit', $permission->id) }}">
                                                 {{ __('Edit') }}
                                             </a>
-                                        
-                                            <form action="{{ route('admin.permissions.destroy', $permission->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this permission?');">
+
+                                            <form action="{{ route('admin.permissions.destroy', $permission->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this permission?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                                <button type="submit"
+                                                    class="text-red-600 hover:text-red-900">
                                                     {{ __('Delete') }}
                                                 </button>
                                             </form>

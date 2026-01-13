@@ -249,7 +249,6 @@ class StudentService
                     foreach ($students as $student) {
                         $newTerm = $student->current_term + 1;
                         
-                        // Assuming 4-year degree (8 terms)
                         if ($newTerm > 8) {
                             $student->update(['academic_status' => 'graduated']);
                         } else {

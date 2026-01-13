@@ -138,7 +138,7 @@ class ScheduleManager extends Component
     #[Layout('layouts.app', ['header' => 'Class Schedule'])]
     public function render()
     {
-        $sessions = ClassSession::with(['course', 'instructor', 'classroom'])
+        $sessions = ClassSession::with(['course', 'user', 'classroom'])
             ->where('semester_id', $this->semester_id)
             ->when($this->filterDay, fn($q) =>
                 $q->where('day_of_week', $this->filterDay))

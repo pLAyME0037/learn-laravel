@@ -113,15 +113,22 @@
                 <div
                     class="mt-6 p-4 rounded-lg flex justify-between items-center {{ $targetStudentCount > 0 ? 'bg-blue-50 border border-blue-200 dark:bg-blue-900/30 dark:border-blue-800' : 'bg-gray-100 dark:bg-gray-700' }}">
                     <div>
-                        <span class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400">Target
-                            Students</span>
+                        <span class="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400">
+                            Target Students
+                        </span>
                         @if ($targetStudentCount > 0)
-                            <span class="text-xs text-blue-600 dark:text-blue-400">Ready to enroll</span>
+                            <span class="text-xs text-blue-600 dark:text-blue-400">
+                                Ready to enroll
+                            </span>
                         @else
-                            <span class="text-xs text-red-500">No active students</span>
+                            <span class="text-xs text-red-500">
+                                No active students
+                            </span>
                         @endif
                     </div>
-                    <div class="text-3xl font-bold text-gray-800 dark:text-white">{{ $targetStudentCount }}</div>
+                    <div class="text-3xl font-bold text-gray-800 dark:text-white">
+                        {{ $targetStudentCount }}
+                    </div>
                 </div>
             </div>
 

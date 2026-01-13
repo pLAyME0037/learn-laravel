@@ -150,8 +150,6 @@ class CalendarManager extends Component
     public function closeSemester(StudentService $service)
     {
         // 1. Deactivate current semesters
-        // (Optional: You might want to keep it active for history until manually changed,
-        // but typically 'Closing' implies deactivating)
         // Semester::query()->update(['is_active' => false]);
 
         // 2. Promote Students

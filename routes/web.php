@@ -71,18 +71,6 @@ Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
         Route::get('/dashboard', AdminDashboard::class)
             ->name('dashboard');
 
-        Route::resource('departments', DepartmentController::class)
-            ->except(['show']);
-        Route::get('/departments/{department}/show', [
-            DepartmentController::class, 'show',
-        ])->name('departments.show');
-        Route::get('/departments/{department}/restore', [
-            DepartmentController::class, 'restore',
-        ])->name('departments.restore');
-        Route::get('/departments/{department}/force-delete', [
-            DepartmentController::class, 'forceDelete',
-        ])->name('departments.force-delete');
-
         Route::resource('users', UserController::class);
         Route::get('users/{user}/edit-access', [
             UserController::class, 'editAccess',
@@ -121,10 +109,6 @@ Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
             RoleController::class, 'updatePermissions',
         ])->name('roles.update-permissions');
 
-        Route::resource('semesters', SemesterController::class);
-
-        Route::resource('transaction-ledgers', TransactionLedgerController::class);
-
         Route::resource('permissions', PermissionController::class)
             ->except(['show']);
 
@@ -132,23 +116,6 @@ Route::middleware(['auth', 'verified', 'role:admin|Super Administrator'])
         // Route::post('send-notification', [
         //     NotificationController::class, 'sendGeneralNotification',
         // ])->name('send-notification');
-
-        // // Backup & Recovery
-        // Route::get('backups', [
-        //     BackupController::class, 'index',
-        // ])->name('backups.index');
-        // Route::post('backups/create', [
-        //     BackupController::class, 'create',
-        // ])->name('backups.create');
-        // Route::get('backups/download/{filename}', [
-        //     BackupController::class, 'download',
-        // ])->name('backups.download');
-        // Route::post('backups/restore/{filename}', [
-        //     BackupController::class, 'restore',
-        // ])->name('backups.restore');
-        // Route::delete('backups/{filename}', [
-        //     BackupController::class, 'destroy',
-        // ])->name('backups.destroy');
 
         Route::get('/settings/dictionaries', DictionaryManager::class)
             ->name('settings.dictionaries');

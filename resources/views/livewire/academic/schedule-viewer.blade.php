@@ -41,8 +41,8 @@
 
                     <!-- Classes Column -->
                     <div class="p-2 flex-1 space-y-3">
-                        @if (isset($schedule[$shortDay])) 
-                        {{-- Use the SHORT key ($shortDay) to lookup data --}}
+                        @if (isset($schedule[$shortDay]))
+                            {{-- Use the SHORT key ($shortDay) to lookup data --}}
                             @foreach ($schedule[$shortDay] as $class)
                                 <div
                                     class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow border-l-4 border-indigo-500 hover:shadow-md transition-shadow group">
@@ -63,6 +63,18 @@
                                         {{ $class->course->name }}
                                     </p>
 
+                                    <!-- Course Info -->
+                                    <h4 class="font-bold text-gray-900 dark:text-white text-sm">
+                                        <span>Instructor
+                                            {{ $class->user->name }}
+                                        </span>
+                                    </h4>
+
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">
+                                        {{ $class->user->instructor->contactDetail->phone ?? 'N/A' }}
+                                    </p>
+                                    <!-- traverse: ClassSession → User → Instructor Profile → Contact Detail. -->
+
                                     <!-- Details -->
                                     <div
                                         class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500">
@@ -82,7 +94,8 @@
                                                 <path stroke-linecap="round"
                                                     stroke-linejoin="round"
                                                     stroke-width="2"
-                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
+                                                </path>
                                             </svg>
                                             {{ $class->classroom->room_number ?? 'TBA' }}
                                         </span>

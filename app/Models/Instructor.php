@@ -34,7 +34,7 @@ class Instructor extends Model
 
     public function classSessions()
     {
-        return $this->hasMany(ClassSession::class);
+        return $this->hasMany(ClassSession::class, 'instructor_id', 'user_id');
     }
 
     public function address()

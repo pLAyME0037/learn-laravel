@@ -149,16 +149,16 @@
                                 <div
                                     class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs mr-3">
                                     <x-profile-image size="xs"
-                                        src="{{ $class->instructor->profile_picture_url }}"
-                                        alt="{{ $class->instructor->username ?? 'N/A' }}" />
+                                        src="{{ $class->user->profile_picture_url }}"
+                                        alt="{{ $class->user->username ?? 'N/A' }}" />
                                 </div>
                                 <div>
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ $class->instructor->name ?? 'Unassigned' }}</div>
-                                    @if ($class->instructor)
+                                        {{ $class->user->name ?? 'Unassigned' }}</div>
+                                    @if ($class->user)
                                         <!-- Assuming you want to show email or staff ID -->
                                         <div class="text-xs text-gray-500">
-                                            {{ $class->instructor->email }}
+                                            {{ $class->user->email }}
                                         </div>
                                     @endif
                                 </div>

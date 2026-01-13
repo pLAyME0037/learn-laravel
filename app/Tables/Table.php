@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Tables;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -38,16 +39,19 @@ class Table
         return $this;
     }
 
-    // Power of Ten: Limit complexity.
-    // We process data here to ensure the view never fails.
     public function build(): array
     {
-        $paginator = $this->query->paginate($this->perPage);
+        $paginator = $this->query->paginate($this->perPage ?? 10);
 
-        return [
+        $result = [
             'headers' => $this->columns,
             'rows'    => $paginator,
-            'style'   => $this->style,
+            'style'   => $this->style ?? 'full',
         ];
+
+        if (!is_array($result)) {
+            die('Table class is broken internally');
+        }
+        return $result;
     }
 }

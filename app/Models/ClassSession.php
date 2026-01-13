@@ -19,7 +19,7 @@ class ClassSession extends Model
         'course_id',
         'semester_id',
         'instructor_id',
-        'classroom_id', // Optional: link to Room model if you have one
+        'classroom_id',
         'section_name', // 'A', 'B'
         'capacity',
         'day_of_week', // 'Mon', 'Tue'
@@ -33,15 +33,19 @@ class ClassSession extends Model
     public function course() {
         return $this->belongsTo(Course::class);
     }
+
     public function semester() {
         return $this->belongsTo(Semester::class);
     }
-    public function instructor() {
+
+    public function user() {
         return $this->belongsTo(User::class, 'instructor_id'); 
     }
+
     public function classroom() {
         return $this->belongsTo(Classroom::class);
     }
+
     public function enrollments() {
         return $this->hasMany(Enrollment::class);
     }

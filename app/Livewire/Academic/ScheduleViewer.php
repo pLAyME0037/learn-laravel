@@ -24,7 +24,7 @@ class ScheduleViewer extends Component
             ->whereIn('status', ['enrolled', 'completed', 'failed'])
             ->with([
                 'classSession.course',
-                'classSession.instructor',
+                'classSession.user',
                 'classSession.classroom',
             ])
             ->get()
@@ -33,7 +33,6 @@ class ScheduleViewer extends Component
         // 2. Organize by Day -> Time
         foreach ($classes as $class) {
             $day = trim($class->day_of_week);
-            // Create a sorting key based on start time (e.g., 09:00)
             $this->schedule[$day][] = $class;
         }
 

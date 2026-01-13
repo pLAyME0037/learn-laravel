@@ -37,7 +37,7 @@ class TranscriptViewer extends Component
 
         // Grouping Logic
         foreach ($enrollments as $record) {
-            $semName                          = $record->classSession->semester->name;
+            $semName = $record->classSession->semester->name;
             $this->transcriptData[$semName][] = $record;
         }
     }
