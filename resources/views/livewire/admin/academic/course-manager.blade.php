@@ -187,8 +187,9 @@
                                     multiple
                                     class="mt-1 block w-full h-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 dark:bg-gray-900 dark:text-white dark:border-gray-600">
                                     @foreach ($allCourses as $c)
-                                        <option value="{{ $c->id }}">{{ $c->code }} -
-                                            {{ $c->name }}</option>
+                                        <option value="{{ $c->id }}">
+                                            {{ $c->code }} - {{ $c->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <p class="text-xs text-gray-500 mt-1">

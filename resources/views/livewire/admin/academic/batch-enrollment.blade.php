@@ -51,13 +51,16 @@
 
                     <!-- Program (With Counts) -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Program
+                        </label>
                         <select wire:model.live="program_id"
                             class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-md">
                             <option value="">Select Program</option>
                             @foreach ($programs as $prog)
                                 @php $count = $programCounts[$prog->id] ?? 0; @endphp
-                                <option value="{{ $prog->id }}">{{ $prog->name }} ({{ $count }} students)
+                                <option value="{{ $prog->id }}">
+                                    {{ $prog->name }} ({{ $count }} students)
                                 </option>
                             @endforeach
                         </select>
@@ -151,17 +154,23 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <h3 class="text-sm font-medium text-yellow-800">Scheduling Gap Detected</h3>
+                            <h3 class="text-sm font-medium text-yellow-800">
+                                Scheduling Gap Detected
+                            </h3>
                             <div class="mt-2 text-sm text-yellow-700">
-                                <p>The Roadmap requires these courses, but they are <strong>not scheduled</strong> for
-                                    this semester:</p>
+                                <p>The Roadmap requires these courses, but they are 
+                                    <strong>not scheduled</strong> 
+                                    for this semester:
+                                </p>
                                 <ul class="list-disc list-inside mt-1">
                                     @foreach ($missingCourses as $missing)
                                         <li>{{ $missing->code }} - {{ $missing->name }}</li>
                                     @endforeach
                                 </ul>
                                 <a href="{{ route('admin.academic.schedule') }}"
-                                    class="block mt-2 font-bold underline">Go to Schedule Manager to fix this</a>
+                                    class="block mt-2 font-bold underline">
+                                    Go to Schedule Manager to fix this
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -172,7 +181,9 @@
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="font-bold text-gray-900 dark:text-white text-lg flex items-center">
                         <span
-                            class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                            class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">
+                            3
+                        </span>
                         Recommended Schedule
                     </h3>
                     @if (count($availableClasses) > 0)
@@ -205,7 +216,9 @@
                                         </span>
                                     </div>
                                     <span
-                                        class="block text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $class->course->name }}</span>
+                                        class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {{ $class->course->name }}
+                                    </span>
 
                                     <div class="mt-3 flex items-center justify-between text-xs">
                                         <div class="flex items-center text-indigo-600 dark:text-indigo-400 font-medium">
@@ -216,7 +229,8 @@
                                                 <path stroke-linecap="round"
                                                     stroke-linejoin="round"
                                                     stroke-width="2"
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                </path>
                                             </svg>
                                             {{ $class->day_of_week }}
                                             {{ \Carbon\Carbon::parse($class->start_time)->format('H:i') }}
@@ -340,13 +354,25 @@
 
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="bg-green-50 p-4 rounded border border-green-200">
-                        <span class="block text-2xl font-bold text-green-700">{{ $analysis['to_create'] }}</span>
+                        <span class="block text-2xl font-bold text-green-700">
+                            {{ $analysis['to_create'] }}
+                        </span>
                         <span class="text-xs text-green-600">
                             New Enrollments
                         </span>
                     </div>
-                    <div class="bg-yellow-50 p-4 rounded border border-yellow-200">
-                        <span class="block text-2xl font-bold text-yellow-700">{{ $analysis['duplicates'] }}</span>
+                    <div class="bg-pink-50 p-4 rounded border border-pink-200">
+                        <span class="block text-2xl font-bold text-pink-700">
+                            {{ $analysis['conflicts'] }}
+                        </span>
+                        <span class="text-xs text-pink-600">
+                            Schdule have confilct time
+                        </span>
+                    </div>
+                    <div class="col-span-2 bg-yellow-50 p-4 rounded border border-yellow-200">
+                        <span class="block text-2xl font-bold text-yellow-700">
+                            {{ $analysis['duplicates'] }}
+                        </span>
                         <span class="text-xs text-yellow-600">
                             Already Enrolled (Skipped)
                         </span>

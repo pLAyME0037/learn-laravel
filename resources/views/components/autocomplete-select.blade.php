@@ -7,7 +7,7 @@
 <div x-data="{
     open: false,
     search: '',
-    selectedId: null,
+    selectedId: @entangle($wireModel),
     selectedLabel: '',
     items: @js($items ?? []),
 
@@ -16,7 +16,6 @@
         if (this.search === '') return this.items;
         return this.items.filter(item =>
             item.label && String(item.label).toLowerCase().includes(this.search.toLowerCase()) 
-            {{-- || (item.sub && item.sub.toLowerCase().includes(this.search.toLowerCase())) --}}
         );
     },
 
@@ -40,27 +39,20 @@
     },
 
     init() {
-        // Pull initial value from Livewire
-        this.selectedId = $wire.get('{{ $wireModel }}');
-
         if (this.selectedId) {
             const found = this.items.find(i => i.id == this.selectedId);
             if (found) {
-                this.selectedLabel = found.label;
                 this.search = found.label;
             }
         }
 
-        // Keep in sync if Livewire changes the value externally (e.g., reset)
-        this.$watch('$wire.{{ $wireModel }}', value => {
-            this.selectedId = value;
+        this.$watch('selectedId', value => {
             if (value) {
-                const found = this.items.find(i => i.id == value);
-                if (found) {
-                    this.selectedLabel = found.label;
-                    this.search = found.label;
-                }
-            } else {
+                console.log('Alpine Watch Triggered:', value);
+                const found = this.items.find(i => i.id == value);  
+                this.search = found ? found.label : '';
+            }
+            else {
                 this.search = '';
             }
         });

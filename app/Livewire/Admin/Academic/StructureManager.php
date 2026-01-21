@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Admin\Academic;
 
 use App\Models\Degree;
@@ -15,17 +14,17 @@ class StructureManager extends Component
 {
     use WithPagination;
 
-    // View State
-    public $activeTab = 'faculties';
-    public $showModal = false;
-    public $isEditing = false;
-    public $itemId;
-
     // Filters
     public $search           = '';
     public $filterFaculty    = '';
     public $filterDepartment = '';
     public $filterDegree     = '';
+
+    // View State
+    public $activeTab = 'faculties';
+    public $showModal = false;
+    public $isEditing = false;
+    public $itemId;
 
     // Generic Form Bucket
     public $formData = [];
@@ -38,9 +37,22 @@ class StructureManager extends Component
         $this->reset(['formData', 'itemId', 'isEditing', 'showModal']);
     }
 
-    public function updatedSearch()
+    /**
+     * Global hook: Runs when ANY property updates.
+     * $property = 'search', 'filterFaculty', 'filterDepartment', 'filterDegree'.
+     */
+    public function updated($property)
     {
-        $this->resetPage();
+        $filters = [
+            'search',
+            'filterFaculty',
+            'filterDepartment',
+            'filterDegree',
+        ];
+
+        if (in_array($property, $filters)) {
+            $this->resetPage();
+        }
     }
 
     public function resetFilters()
@@ -51,6 +63,7 @@ class StructureManager extends Component
             'filterDepartment',
             'filterDegree',
         ]);
+        $this->resetPage();
     }
 
     public function updatedFormDataMajorId($value)
@@ -70,15 +83,13 @@ class StructureManager extends Component
     }
 
     // --- Actions ---
-    public function create()
-    {
+    public function create() {
         $this->reset(['formData', 'itemId', 'isEditing']);
         $this->setDefaultFormData();
         $this->showModal = true;
     }
 
-    public function edit($id)
-    {
+    public function edit($id) {
         $this->resetValidation();
         $this->reset(['formData', 'itemId', 'isEditing']);
 
@@ -97,8 +108,7 @@ class StructureManager extends Component
         $this->showModal = true;
     }
 
-    public function save()
-    {
+    public function save() {
         try {
             $this->validate();
 
@@ -116,22 +126,20 @@ class StructureManager extends Component
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->dispatch('swal:error', [
-                'message' => $e->validator->errors()->first()
+                'message' => $e->validator->errors()->first(),
             ]);
             throw $e;
         }
     }
 
-    public function delete($id)
-    {
+    public function delete($id) {
         $this->getModelClass()::find($id)->delete();
         $this->dispatch('swal:success', ['message' => 'Deleted.']);
     }
 
     // --- Helpers (DRY) ---
 
-    private function getModelClass()
-    {
+    private function getModelClass() {
         return match ($this->activeTab) {
             'faculties'   => Faculty::class,
             'departments' => Department::class,
@@ -141,8 +149,7 @@ class StructureManager extends Component
         };
     }
 
-    private function setDefaultFormData()
-    {
+    private function setDefaultFormData() {
         // Initialize keys to avoid "undefined array key" errors in view
         $defaults = match ($this->activeTab) {
             'departments' => [
@@ -151,7 +158,7 @@ class StructureManager extends Component
             'majors'      => [
                 'department_id' => '',
                 'degree_id'     => '',
-                'cost_per_term' => 0,
+                'cost_per_term' => 50,
             ],
             'programs'    => [
                 'major_id'  => '',
@@ -163,8 +170,7 @@ class StructureManager extends Component
         $this->formData = array_merge(['name' => ''], $defaults);
     }
 
-    protected function rules()
-    {
+    protected function rules() {
         return match ($this->activeTab) {
             'faculties'   => ['formData.name' => 'required|string|max:255'],
             'degrees'     => ['formData.name' => 'required|string|max:255'],
@@ -189,30 +195,28 @@ class StructureManager extends Component
     }
 
     #[Layout('layouts.app', ['header' => 'Academic Structure'])]
-    public function render()
-    {
+    public function render() {
         $data = match ($this->activeTab) {
             'faculties' => Faculty::withCount('departments')
                 ->when(
                     $this->search,
-                    fn ($q) =>
-                    $q->where('name', 'like', "%{$this->search}%")
+                    fn($q) => $q->where('name', 'like', "%{$this->search}%")
                 )
                 ->orderBy('name')
-                ->paginate(20),
+                ->get(),
 
             'departments' => Department::with('faculty')
                 ->withCount('majors')
                 ->when(
                     $this->search,
-                    fn ($q) =>
-                    $q->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('code', 'like', "%{$this->search}%")
+                    fn($sub) => $sub->where(
+                        fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                            ->orWhere('code', 'like', "%{$this->search}%")
+                    )
                 )
                 ->when(
                     $this->filterFaculty,
-                    fn ($q) =>
-                    $q->where('faculty_id', $this->filterFaculty)
+                    fn($q) => $q->where('faculty_id', $this->filterFaculty)
                 )
                 ->orderBy('name')
                 ->paginate(20),
@@ -220,18 +224,15 @@ class StructureManager extends Component
             'majors' => Major::with(['department.faculty', 'degree'])
                 ->when(
                     $this->search,
-                    fn ($q) =>
-                    $q->where('name', 'like', "%{$this->search}%")
+                    fn($q) => $q->where('name', 'like', "%{$this->search}%")
                 )
                 ->when(
                     $this->filterDepartment,
-                    fn ($q) =>
-                    $q->where('department_id', $this->filterDepartment)
+                    fn($q) => $q->where('department_id', $this->filterDepartment)
                 )
                 ->when(
                     $this->filterDegree,
-                    fn ($q) =>
-                    $q->where('degree_id', $this->filterDegree)
+                    fn($q) => $q->where('degree_id', $this->filterDegree)
                 )
                 ->orderBy('name')
                 ->paginate(20),
@@ -239,28 +240,26 @@ class StructureManager extends Component
             'programs' => Program::with(['major.department', 'degree'])
                 ->when(
                     $this->search,
-                    fn ($q) =>
-                    $q->where('name', 'like', "%{$this->search}%")
+                    fn($q) => $q->where('name', 'like', "%{$this->search}%")
                 )
                 ->when(
                     $this->filterDepartment,
-                    fn ($q) =>
+                    fn($q) =>
                     $q->whereHas(
                         'major',
-                        fn ($m) =>
-                        $m->where('department_id', $this->filterDepartment)
+                        fn($m) => $m->where('department_id', $this->filterDepartment)
                     )
                 )
                 ->orderBy('name')
                 ->paginate(20),
 
-            'degrees' => Degree::when(
-                $this->search,
-                fn ($q) =>
-                $q->where('name', 'like', "%{$this->search}%")
-            )
+            'degrees' => Degree::query()
+                ->when(
+                    $this->search,
+                    fn($q) => $q->where('name', 'like', "%{$this->search}%")
+                )
                 ->orderBy('name')
-                ->paginate(20),
+                ->get(),
         };
 
         return view('livewire.admin.academic.structure-manager', [

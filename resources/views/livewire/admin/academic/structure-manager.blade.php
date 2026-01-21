@@ -3,7 +3,7 @@
     <div class="border-b border-gray-200 dark:border-gray-700 mb-6 flex overflow-x-auto space-x-1">
         @foreach (['faculties', 'departments', 'degrees', 'majors', 'programs'] as $tab)
             <button wire:click="$set('activeTab', '{{ $tab }}')"
-                class="px-6 py-3 font-medium text-sm focus:outline-none transition-colors 
+                class="px-6 py-3 font-medium text-sm focus:outline-none transition-colors
                 {{ $activeTab === $tab
                     ? 'bg-white dark:bg-gray-800 border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
@@ -12,61 +12,141 @@
         @endforeach
     </div>
 
-    <!-- FILTER SECTION (Dynamic based on Tab) -->
-    @php
-        $filtersConfig = [
-            [
-                'type' => 'text',
-                'name' => 'search',
-                'label' => 'Search Name',
-                'placeholder' => 'Type to search...',
-            ],
-        ];
+    <div x-data="{ expanded: true }"
+        class="w-full bg-white dark:bg-gray-800 rounded-lg shadow mb-6 transition-all duration-300">
 
-        // Add Specific Filters per Tab
-        if ($activeTab === 'departments') {
-            $filtersConfig[] = [
-                'type' => 'select',
-                'name' => 'filterFaculty',
-                'label' => 'Faculty',
-                'options' => $faculties_list,
-                'defaultOptionText' => 'All Faculties',
-            ];
-        }
+        <!-- HEADER / TOGGLE BAR -->
+        <div class="px-6 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 flex justify-between items-center cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+            @click="expanded = !expanded">
 
-        if (in_array($activeTab, ['majors', 'programs'])) {
-            $filtersConfig[] = [
-                'type' => 'select',
-                'name' => 'filterDepartment',
-                'label' => 'Department',
-                'options' => $departments_list,
-                'defaultOptionText' => 'All Departments',
-            ];
-        }
+            <div class="flex items-center space-x-2">
+                <svg class="w-5 h-5 text-gray-500 transition-transform duration-300"
+                    :class="{ 'rotate-180': expanded, 'rotate-0': !expanded }"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7">
+                    </path>
+                </svg>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-200">
+                    {{ __('Filter Options') }}
+                </h3>
+            </div>
 
-        if (in_array($activeTab, ['majors', 'programs'])) {
-            $filtersConfig[] = [
-                'type' => 'select',
-                'name' => 'filterDegree',
-                'label' => 'Degree Level',
-                'options' => $degrees_list,
-                'defaultOptionText' => 'All Levels',
-            ];
-        }
-    @endphp
+            <!-- Create button when collapsed -->
+            {{-- <div x-show="!expanded"
+                x-cloak
+                class="transition-opacity duration-200">
+                <button wire:click="create"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+                    <span class="mr-2 text-lg">+</span>
+                    Add {{ ucfirst(substr($activeTab, 0, -1)) }}
+                </button>
+            </div> --}}
+        </div>
 
-    <x-filter-live 
-    wire:key="filters-{{ $activeTab }}"
-    :filters="$filtersConfig" />
+        <!-- EXPANDABLE CONTENT -->
+        <div x-show="expanded"
+            x-collapse
+            class="p-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="col-span-1">
+                    <x-input-label for="search"
+                        value="Name" />
+                    <x-text-input id="search"
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        type="text"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="Search For Name..." />
+                </div>
+
+                <div class="col-span-1">
+                    @if ($activeTab === 'departments')
+                        <x-input-label for="filterFaculty"
+                            value="Faculty" />
+                        <select id="filterFaculty"
+                            wire:model.live="filterFaculty"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">All Faculties</option>
+                            @foreach ($faculties_list as $faculty)
+                                <option value="{{ $faculty->id }}">{{ $faculty->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+
+                <div class="col-span-1">
+                    @if ($activeTab === 'majors')
+                        <x-input-label for="filterDepartment"
+                            value="Department" />
+                        <select id="filterDepartment"
+                            wire:model.live="filterDepartment"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">All Departments</option>
+                            @foreach ($departments_list as $dept)
+                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+
+                <div class="col-span-1">
+                    @if (in_array($activeTab, ['majors', 'programs']))
+                        <x-input-label for="filterDegree"
+                            value="Degree" />
+                        <select id="filterDegree"
+                            wire:model.live="filterDegree"
+                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">All Degree</option>
+                            @foreach ($degrees_list as $degree)
+                                <option value="{{ $degree->id }}">{{ $degree->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+                {{--
+                        <x-autocomplete-select :items="$options"
+                            wire-model="{{ $faculties_list }}"
+                            placeholder="{{ $filter['defaultOptionText'] ?? 'Search or select...' }}" />
+                    --}}
+            </div>
+
+            <!-- FOOTER ACTIONS -->
+            <div
+                class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-4">
+                <div class="flex items-center space-x-3">
+                    <button wire:click="resetFilters"
+                        type="button"
+                        class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                        {{ __('Reset') }}
+                    </button>
+
+                    <span wire:loading
+                        class="text-sm text-gray-500">Loading...</span>
+                </div>
+
+                {{-- <button wire:click="create"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+                    <span class="mr-2 text-lg">+</span>
+                    Add {{ ucfirst(substr($activeTab, 0, -1)) }}
+                </button> --}}
+            </div>
+        </div>
+    </div>
 
     <!-- Action Bar (Create Button) -->
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800 dark:text-white">
             {{ ucfirst($activeTab) }} List
         </h2>
-        <button wire:click="create" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
+        <button wire:click="create"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow flex items-center">
             <span class="mr-2 text-lg">+</span>
-             Add {{ ucfirst(substr($activeTab, 0, -1)) }}
+            Add {{ ucfirst(substr($activeTab, 0, -1)) }}
         </button>
     </div>
 
@@ -75,54 +155,44 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                         No
                     </th>
-                    <th
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                         Name
                     </th>
 
                     @if ($activeTab === 'departments')
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Code
                         </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Faculty
                         </th>
                     @endif
 
                     @if ($activeTab === 'majors')
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Department
                         </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Degree
                         </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Cost per credit
                         </th>
                     @endif
 
                     @if ($activeTab === 'programs')
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Major
                         </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                             Degree
                         </th>
                     @endif
 
-                    <th
-                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                         Actions
                     </th>
                 </tr>
@@ -131,7 +201,11 @@
                 @forelse($data as $item)
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                            {{ $data->firstItem() + $loop->index }}
+                            @if (method_exists($data, 'firstItem'))
+                                {{ $data->firstItem() + $loop->index }}
+                            @else
+                                {{ $loop->iteration }}
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 dark:text-white">
                             {{ $item->name }}
@@ -196,7 +270,9 @@
             </tbody>
         </table>
         <div class="p-4 border-t dark:border-gray-700">
-            {{ $data->links() }}
+            @if (method_exists($data, 'firstItem'))
+                {{ $data->links() }}
+            @endif
         </div>
     </div>
 
@@ -333,7 +409,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Cost Per Term
+                                        Cost Per Credit
                                     </label>
                                     <input type="number"
                                         wire:model="formData.cost_per_term"

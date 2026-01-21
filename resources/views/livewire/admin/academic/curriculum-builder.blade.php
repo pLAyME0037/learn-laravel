@@ -70,17 +70,25 @@
                             <label class="block text-sm dark:text-gray-300">
                                 Year
                             </label>
-                            <input type="number"
+                            <select type="number"
+                            @foreach ([1, 2, 3, 4] as $y)
                                 wire:model="year"
                                 class="w-full border rounded p-2 dark:bg-gray-900 dark:text-white">
+                                <option value="{{ $y }}">Year {{ $y }}</option>
+                            @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm dark:text-gray-300">
                                 Term
                             </label>
-                            <input type="number"
+                            <select type="number"
+                                @foreach ([1, 2] as $t)
                                 wire:model="term"
                                 class="w-full border rounded p-2 dark:bg-gray-900 dark:text-white">
+                                <option value="{{ $t }}">Term {{ $t }}</option>
+                            @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>

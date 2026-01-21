@@ -1,7 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
 
-import Alpine from 'alpinejs';
 import Collapse from '@alpinejs/collapse'; // Import the Collapse plugin
 import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 

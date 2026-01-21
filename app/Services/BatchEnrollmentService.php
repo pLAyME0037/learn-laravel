@@ -15,27 +15,47 @@ class BatchEnrollmentService
     public function previewChanges(Collection $students, Collection $classSessions): array
     {
         $analysis = [
-            'total_students' => $students->count(),
-            'total_classes'  => $classSessions->count(),
+            // 'total_students' => $students->count(),
+            // 'total_classes'  => $classSessions->count(),
             'to_create'      => 0,
             'duplicates'     => 0,
             'conflicts'      => 0,
         ];
 
-        $existingEnrollments = Enrollment::whereIn('student_id', $students->pluck('id'))
+        $existingEnrollments = Enrollment::query()
+            ->whereIn('student_id', $students->pluck('id'))
             ->whereIn('class_session_id', $classSessions->pluck('id'))
             ->get()
             ->mapWithKeys(fn($e) => ["{$e->student_id}-{$e->class_session_id}" => true]);
 
+        $studentSchedules = Enrollment::query()
+            ->whereIn('student_id', $students->pluck('id'))
+            ->with('classSession')
+            ->get()
+            ->groupBy('student_id')
+            ->map(fn($e) => $e->pluck('classSession'));
+
         foreach ($students as $student) {
+            $currentSchedule = $studentSchedules->get($student->id, collect());
+
             foreach ($classSessions as $session) {
                 $key = "{$student->id}-{$session->id}";
 
                 if ($existingEnrollments->has($key)) {
                     $analysis['duplicates']++;
+                    continue;
+                }
+
+                $hasConflict = $currentSchedule->contains(fn($existSes) =>
+                    $existSes
+                    && $existSes->day_of_week === $session->day_of_week
+                    && $existSes->start_time < $session->end_time
+                    && $existSes->end_time > $session->start_time
+                );
+                if ($hasConflict) {
+                    $analysis['conflicts']++;
                 } else {
                     $analysis['to_create']++;
-                    // Optional: Check time conflict logic here if needed
                 }
             }
         }
@@ -47,13 +67,13 @@ class BatchEnrollmentService
      * DANGER: Remove all enrollments for a cohort in a specific semester.
      */
     public function rollbackCohort(
-        int $programId, 
-        int $currentTerm, 
+        int $programId,
+        int $currentTerm,
         int $semesterId
     ): int {
         return DB::transaction(function () use (
-            $programId, 
-            $currentTerm, 
+            $programId,
+            $currentTerm,
             $semesterId,
         ) {
             // 1. Find Students

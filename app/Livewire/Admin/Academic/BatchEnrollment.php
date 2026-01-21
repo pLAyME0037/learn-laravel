@@ -53,19 +53,11 @@ class BatchEnrollment extends Component
         $this->loadRecommendedClasses();
     }
 
-    public function updatedYearLevel()
-    {
-        $this->loadRecommendedClasses();
-    }
-
-    public function updatedTermNumber()
-    {
-        $this->loadRecommendedClasses();
-    }
-
-    public function updatedSemesterId()
-    {
-        $this->loadRecommendedClasses();
+    public function updated($property) {
+        $filters = ['year_level', 'term_number', 'semester_id'];
+        if(in_array($property, $filters)) {
+            $this->loadRecommendedClasses();
+        }
     }
 
     /**
@@ -79,8 +71,9 @@ class BatchEnrollment extends Component
             ->groupBy('program_id');
 
         if ($this->department_id) {
-            $query->whereHas('program.major', fn($q) =>
-                $q->where('department_id', $this->department_id)
+            $query->whereHas(
+                'program.major',
+                fn($q) => $q->where('department_id', $this->department_id)
             );
         }
         $this->programCounts = $query->pluck('total', 'program_id')->toArray();
@@ -88,12 +81,13 @@ class BatchEnrollment extends Component
         // 2. Cohort Counts (NEW: Breakdown by Term for the selected Program)
         $this->cohortCounts = [];
         if ($this->program_id) {
-            $this->cohortCounts = Student::select('current_term', DB::raw('count(*) as total'))
-                ->where('program_id', $this->program_id)
-                ->where('academic_status', 'active')
-                ->groupBy('current_term')
-                ->pluck('total', 'current_term')
-                ->toArray();
+            $this->cohortCounts = Student::query()
+            ->select('current_term', DB::raw('count(*) as total'))
+            ->where('program_id', $this->program_id)
+            ->where('academic_status', 'active')
+            ->groupBy('current_term')
+            ->pluck('total', 'current_term')
+            ->toArray();
         }
     }
 
@@ -120,7 +114,7 @@ class BatchEnrollment extends Component
             return;
         }
 
-        $this->availableClasses = ClassSession::with(['course', 'instructor'])
+        $this->availableClasses = ClassSession::with(['course', 'user'])
             ->where('semester_id', $this->semester_id)
             ->whereIn('course_id', $requiredCourseIds)
             ->where('status', 'open')
@@ -189,8 +183,9 @@ class BatchEnrollment extends Component
         $this->dispatch('swal:confirm', [
             'title' => '⚠️ Danger Rollback Schhdule!',
             'text'  => ""
-            . "This will DELETE all enrollments for Year {$this->year_level} "
-            . "Sem {$this->term_number} students in this semester. Grades will be lost!",
+                . "This will DELETE all enrollments for Year {$this->year_level} "
+                . "Sem {$this->term_number} students in this semester. "
+                . "Grades will be lost!",
             'icon'               => 'warning',
             'confirmButtonText'  => 'Yes, Delete All',
             'confirmButtonColor' => '#ef4444',
@@ -199,7 +194,6 @@ class BatchEnrollment extends Component
 
     }
 
-    #[On('runEnrollment')]
     public function runEnrollment(BatchEnrollmentService $service)
     {
         try {
@@ -210,14 +204,21 @@ class BatchEnrollment extends Component
                 ->get();
 
             $classes = ClassSession::whereIn('id', $this->selectedClasses)
-                ->withCount(['enrollments as enrolled_count' => function ($query) {
-                    $query->whereIn('status', ['enrolled', 'completed', 'failed']);
-                }])
+                ->withCount(['enrollments as enrolled_count' => fn ($q) =>
+                    $q->whereIn('status', ['enrolled', 'completed', 'failed'])
+                ])
                 ->get();
             foreach ($classes as $class) {
-                if ($class->enrolled_count + $students->count() > $class->capacity) {
+                $inClassStu = Enrollment::where('class_session_id', $class->id)
+                ->whereIn('student_id', $students->pluck('id'))
+                ->count();
+                $newStud = $students->count() - $inClassStu;
+                if ($class->enrolled_count + $newStud > $class->capacity) {
+                    $i = $newStud; //debug
+                    $j = $class->enrolled_count; //debug
                     throw new \Exception(
-                        "Class {$class->course->code} is over capacity."
+                        "Class {$class->course->code} is over session capacity "
+                        . "of {$class->capacity} < {$i}+{$j}"
                     );
                 }
             }

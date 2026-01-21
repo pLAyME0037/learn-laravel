@@ -4,11 +4,11 @@ namespace App\Exports;
 use App\Models\Attendance;
 use App\Models\ClassSession;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings; // For styling
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class AttendanceExport implements FromCollection, WithHeadings, WithMapping, WithStyles
@@ -31,28 +31,28 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Wit
         $semesterStartDate = Carbon::parse($classSession->semester->start_date);
         $semesterEndDate   = Carbon::parse($classSession->semester->end_date);
 
-         $targetDayMap = [
-            'Sun' => Carbon::SUNDAY, 
-            'Mon' => Carbon::MONDAY, 
-            'Tue' => Carbon::TUESDAY, 
-            'Wed' => Carbon::WEDNESDAY, 
-            'Thu' => Carbon::THURSDAY, 
-            'Fri' => Carbon::FRIDAY, 
-            'Sat' => Carbon::SATURDAY
+        $targetDayMap = [
+            'Sun' => Carbon::SUNDAY,
+            'Mon' => Carbon::MONDAY,
+            'Tue' => Carbon::TUESDAY,
+            'Wed' => Carbon::WEDNESDAY,
+            'Thu' => Carbon::THURSDAY,
+            'Fri' => Carbon::FRIDAY,
+            'Sat' => Carbon::SATURDAY,
         ];
 
         $classDayInt = $targetDayMap[$classSession->day_of_week] ?? Carbon::MONDAY;
 
         $this->allDatesInSemester = collect();
-        $currentDate = $semesterStartDate->copy();
+        $currentDate              = $semesterStartDate->copy();
 
         if ($currentDate->dayOfWeek !== $classDayInt) {
-         $currentDate->next($classDayInt);
+            $currentDate->next($classDayInt);
         }
 
         while ($currentDate->lte($semesterEndDate)) {
-         $this->allDatesInSemester->push($currentDate->format('Y-m-d'));
-         $currentDate->addWeek();
+            $this->allDatesInSemester->push($currentDate->format('Y-m-d'));
+            $currentDate->addWeek();
         }
 
         $this->attendanceRecords = Attendance::query()
@@ -91,10 +91,9 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Wit
             $attendance = $this->attendanceRecords->get($key);
 
             if ($attendance) {
-               $status = $attendance->first()->status;
-            }
-            else {
-               $status = Carbon::parse($date)->isFuture() ? '' : 'unmarked';
+                $status = $attendance->first()->status;
+            } else {
+                $status = Carbon::parse($date)->isFuture() ? '' : 'unmarked';
             }
             $rowData[] = $status;
         }
@@ -106,10 +105,14 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Wit
     public function styles(Worksheet $sheet)
     {
         // Style Header
-        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['argb' => 'FFE0E7FD']], // Light Indigo
-        ]);
+        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')
+            ->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color'    => ['argb' => 'FFE0E7FD'], // Light Indigo
+                ],
+            ]);
 
         // Auto-size columns
         foreach (range('A', $sheet->getHighestColumn()) as $col) {

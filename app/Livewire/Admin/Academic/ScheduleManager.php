@@ -38,14 +38,28 @@ class ScheduleManager extends Component
         $this->semester_id = Semester::where('is_active', true)->value('id');
     }
 
-    public function updatedSemesterId()
-    {$this->resetPage();}
-    public function updatedSearch()
-    {$this->resetPage();}
-    public function updatedFilterInst()
-    {$this->resetPage();}
-    public function updatedFilterDay()
-    {$this->resetPage();}
+    // public function updatedSemesterId()
+    // {$this->resetPage();}
+    // public function updatedSearch()
+    // {$this->resetPage();}
+    // public function updatedFilterInst()
+    // {$this->resetPage();}
+    // public function updatedFilterDay()
+    // {$this->resetPage();}
+
+    /**
+     * Global hook: Runs when ANY property updates.
+     * $property = 'semester_id', 'search', etc.
+     */
+    public function updated($property)
+    {
+        // List of properties that should reset pagination
+        $filters = ['semester_id', 'search', 'filterInst', 'filterDay'];
+
+        if (in_array($property, $filters)) {
+            $this->resetPage();
+        }
+    }
 
     public function create()
     {
@@ -71,13 +85,9 @@ class ScheduleManager extends Component
 
         $this->sessionId = $session->id;
         $this->course_id = $session->course_id;
-
-        // FIX: Ensure we use the ID that matches the Dropdown Value
-        // Since the dropdown uses $inst->user_id (User ID), and session stores User ID, this matches.
-        // If session stored Instructor ID, we would need $session->instructor->user_id here.
         $this->instructor_id = $session->instructor_id;
-
         $this->classroom_id = $session->classroom_id;
+        
         $this->section_name = $session->section_name;
         $this->capacity     = $session->capacity;
         $this->day_of_week  = $session->day_of_week;

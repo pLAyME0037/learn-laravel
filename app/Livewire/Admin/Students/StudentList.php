@@ -23,8 +23,7 @@ class StudentList extends Component
     public $filterProgram    = '';
     public $filterStatus     = '';
 
-    public function buildTable($query)
-    {
+    public function buildTable($query) {
         return Table::make($query)->columns([
             // 1. ID Column (Calculation)
             Column::make('#')->stack([
@@ -71,25 +70,25 @@ class StudentList extends Component
             Column::make('Action')->right()->stack([
                 Field::make('id')->actions([
 
-                Action::link(fn($row) => route('admin.students.show', $row['id']))
-                    ->icon('heroicon-o-eye') // Much cleaner!
-                    ->color('text-gray-500')
-                    ->when(fn($row) => empty($row['deleted_at'])),
+                    Action::link(fn($row) => route('admin.students.show', $row['id']))
+                        ->icon('heroicon-o-eye') // Much cleaner!
+                        ->color('text-gray-500')
+                        ->when(fn($row) => empty($row['deleted_at'])),
 
-                Action::link(fn($row) => route('admin.students.edit', $row['id']))
-                    ->icon('heroicon-o-pencil-square')
-                    ->color('text-blue-500')
-                    ->when(fn($row) => empty($row['deleted_at'])),
+                    Action::link(fn($row) => route('admin.students.edit', $row['id']))
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('text-blue-500')
+                        ->when(fn($row) => empty($row['deleted_at'])),
 
-                Action::button('confirmDelete')
-                    ->icon(fn($row) => ($row['deleted_at'])
-                            ? 'heroicon-o-arrow-path'
-                            : 'heroicon-o-trash'
-                    )
-                    ->color(fn($row) => ($row['deleted_at'])
-                            ? 'text-green-600 hover:text-green-800'
-                            : 'text-red-500 hover:text-red-700'
-                    ),
+                    Action::button('confirmDelete')
+                        ->icon(fn($row) => ($row['deleted_at'])
+                        ? 'heroicon-o-arrow-path'
+                        : 'heroicon-o-trash'
+                        )
+                        ->color(fn($row) => ($row['deleted_at'])
+                        ? 'text-green-600 hover:text-green-800'
+                        : 'text-red-500 hover:text-red-700'
+                        ),
                 ]),
             ]),
         ])->build();

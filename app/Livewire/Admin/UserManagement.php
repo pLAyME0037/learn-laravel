@@ -14,8 +14,7 @@ class UserManagement extends Component
     public $search = '';
     public $selectedRoles = [];
 
-    public function render()
-    {
+    public function render() {
         $users = User::query()
             ->when($this->search, function ($query, $search) {
                 $query->where('name', 'like', '%' . $search . '%')
@@ -32,8 +31,7 @@ class UserManagement extends Component
         ]);
     }
 
-    public function assignRole($userId, $roleName)
-    {
+    public function assignRole($userId, $roleName) {
         $user = User::find($userId);
         if ($user) {
             $user->assignRole($roleName);
@@ -41,8 +39,7 @@ class UserManagement extends Component
         }
     }
 
-    public function removeRole($userId, $roleName)
-    {
+    public function removeRole($userId, $roleName) {
         $user = User::find($userId);
         if ($user) {
             $user->removeRole($roleName);
