@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -84,7 +86,7 @@ class UserController extends Controller
         });
 
         return redirect()->route('admin.users.index')
-        ->with('success', 'User roles and permissions updated successfully.');
+                         ->with('success', 'User roles and permissions updated successfully.');
     }
 
     /**
@@ -98,36 +100,37 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {
-        $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'username' => 'required|string|max:255|alpha_dash|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role'     => 'required|string|exists:roles,name',
-            'bio'      => 'nullable|string|max:500',
-        ]);
+    public function store(StoreUserRequest $request) {
+        $data = $request->validated();
 
-        if (
-            $validated['role'] === "Super Administrator"
+        if ($data['role'] === "Super Administrator"
             && ! Auth::user()->hasRole("Super Administrator")
         ) abort(403, "Cannot create user with higher privileges than yourself.");
 
-        DB::transaction(function() use ($validated) {
-            $user = User::create([
-                'name'              => $validated['name'],
-                'email'             => $validated['email'],
-                'username'          => $validated['username'],
-                'password'          => Hash::make($validated['password']),
-                'bio'               => $validated['bio'],
-                'email_verified_at' => now(),
-            ]);
+        try {
+            DB::transaction(function() use ($data) {
+                $user = User::create([
+                    'name'              => $data['name'],
+                    'email'             => $data['email'],
+                    'username'          => $data['username'],
+                    'password'          => Hash::make($data['password']),
+                    'bio'               => $data['bio'],
+                    'email_verified_at' => now(),
+                ]);
 
-            $user->assignRole($validated['role']); // Assign role using Spatie
-        });
+                $user->assignRole($data['role']); // Assign role using Spatie
+            });
+            DB::commit();
+        } catch(\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to create user: ' . $e->getMessage());
+            return redirect()->back()
+                 ->with('error', 'Failed to create user: ' . $e->getMessage())
+                 ->withInput();
+        }
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User create successfully');
+             ->with('success', 'User create successfully');
     }
 
     /**
@@ -154,38 +157,28 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user): RedirectResponse {
-        $this->authorize('changePassword', $user);
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse {
+        $validated = $request->validated();
+        $userData = [
+            'name'      => $validated['name'],
+            'username'  => $validated['username'],
+            'email'     => $validated['email'],
+            'bio'       => $validated['bio'],
+        ];
 
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'username'  => 'required|string|max:255|alpha_dash|unique:users,username,' . $user->id,
-            'email'     => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'bio'       => 'nullable|string|max:500',
-            'is_active' => 'sometimes|boolean',
-            'password'  => ['nullable', 'confirmed', Password::min(8)],
-        ]);
+        if (isset($validated["is_active"])) {
+            $userData["is_active"] = $validated["is_active"];
+        }
 
+        if (empty($validated['password'])) { return $newHashPass = null; }
+        else $newHashPass = Hash::make($validated['password'])
 
         try {
-            DB::transaction(function () use ($user, $validated) {
-                $userData = [
-                    'name'      => $validated['name'],
-                    'username'  => $validated['username'],
-                    'email'     => $validated['email'],
-                    'bio'       => $validated['bio'],
-                ];
-
-                if (isset($validated["is_active"])) {
-                    $userData["is_active"] = $validated["is_active"];
-                }
-
+            DB::transaction(function () use ($request, $user, $newHashPass) {
                 $user->update($userData);
 
-                if (! empty($validated['password'])) {
-                    $user->update([
-                        'password' => Hash::make($validated['password'])
-                    ]);
+                if ($newHashPass) {
+                    $user->update(['password' => $newHashPass]);
                 }
             });
 
@@ -197,12 +190,11 @@ class UserController extends Controller
                 ['user_id' => $user->id]
             );
             return redirect()->back()
-                ->with('error', 'Failed to update user: ' . $e->getMessage())
-                ->withInput();
+                 ->with('error', 'Failed to update user: ' . $e->getMessage());
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User updated successfully.');
+                 ->with('success', 'User updated successfully.');
     }
 
     private function checkSelfModif(
@@ -227,7 +219,7 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
+             ->with('success', 'User deleted successfully.');
     }
 
     public function restore(User $user) {
@@ -235,7 +227,7 @@ class UserController extends Controller
         $user->restore();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User restore successfully.');
+             ->with('success', 'User restore successfully.');
     }
 
     public function forceDelete(string $id) {
@@ -248,7 +240,7 @@ class UserController extends Controller
         $user->forceDelete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'User permanently deleted.');
+             ->with('success', 'User permanently deleted.');
     }
 
     public function updateStatus(User $user) {
@@ -262,6 +254,6 @@ class UserController extends Controller
         $status = $user->is_active ? 'activated' : 'deactivated';
 
         return redirect()->route('admin.users.index')
-            ->with('success', "User {$status} successfully");
+             ->with('success', "User {$status} successfully");
     }
 }

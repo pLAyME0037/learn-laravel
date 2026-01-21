@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
+use App\Model\User;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -11,9 +15,9 @@ class UpdateUserRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool {
-        $targetuser = this->route("user");
-        return this->user()->can("edit.users")
-            && this->user()->can("changePass", $targetuser);
+        $targetuser = $this->route("user");
+        return $this->user()->can("edit.users")
+            && $this->user()->can("changePassword", $targetuser);
     }
 
     /**
@@ -23,16 +27,16 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array {
         /**
-         * $var User $user
+         * @var User $user
          */
         $user = $this->route("user");
         return [
             'name'      => ['required', 'string', 'max:255'],
             'username'  => [ 'required', 'string', 'max:255', 'alpha_dash',
-                'unique:users,username,' . $user->id
+                Rule::unique("users", "username")->ignore($user->id)
             ],
             'email'     => [ 'required', 'string', 'email', 'max:255',
-                'unique:users,email,' . $user->id
+                Rule::unique("users", "username")->ignore($user->id)
             ],
             'bio'       => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],
