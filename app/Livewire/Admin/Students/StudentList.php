@@ -64,54 +64,53 @@ class StudentList extends Component
             Column::make('Status')->center()->stack([
                 Field::make('academic_status')
                     ->format(fn($val, $row) => !empty($row['deleted_at']) ? 'Trashed' : $val)
-                    ->view('components.table.student.status-badge'),
+                    ->view('components.table.Student.status-badge'),
             ]),
 
             Column::make('Action')->right()->stack([
                 Field::make('id')->actions([
 
-                    Action::link(fn($row) => route('admin.students.show', $row['id']))
-                        ->icon('heroicon-o-eye') // Much cleaner!
-                        ->color('text-gray-500')
-                        ->when(fn($row) => empty($row['deleted_at'])),
+                Action::link(fn($row) => route('admin.students.show', $row['id']))
+                    ->icon('heroicon-o-eye') // Much cleaner!
+                    ->color('text-gray-500')
+                    ->when(fn($row) => empty($row['deleted_at'])),
 
-                    Action::link(fn($row) => route('admin.students.edit', $row['id']))
-                        ->icon('heroicon-o-pencil-square')
-                        ->color('text-blue-500')
-                        ->when(fn($row) => empty($row['deleted_at'])),
+                Action::link(fn($row) => route('admin.students.edit', $row['id']))
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('text-blue-500')
+                    ->when(fn($row) => empty($row['deleted_at'])),
 
-                    Action::button('confirmDelete')
-                        ->icon(fn($row) => ($row['deleted_at'])
-                        ? 'heroicon-o-arrow-path'
-                        : 'heroicon-o-trash'
-                        )
-                        ->color(fn($row) => ($row['deleted_at'])
-                        ? 'text-green-600 hover:text-green-800'
-                        : 'text-red-500 hover:text-red-700'
-                        ),
+                Action::button('confirmDelete')
+                    ->icon(fn($row) => ($row['deleted_at'])
+                    ? 'heroicon-o-arrow-path'
+                    : 'heroicon-o-trash'
+                    )
+                    ->color(fn($row) => ($row['deleted_at'])
+                    ? 'text-green-600 hover:text-green-800'
+                    : 'text-red-500 hover:text-red-700'
+                    ),
                 ]),
             ]),
         ])->build();
     }
 
-    // Reset pagination when any filter changes
-    public function updatedSearch()
-    {
-        $this->resetPage();
+    /**
+     * Global hook: Runs when ANY property updates.
+     * $property = 'search', 'filterProgram', 'filterStatus'.
+     */
+    public function updated($property) {
+        $filters = [
+            'search',
+            'filterProgram',
+            'filterStatus',
+        ];
+
+        if (in_array($property, $filters)) {
+            $this->resetPage();
+        }
     }
 
-    public function updatedFilterProgram()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedFilterStatus()
-    {
-        $this->resetPage();
-    }
-
-    public function updatedFilterDepartment()
-    {
+    public function updatedFilterDepartment() {
         $this->filterProgram = '';
         $this->resetPage();
     }

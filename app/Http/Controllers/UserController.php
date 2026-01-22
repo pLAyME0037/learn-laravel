@@ -171,10 +171,10 @@ class UserController extends Controller
         }
 
         if (empty($validated['password'])) { return $newHashPass = null; }
-        else $newHashPass = Hash::make($validated['password'])
+        else { $newHashPass = Hash::make($validated['password']); }
 
         try {
-            DB::transaction(function () use ($request, $user, $newHashPass) {
+            DB::transaction(function () use ($user, $userData, $newHashPass) {
                 $user->update($userData);
 
                 if ($newHashPass) {
@@ -183,6 +183,7 @@ class UserController extends Controller
             });
 
             DB::commit();
+
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error(
@@ -194,7 +195,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-                 ->with('success', 'User updated successfully.');
+             ->with('success', 'User updated successfully.');
     }
 
     private function checkSelfModif(

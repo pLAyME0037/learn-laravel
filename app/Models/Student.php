@@ -37,32 +37,29 @@ class Student extends Model
 
     // --- Relationships ---
 
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo(User::class);
     }
-    public function department()
-    {
+
+    public function department() {
         return $this->belongsTo(Department::class);
     }
-    public function program()
-    {
+
+    public function program() {
         return $this->belongsTo(Program::class);
     }
-    public function enrollments()
-    {
+
+    public function enrollments() {
         return $this->hasMany(Enrollment::class);
     }
 
     // Polymorphic relation to Address
-    public function address()
-    {
+    public function address() {
         return $this->morphOne(Address::class, 'addressable');
     }
 
     // Polymorphic relation to Contact Detail
-    public function contactDetail()
-    {
+    public function contactDetail() {
         return $this->morphOne(ContactDetail::class, 'contactable');
     }
 
@@ -71,16 +68,14 @@ class Student extends Model
     /**
      * Handle Encrypted Sensitive Data automatically.
      */
-    protected function sensitiveData(): Attribute
-    {
+    protected function sensitiveData(): Attribute {
         return Attribute::make(
             get: fn($value) => $value ? json_decode(Crypt::decryptString($value), true) : [],
             set: fn($value) => Crypt::encryptString(json_encode($value))
         );
     }
 
-    public function scopeApplyFilters($query, array $filters)
-    {
+    public function scopeApplyFilters($query, array $filters) {
         // 1. Eager Load
         $query->with([
             'user'          => fn($q) => $q->withTrashed(),
@@ -123,13 +118,11 @@ class Student extends Model
     }
 
     // Helper to get Department via Program
-    public function getDepartmentAttribute()
-    {
+    public function getDepartmentAttribute() {
         return $this->program?->major?->department;
     }
 
-    protected function academicProgress(): Attribute
-    {
+    protected function academicProgress(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 $term = $attributes['current_term'] ?? 1;
