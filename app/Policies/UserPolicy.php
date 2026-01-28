@@ -56,10 +56,10 @@ class UserPolicy
         }
 
         // HODs can change passwords for users who are not admins or Super Admins
-        if (
-            $currentUser->hasRole('hod')
-            && ! $targetUser->hasAnyRole(['admin', 'Super Administrator'])
-        ) { return true; }
+        if ($currentUser->hasRole('hod')
+            && ! $targetUser->hasAnyRole(['admin', 'Super Administrator'])) {
+            return true;
+        }
 
         return false;
     }

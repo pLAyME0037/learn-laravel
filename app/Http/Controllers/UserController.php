@@ -6,6 +6,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Tables\Action;
+use App\Tables\Table;
+use App\Tables\Column;
+use App\Tables\Field;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -13,14 +17,82 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Permission;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
     public function __construct() {
         $this->authorizeResource(User::class, 'user');
+    }
+
+    public function builtTable($query) {
+        return Table::make($query)->columns([
+        // 1. ID Column (Calculation)
+        Column::make('#')->stack([
+            Field::index()->css('font-bold text-indigo-600'),
+        ]),
+
+        // 2. Identity (Profile Image + Name)
+        Column::make('Identity')->grid('max-content 1fr', [
+            Field::make('')->component('profile-image', fn($user) => [
+                'size' => 'sm',
+                'src'  => $user?->profile_picture_url,
+                'alt'  => $user?->name ?? 'N/A',
+            ]),
+            Column::make('')->stack([
+                Field::make('name')->bold(),
+                Field::make('username')->small(),
+                Field::make('email')->small(),
+            ]),
+        ]),
+        Column::make('User Status')->stack([
+            Field::make('roles')->view('components.table.cell.role-badge', fn($r, $u) => [
+                'roles' => $r,
+                'user' => $u,
+            ]), // FIX return user name and not user role.
+            Field::make('is_active')->view('components.table.cell.status-badge', fn($v, $u) => [
+                'user' => $u,
+            ]),
+            Field::make('email_verified_at')->html(function($value) {
+                if ($value) {
+                    $date = Carbon::parse($value)->format('d-m-Y');
+                    return "<span class='text-green-600 font-bold'>Verified at {$date}</span>";
+                }
+                return "<span class='text-red-500 italic'>Unverified</span>";
+            }),
+        ]),
+        Column::make('System Status')->stack([
+            Field::make('')->view('components.table.cell.user-state', fn($u) => [
+                'user' => $u,
+            ]),
+        ]),
+        Column::make('Action')->right()->stack([
+            Field::make('id')->actions([
+
+            Action::link(fn($row) => route('admin.users.show', $row['id']))
+                ->icon('heroicon-o-eye')
+                ->color('text-gray-500')
+                ->when(fn($row) => empty($row['deleted_at'])),
+
+            Action::link(fn($row) => route('admin.users.edit', $row['id']))
+                ->icon('heroicon-o-pencil-square')
+                ->color('text-blue-500')
+                ->when(fn($row) => empty($row['deleted_at'])),
+
+            Action::button('confirmDelete')
+                ->icon(fn($row) => ($row['deleted_at'])
+                ? 'heroicon-o-arrow-path'
+                : 'heroicon-o-trash'
+                )
+                ->color(fn($row) => ($row['deleted_at'])
+                ? 'text-green-600 hover:text-green-800'
+                : 'text-red-500 hover:text-red-700'
+                ),
+            ]),
+        ]),
+        ]);
     }
 
     /**
@@ -35,18 +107,17 @@ class UserController extends Controller
             'orderby' => 'nullable|string|in:newest,oldest,a_to_z,z_to_a',
         ]);
 
-        $users = User::with('roles')
-            ->applyFilters($filters)
-            ->paginate(10)
-            ->withQueryString();
+        $prepUsers = User::with('roles')
+            ->applyFilters($filters);
+        $users = $this->builtTable($prepUsers);
 
-        $roles = Role::orderBy('name')->pluck('name', 'name');
+        $roles = Role::orderBy('name')->pluck('name', 'id');
 
-        return view('admin.users.index', [
-            'users'   => $users,
-            'roles'   => $roles,
-            'filters' => $filters,
-        ]);
+        return view('admin.users.index', compact([
+            'users',
+            'roles',
+            'filters',
+        ]));
     }
 
     public function editAccess(User $user) {
@@ -170,7 +241,7 @@ class UserController extends Controller
             $userData["is_active"] = $validated["is_active"];
         }
 
-        if (empty($validated['password'])) { return $newHashPass = null; }
+        if (empty($validated['password'])) { $newHashPass = null; }
         else { $newHashPass = Hash::make($validated['password']); }
 
         try {
@@ -198,11 +269,7 @@ class UserController extends Controller
              ->with('success', 'User updated successfully.');
     }
 
-    private function checkSelfModif(
-        User $user,
-        string $key,
-        string $value
-    ) {
+    private function checkSelfModif(User $user, string $key, string $value) {
         // Prevent admin from modifying themselves
         if (Auth::check() && $user->id === Auth::id()) {
             return redirect()->route('admin.users.index')->with($key, $value);

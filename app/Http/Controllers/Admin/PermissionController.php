@@ -1,58 +1,53 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Permission\StorePermissionRequest;
+use App\Http\Requests\Permission\UpdatePermissionRequest;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class PermissionController extends Controller
 {
-    public function index(Request $request)
-    {
-        $search      = $request->get('search');
-        $permissions = Permission::query()
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('group_name', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
-            })
-            ->with('roles')
-            ->orderBy('name', 'asc')
-            ->paginate(20);
-
-        return view('admin.permissions.index', compact('permissions', 'search'));
+    public function __construct() {
+        $this->authorizeResource(Permission::class, 'permission');
     }
 
-    public function create()
-    {
-        $roles = Role::all();
+    /**
+     * Logic move to Livewire : PermissionIndex
+     */
+    public function index(): View {
+        return view('admin.permissions.index');
+    }
+
+    public function create(): View {
+        $roles = Role::orderBy('name')->get();
         return view('admin.permissions.create', compact('roles'));
     }
 
-    public function store(Request $request)
-    {
-        // Set default for 'group' if not provided
-        if (! $request->has('group')) {
-            $request->merge(['group' => 'web']);
-        }
+    public function store(StorePermissionRequest $request): RedirectResponse {
+        $validate = $request->validated();
 
-        $validate = $request->validate([
-            'name'        => 'required|string|max:255',
-            'group'       => 'required|string',
-            'group_name'  => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'role_id'     => 'required|string|exists:roles,id',
+        /**
+         * @var Permission $permission
+         */
+        $permission = Permission::create([
+            'name' => $validate['name'],
+            'group' => $validate['group'],
+            'guard_name' => $validate['guard_name'],
+            'description' => $validate['description'] ?? null,
         ]);
 
-        $permission = Permission::create($validate);
-
         // Assign the role to the permission if role_id is present
-        if (isset($validate['role_id'])) {
-            $role = Role::findById($validate['role_id']);
-            if ($role) {
-                $permission->assignRole($role);
-            }
+        if (! isset($validate['role_id'])) {
+            $role = Role::findById((int) $validate['role_id']);
+            $permission->assignRole($role);
         }
 
         return redirect()->route('admin.permissions.index')
@@ -60,37 +55,33 @@ class PermissionController extends Controller
 
     }
 
-    public function edit(Permission $permission)
-    {
-        $roles = Role::all();
-        return view('admin.permissions.edit', compact('permission', 'roles'));
+    public function edit(Permission $permission): View {
+        $roles = Role::orderBy('name')->get();
+        $currentRoleId = $permission->roles->first()?->id;
+        return view('admin.permissions.edit', compact(
+            'permission',
+            'roles',
+            'currentRoleId'
+        ));
     }
 
-    public function update(Request $request, Permission $permission)
-    {
-        // Set default for 'group' if not provided
-        if (! $request->has('group')) {
-            $request->merge(['group' => 'web']);
-        }
+    public function update(
+        UpdatePermissionRequest $request,
+        Permission $permission
+    ): RedirectResponse {
+        $validate = $request->validated();
 
-        $validate = $request->validate([
-            'name'        => 'required|string|max:255',
-            'group'       => 'required|string',
-            'group_name'  => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'role_id'     => 'required|string|exists:roles,id',
+        $permission->update([
+            'name' => $validate['name'],
+            'group' => $validate['group'],
+            'guard_name' => $validate['guard_name'],
+            'description' => $validate['description'],
         ]);
 
-        $permission->update($validate);
-
-        // Sync the role to the permission if role_id is present
-        if (isset($validate['role_id'])) {
-            $role = Role::findById($validate['role_id']);
-            if ($role) {
-                $permission->syncRoles([$role]);
-            }
+        if (! empty($validate['role_id'])) {
+            $role = Role::findById((int) $validate['role_id']);
+            $permission->syncRoles([$role]);
         } else {
-            // If no role_id is provided, detach all roles
             $permission->syncRoles([]);
         }
 
@@ -98,10 +89,9 @@ class PermissionController extends Controller
             ->with('success', 'Permission updated successfully.');
     }
 
-    public function destroy(Permission $permission)
-    {
-        $permission->delete();
-        return redirect()->route('admin.permissions.index')
-            ->with('success', 'Course deleted successfully.');
-    }
+    // public function destroy(Permission $permission): RedirectResponse {
+    //     $permission->delete();
+    //     return redirect()->route('admin.permissions.index')
+    //         ->with('success', 'Course deleted successfully.');
+    // }
 }

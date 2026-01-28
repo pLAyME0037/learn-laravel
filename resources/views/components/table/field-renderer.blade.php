@@ -1,4 +1,4 @@
-{{-- 
+{{--
     components.table.field-renderer
 --}}
 @if ($field->type === 'component')
@@ -10,10 +10,7 @@
         {{ $paginator->firstItem() + $rowIndex }}
     </span>
 @elseif($field->type === 'view')
-    @include($field->componentName, [
-        'value' => $field->resolve($row),
-        'row' => $row,
-    ])
+    @include($field->componentName, $field->resolveViewData($row))
 @elseif($field->type === 'html')
     <div class="{{ $field->css }} text-sm">
         {!! $field->resolve($row) !!}
@@ -42,14 +39,14 @@
                         title="{{ $action->label ?? '' }}">
                         @if ($icon)
                             @if($isSvg)
-                                <svg class="w-5 h-5" 
-                                    fill="none" 
-                                    stroke="currentColor" 
+                                <svg class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     {!! $icon !!}
                                 </svg>
                             @else
-                                <x-dynamic-component :component="$icon" 
+                                <x-dynamic-component :component="$icon"
                                 class="w-5 h-5" />
                             @endif
                         @else
@@ -67,15 +64,15 @@
                         @endif>
                         @if ($icon)
                             @if($isSvg)
-                                <svg 
-                                    class="w-5 h-5" 
-                                    fill="none" 
-                                    stroke="currentColor" 
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     {!! $icon !!}
                                 </svg>
                             @else
-                                <x-dynamic-component :component="$icon" 
+                                <x-dynamic-component :component="$icon"
                                 class="w-5 h-5" />
                             @endif
                         @else

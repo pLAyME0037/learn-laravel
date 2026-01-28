@@ -6,13 +6,10 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\LoginHistoryController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SidebarController;
 use App\Http\Controllers\ThemeController;
-use App\Http\Controllers\TransactionLedgerController;
 use App\Http\Controllers\UserController;
 use App\Livewire\Academic\Dashboard as AcademicDashboard;
 use App\Livewire\Academic\ScheduleViewer;
@@ -36,13 +33,15 @@ use App\Livewire\Admin\UserManagement;
 use App\Livewire\Instructor\AttendanceTaker;
 use App\Livewire\Instructor\Dashboard as InstructorDashboard;
 use App\Livewire\Instructor\Gradebook;
+use App\Models\Faculty;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
 Route::get('/programs', function () {
-    $faculties = \App\Models\Faculty::with('departments.majors.programs')->get();
+    $faculties = Faculty::with('departments.majors.programs')->get();
     return view('public.programs', compact('faculties'));
 })->name('public.programs');
 

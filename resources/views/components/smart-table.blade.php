@@ -1,7 +1,13 @@
-{{-- 
+{{--
     components.smart-table
 --}}
-@props(['config'])
+@props(['table'])
+
+@php
+    $paginator = $table->getQuery()->paginate($table->getPerPage());
+    $columns = $table->getColumns();
+    $hidden = $table->getHiddenColumns();
+@endphp
 
 <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
 
@@ -12,10 +18,10 @@
             {{-- 1.1 Header --}}
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                    @foreach ($config['headers'] as $col)
-                        @if (!in_array($col->header, $config['hidden'] ?? []))
+                    @foreach ($columns as $col)
+                        @if (!in_array($col->header, $hidden ?? []))
                             <th
-                                class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider 
+                                class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider
                                        {{ $col->width }} text-{{ $col->align }}">
                                 {{ $col->header }}
                             </th>
@@ -26,25 +32,25 @@
 
             {{-- 1.2 Body --}}
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                @forelse($config['rows'] as $row)
+                @forelse($paginator as $row)
                     @php $rowIndex = $loop->index; @endphp
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
 
-                        @foreach ($config['headers'] as $col)
-                            @if (!in_array($col->header, $config['hidden'] ?? []))
-                                <td class="px-6 py-4 whitespace-nowrap text-{{ $col->align }}">
+                        @foreach ($columns as $col)
+                            @if (!in_array($col->header, $hidden ?? []))
+                                <td class="px-6 py-4 whitespace-nowrap text-{{ $col->align ?? 'left' }}">
 
                                     {{-- CELL CONTENT WRAPPER --}}
                                     <div
                                         class="flex flex-col gap-1 {{ $col->align === 'right' ? 'items-end' : ($col->align === 'center' ? 'items-center' : 'items-start') }}">
 
                                         {{-- Loop through Layout Blocks (Fields/Stacks/Grids) --}}
-                                        @foreach ($col->fields as $block)
+                                        @foreach ($col->fields ?? [] as $block)
                                             @include('components.table.layout-renderer', [
                                                 'block' => $block,
                                                 'row' => $row,
                                                 'rowIndex' => $rowIndex, // Pass Loop
-                                                'paginator' => $config['rows'], // Pass Paginator
+                                                'paginator' => $paginator ?? 10, // Pass Paginator
                                             ])
                                         @endforeach
 
@@ -57,7 +63,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($config['headers']) }}"
+                        <td colspan="{{ count($columns) }}"
                             class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                             <div class="flex flex-col items-center justify-center">
                                 <svg class="w-12 h-12 text-gray-300 mb-3"
@@ -79,10 +85,10 @@
         </table>
     </div>
 
-    {{-- 2. Pagination --}}
-    @if (method_exists($config['rows'], 'links'))
+    {{-- 2. pagination --}}
+    @if (method_exists($paginator, 'links') && $paginator->hasPages())
         <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            {{ $config['rows']->links() }}
+            {{ $paginator->links() }}
         </div>
     @endif
 </div>
