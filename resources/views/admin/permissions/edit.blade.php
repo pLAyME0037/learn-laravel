@@ -42,15 +42,15 @@
                 </div>
 
                 <div class="mt-4">
-                    <x-input-label for="group_name"
-                        :value="__('Group Name')" />
-                    <x-text-input id="group_name"
+                    <x-input-label for="guard_name"
+                        :value="__('Guard Name')" />
+                    <x-text-input id="guard_name"
                         class="block mt-1 w-full"
                         type="text"
-                        name="group_name"
-                        :value="old('group_name', $permission->group_name)"
-                        autocomplete="group_name" />
-                    <x-input-error :messages="$errors->get('group_name')"
+                        name="guard_name"
+                        :value="old('guard_name', $permission->guard_name)"
+                        autocomplete="guard_name" />
+                    <x-input-error :messages="$errors->get('guard_name')"
                         class="mt-2" />
                 </div>
 
@@ -77,7 +77,7 @@
                         <option value="">{{ __('Select Role') }}</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->id }}"
-                                {{ old('role_id', $permission->role_id) == $role->id ? 'selected' : '' }}>
+                                {{ old('role_id') == $role->id ? 'selected' : '' }}>
                                 {{ $role->name }}
                             </option>
                         @endforeach

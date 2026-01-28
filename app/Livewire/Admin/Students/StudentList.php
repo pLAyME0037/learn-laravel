@@ -52,19 +52,19 @@ class StudentList extends Component
             // 3. Address (Complex HTML with Orange Text)
             Column::make('Address')->stack([
                 Field::make('address')
-                    ->view('components.table.Student.address-block'),
+                ->view('components.table.Student.address-block'),
             ]),
 
             // 4. Progress (Calculation on Fly)
             Column::make('Progress')->center()->stack([
                 Field::make('current_term')
-                    ->view('components.table.Student.term'),
+                ->view('components.table.Student.term'),
             ]),
 
             Column::make('Status')->center()->stack([
                 Field::make('academic_status')
-                    ->format(fn($val, $row) => !empty($row['deleted_at']) ? 'Trashed' : $val)
-                    ->view('components.table.Student.status-badge'),
+                ->format(fn($val, $row) => !empty($row['deleted_at']) ? 'Trashed' : $val)
+                ->view('components.table.Student.status-badge'),
             ]),
 
             Column::make('Action')->right()->stack([
@@ -91,7 +91,7 @@ class StudentList extends Component
                     ),
                 ]),
             ]),
-        ])->build();
+        ]);
     }
 
     /**
@@ -173,7 +173,7 @@ class StudentList extends Component
             $student->address()->delete();
             $student->contactDetail()->delete();
             $msg = 'Student and User account moved to trash.';
-            break;
+        break;
 
         case 'restore':
             $student->restore();
@@ -197,7 +197,7 @@ class StudentList extends Component
             }
 
             $msg = 'Student record restored.';
-            break;
+        break;
 
         case 'force_delete':
             if ($student->user) {
@@ -206,7 +206,7 @@ class StudentList extends Component
 
             $student->forceDelete();
             $msg = 'Student permanently deleted.';
-            break;
+        break;
         }
 
         $this->dispatch('swal:success', ['message' => $msg]);
@@ -223,7 +223,7 @@ class StudentList extends Component
             'academic_status' => $this->filterStatus,
         ])->orderByDesc('created_at');
 
-        $students = $this->buildTable($query);
+        $table = $this->buildTable($query); // Student table
 
         $departments = Department::orderBy('name')
             ->get()
@@ -248,10 +248,10 @@ class StudentList extends Component
                 'sub'        => "{$m->major->name} • ({$m->degree->name})",
             ]);
 
-        return view('livewire.admin.students.student-list', [
-            'table'       => $students,
-            'departments' => $departments,
-            'programs'    => $programs,
-        ]);
+        return view('livewire.admin.students.student-list', compact(
+            'table',
+            'departments',
+            'programs',
+        ));
     }
 }

@@ -4,10 +4,13 @@ namespace App\Providers;
 use App\Models\Enrollment;
 use App\Models\User;
 use App\Observers\EnrollmentObserver;
+use App\Policies\PermissionPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Models\Permission;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,12 +29,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
+    public function boot(): void {
         if (config('database.default') === 'sqlite') {
             DB::statement('PRAGMA foreign_keys = ON;');
         }
-        
+
+        Gate::policy(Permission::class, PermissionPolicy::class);
+
         // Admin-only directive
         Blade::if('admin', function () {
             $user = auth()->user();
