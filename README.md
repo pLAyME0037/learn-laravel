@@ -152,3 +152,17 @@ This is the most complex Admin task.
 | **Grades** | Instructor | Student (Views) |
 | **Payments** | Finance Officer | Student (Pays) |
 | **System Config** | Super Admin | - |
+
+---
+## Step to set up this system:
+1 .``` git clone https://github.com/pLAyME0037/learn-laravel.git ```
+2. cd learn-laravel
+3. composer install
+4. npm install
+5. copy .env.example .env
+6. php artisan key:generate
+7. php artisan migrate
+8. php artisan migrate --database=sqlite_locations --path=database/migrations/locations && php artisan db:seed --class=LocationSeeder --path=database/seeders/locations
+9. php artisan migrate --seed
+10. npm run build
+11. php artisan serve
