@@ -59,9 +59,6 @@ class StudentList extends Component
             Column::make('Progress')->center()->stack([
                 Field::make('current_term')
                 ->view('components.table.Student.term'),
-            ]),
-
-            Column::make('Status')->center()->stack([
                 Field::make('academic_status')
                 ->format(fn($val, $row) => !empty($row['deleted_at']) ? 'Trashed' : $val)
                 ->view('components.table.Student.status-badge'),
@@ -96,7 +93,7 @@ class StudentList extends Component
 
     /**
      * Global hook: Runs when ANY property updates.
-     * $property = 'search', 'filterProgram', 'filterStatus'.
+     * @param string $property = 'search', 'filterProgram', 'filterStatus'.
      */
     public function updated($property) {
         $filters = [
@@ -115,8 +112,7 @@ class StudentList extends Component
         $this->resetPage();
     }
 
-    public function resetFilters()
-    {
+    public function resetFilters() {
         $this->reset([
             'search',
             'filterDepartment',
@@ -126,12 +122,9 @@ class StudentList extends Component
         $this->resetPage();
     }
 
-    public function confirmDelete($id)
-    {
+    public function confirmDelete($id) {
         $student = Student::withTrashed()->find($id);
-        if (! $student) {
-            return;
-        }
+        if (! $student) { return; }
 
         // Default Config (Active Student)
         $config = [
@@ -156,8 +149,7 @@ class StudentList extends Component
     }
 
     #[On('executeAction')]
-    public function executeAction($id, $action)
-    {
+    public function executeAction($id, $action) {
         // 1. Find Student (With Trashed)
         $student = Student::withTrashed()->find($id);
 
@@ -213,8 +205,7 @@ class StudentList extends Component
     }
 
     #[Layout('layouts.app', ['header' => 'Students Management'])]
-    public function render()
-    {
+    public function render() {
         // dump($this->filterDepartment, $this->filterProgram, $this->search, $this->filterStatus);
         $query = Student::applyFilters([
             'search'          => $this->search,

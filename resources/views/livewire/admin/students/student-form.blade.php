@@ -5,10 +5,6 @@
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
                 {{ $isEdit ? 'Edit Student Profile' : 'Register New Student' }}
             </h2>
-            <a href="{{ route('admin.students.index') }}"
-                class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                Cancel
-            </a>
         </div>
 
         <form wire:submit="save"
@@ -311,7 +307,7 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end pt-4">
+            <div class="flex justify-end pt-4 gap-2">
                 <button type="submit"
                     wire:loading.attr="disabled"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center disabled:opacity-50">
@@ -321,6 +317,11 @@
                     <span wire:loading
                         class="ml-2">Saving...</span>
                 </button>
+
+                <a href="{{ route('admin.students.index') }}"
+                   class="bg-red-400 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center disabled:opacity-50">
+                    Cancel
+                </a>
             </div>
 
         </form>

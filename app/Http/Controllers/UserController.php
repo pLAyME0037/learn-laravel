@@ -13,6 +13,7 @@ use App\Tables\Field;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -23,11 +24,19 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    /**
+     * Appily resource authorization (User Policy) to all method in Controller.
+     */
     public function __construct() {
         $this->authorizeResource(User::class, 'user');
     }
 
-    public function builtTable($query) {
+    /**
+     * Server side html builder.
+     * @param Builder $query
+     * @return Table instance
+     */
+    public function builtTable(Builder $query): Table {
         return Table::make($query)->columns([
         // 1. ID Column (Calculation)
         Column::make('#')->stack([
@@ -51,7 +60,7 @@ class UserController extends Controller
             Field::make('roles')->view('components.table.cell.role-badge', fn($r, $u) => [
                 'roles' => $r,
                 'user' => $u,
-            ]), // FIX return user name and not user role.
+            ]),
             Field::make('is_active')->view('components.table.cell.status-badge', fn($v, $u) => [
                 'user' => $u,
             ]),
@@ -83,13 +92,11 @@ class UserController extends Controller
 
             Action::button('confirmDelete')
                 ->icon(fn($row) => ($row['deleted_at'])
-                ? 'heroicon-o-arrow-path'
-                : 'heroicon-o-trash'
-                )
+                    ? 'heroicon-o-arrow-path'
+                    : 'heroicon-o-trash')
                 ->color(fn($row) => ($row['deleted_at'])
-                ? 'text-green-600 hover:text-green-800'
-                : 'text-red-500 hover:text-red-700'
-                ),
+                    ? 'text-green-600 hover:text-green-800'
+                    : 'text-red-500 hover:text-red-700'),
             ]),
         ]),
         ]);
@@ -97,9 +104,10 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
+     * @param Request $request
+     * @return view
      */
     public function index(Request $request) {
-        // Validate filters
         $filters = $request->validate([
             'search'  => 'nullable|string|max:100',
             'role'    => 'nullable|string|max:50',
@@ -107,6 +115,8 @@ class UserController extends Controller
             'orderby' => 'nullable|string|in:newest,oldest,a_to_z,z_to_a',
         ]);
 
+        // get null and empty value out filters completely for cleaner.
+        $filters = array_filter($filters, fn($v) => !is_null($v) && $v !== '');
         $prepUsers = User::with('roles')
             ->applyFilters($filters);
         $users = $this->builtTable($prepUsers);
@@ -162,6 +172,7 @@ class UserController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     * @return view
      */
     public function create() {
         $roles = Role::all();
@@ -170,6 +181,7 @@ class UserController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * @param StoreUserRequest $request
      */
     public function store(StoreUserRequest $request) {
         $data = $request->validated();
@@ -206,14 +218,18 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
+     * @param User $user
+     * @return view
      */
     public function show(User $user) {
-        $user->load('roles'); // Use the correct 'roles' relationship for Spatie
+        $user->load('roles');
         return view('admin.users.show', compact('user'));
     }
 
     /**
      * Show the form for editing the specified resource.
+     * @param User $user
+     * @return view
      */
     public function edit(User $user) {
         $roles = Role::orderBy('name')->pluck('name', 'name');
@@ -227,6 +243,9 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * @param UpdateUserRequest $request
+     * @param User $user
+     * @return RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse {
         $validated = $request->validated();
@@ -269,6 +288,12 @@ class UserController extends Controller
              ->with('success', 'User updated successfully.');
     }
 
+    /**
+     * Check prevent user form deleting their own account.
+     * @param User $id
+     * @param string $key "success, error"
+     * @param string $value "message that trigger by $key"
+     */
     private function checkSelfModif(User $user, string $key, string $value) {
         // Prevent admin from modifying themselves
         if (Auth::check() && $user->id === Auth::id()) {
@@ -279,6 +304,7 @@ class UserController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * @param User $user
      */
     public function destroy(User $user) {
         $this->checkSelfModif($user,
@@ -290,6 +316,10 @@ class UserController extends Controller
              ->with('success', 'User deleted successfully.');
     }
 
+    /**
+     * Restore user back.
+     * @param User $user
+     */
     public function restore(User $user) {
         $this->authorize('restore', $user);
         $user->restore();
@@ -298,6 +328,10 @@ class UserController extends Controller
              ->with('success', 'User restore successfully.');
     }
 
+    /**
+     * Forver delete user form system.
+     * @param string $id to access soft delete record
+     */
     public function forceDelete(string $id) {
         $user = User::withTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $user);

@@ -22,32 +22,32 @@ class InstructorList extends Component
     public $filterStatus     = '';
 
     // --- Hooks ---
+    public function updated($property) {
+        $filters = [
+            'search',
+            'filterDepartment',
+            'filterStatus',
+        ];
 
-    public function updatedSearch()
-    {$this->resetPage();}
-    public function updatedFilterDepartment()
-    {$this->resetPage();}
-    public function updatedFilterStatus()
-    {$this->resetPage();}
+        if (in_array($property, $filters)) {
+            $this->resetPage();
+        }
+    }
 
-    public function resetFilters()
-    {
+    public function resetFilters() {
         $this->reset(['search', 'filterDepartment', 'filterStatus']);
         $this->resetPage();
     }
 
     // --- Table Definition (The Core) ---
 
-    public function buildTable($query)
-    {
+    public function buildTable($query) {
         return Table::make($query)->columns([
 
-            // 1. Index
             Column::make('#')->stack([
                 Field::index()->css('font-bold text-indigo-600'),
             ]),
 
-            // 2. Identity (Grid: Image + Details)
             Column::make('Instructor')->grid('max-content 1fr', [
                 Field::make('user')->component('profile-image', fn($user) => [
                     'size' => 'sm',
@@ -61,20 +61,26 @@ class InstructorList extends Component
                 ]),
             ]),
 
-            // 3. Department & Specialization
             Column::make('Department')->stack([
                 Field::make('department.name')->bold(),
-                Field::make('attributes.specialization')->label('sp: '),
-                Field::make('office_hours')->small()->label('hours: '),
-            ]),
-
-            // 4. Contact Info
-            Column::make('Contact')->stack([
+                Field::make('attributes.specialization')->label('specialize: '),
                 Field::make('contactDetail.phone')->small(),
-                Field::make('contactDetail.emergency_phone')->small()->css('text-red-400'),
+                Field::make('contactDetail.emergency_phone')
+                    ->css('text-red-400 dark:text-red-400')
+                    ->small(),
             ]),
 
-            // 5. Actions (Smart Buttons)
+            Column::make('Working hours')->stack([
+                Field::make('office_hours')
+                ->html(fn($val) => $val)
+                ->format(fn($val) => str_replace(',', '<br>', $val))
+                ->css('text-white')
+                ->small(),
+            ]),
+
+            // Column::make('Contact')->stack([
+            // ]),
+
             Column::make('Action')->right()->stack([
                 Field::make('id')->actions([
 
@@ -103,18 +109,14 @@ class InstructorList extends Component
                 ]),
             ]),
 
-        ])->build();
+        ]);
     }
 
     // --- Action Logic ---
-
-    public function confirmDelete($id)
-    {
+    public function confirmDelete($id) {
         $instructor = Instructor::withTrashed()->find($id);
 
-        if (! $instructor) {
-            return;
-        }
+        if (! $instructor) { return; }
 
         $name = $instructor->user->name ?? 'Unknown Instructor';
 
@@ -142,8 +144,7 @@ class InstructorList extends Component
     }
 
     #[On('executeAction')]
-    public function executeAction($id, $action)
-    {
+    public function executeAction($id, $action) {
         $instructor = Instructor::withTrashed()->find($id);
 
         if (! $instructor) {
@@ -181,8 +182,7 @@ class InstructorList extends Component
     }
 
     #[Layout('layouts.app', ['header' => 'Instructors'])]
-    public function render()
-    {
+    public function render() {
         // 1. Build Query with Eager Loading (Including Trashed for restore logic)
         $query = Instructor::with([
             'user' => fn($q) => $q->withTrashed(),
@@ -211,10 +211,12 @@ class InstructorList extends Component
         // 3. Build Table
         $instructors = $this->buildTable($query);
 
+        $departments = Department::orderBy('name')->pluck('name', 'id');
+
         // 4. Return View
-        return view('livewire.admin.instructors.instructor-list', [
-            'instructors' => $instructors,
-            'departments' => Department::orderBy('name')->pluck('name', 'id'),
-        ]);
+        return view('livewire.admin.instructors.instructor-list', compact(
+            'instructors',
+            'departments',
+        ));
     }
 }

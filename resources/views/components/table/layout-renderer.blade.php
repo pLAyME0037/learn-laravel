@@ -1,6 +1,4 @@
-{{-- 
-    components.table.layout-renderer
---}}
+{{-- components.table.layout-renderer --}}
 @props(['block', 'row', 'rowIndex', 'paginator'])
 
 @if (is_array($block) && isset($block['type']))

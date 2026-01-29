@@ -14,8 +14,7 @@ class UpdatePermissionRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool {
-        // return $this->user()->can("view.roles");
-        return true;
+        return $this->user()->can("Manage Roles & Permissions");
     }
 
     public function prepareForValidation(): void {
@@ -28,9 +27,7 @@ class UpdatePermissionRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
-        /**
-         * @var Permission $permission
-         */
+        /** @var Permission $permission */
         $permission = $this->route('permission');
 
         return [
@@ -38,7 +35,7 @@ class UpdatePermissionRequest extends FormRequest
                 Rule::unique('permissions', 'name')->ignore($permission->id),
             ],
             'group'       => ['required', 'string', 'max:50'],
-            'guard_name'  => ['required', 'string', 'max:125', 'in:web,api'],
+            'guard_name'  => ['required', 'string', 'max:125'],
             'description' => ['nullable', 'string', 'max:255'],
             'role_id'     => ['nullable', 'integer', 'exists:roles,id'],
         ];

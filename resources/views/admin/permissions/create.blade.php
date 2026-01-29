@@ -73,7 +73,7 @@
                     <select id="role_id"
                         name="role_id"
                         class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
-                        <option value="Super Administrator">Super Administrator</option>
+                        <option value="1">Super Administrator</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->id }}"
                                 {{ old('role_id') == $role->id ? 'selected' : '' }}>

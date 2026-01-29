@@ -89,9 +89,10 @@ class PermissionController extends Controller
             ->with('success', 'Permission updated successfully.');
     }
 
-    // public function destroy(Permission $permission): RedirectResponse {
-    //     $permission->delete();
-    //     return redirect()->route('admin.permissions.index')
-    //         ->with('success', 'Course deleted successfully.');
-    // }
+    public function destroy(Permission $permission): RedirectResponse {
+        // $permission->delete();
+        // return redirect()->route('admin.permissions.index')
+        //     ->with('success', 'Course deleted successfully.');
+        return back();
+    }
 }

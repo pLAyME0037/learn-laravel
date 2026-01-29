@@ -15,7 +15,7 @@
                     <option value="{{ $id }}">{{ $name }}</option>
                 @endforeach
             </select>
- 
+
             <select wire:model.live="filterStatus"
                 class="w-1/3 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm">
                 <option value="">All Status</option>
@@ -39,7 +39,7 @@
         </a>
     </div>
 
-    <x-smart-table :config="$instructors" />
+    <x-smart-table :table="$instructors" />
 </div>
 @push('scripts')
     <x-sweet-alert-actions />

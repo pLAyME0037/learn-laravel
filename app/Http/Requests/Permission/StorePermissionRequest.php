@@ -12,8 +12,7 @@ class StorePermissionRequest extends FormRequest
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool {
-        // return $this->user()->can(view.roles);
-        return true;
+        return $this->user()->can('Manage Roles & Permissions');
     }
 
     public function prepareForValidation(): void {
@@ -30,7 +29,7 @@ class StorePermissionRequest extends FormRequest
         return [
             'name'        => ['required', 'string', 'max:255', 'unique:permissions,name'],
             'group'       => ['required', 'string', 'max:50'],
-            'guard_name'  => ['required', 'string', 'max:125', 'in:web,api'],
+            'guard_name'  => ['required', 'string', 'max:125'],
             'description' => ['nullable', 'string', 'max:255'],
             'role_id'     => ['nullable', 'integer', 'exists:roles,id'],
         ];

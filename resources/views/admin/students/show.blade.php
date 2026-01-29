@@ -65,7 +65,7 @@
                             </span>
                             <div class="mt-1">
                                 <span
-                                    class="px-2 py-1 text-xs font-bold rounded-full 
+                                    class="px-2 py-1 text-xs font-bold rounded-full
                                     {{ $student->academic_status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' }}">
                                     {{ ucfirst($student->academic_status) }}
                                 </span>
@@ -272,30 +272,35 @@
                         @endif
                     </div>
 
-                    <!-- 7. Quick Actions -->
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border dark:border-gray-700">
+                    <div class="grid grid-cols-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 gap-2 border dark:border-gray-700 items-center">
+                        <x-secondary-button href="{{ route('admin.students.index') }}"
+                            class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-900/40 rounded justify-center">
+                            {{ __('Back') }}
+                        </x-secondary-button>
+                        <x-secondary-button href="{{ route('admin.students.edit', $student->id) }}"
+                            class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 dark:hover:bg-indigo-900/40 rounded justify-center">
+                            {{ __('Edit') }}
+                        </x-secondary-button>
+
                         <h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">
                             Admin Actions
                         </h4>
                         <div class="space-y-2">
-                            <!-- Delete Button (Only for admins) -->
-                            @can('delete.students')
+
                                 <form action="#"
                                     method="POST"
                                     onsubmit="return confirm('Are you sure?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
-                                        Delete Record
-                                    </button>
+                                    <x-secondary-button class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
+                                        Delete Record (not implement)
+                                    </x-secondary-button>
                                 </form>
-                            @endcan
-                            <!-- Print ID Card -->
-                            <button
-                                class="w-full text-left px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded">
-                                Print ID Card
-                            </button>
+
+                            <x-secondary-button class="w-full text-left px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded">
+                                Print ID Card (not implement)
+                            </x-secondary-button>
+
                         </div>
                     </div>
 

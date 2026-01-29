@@ -1,6 +1,4 @@
-{{--
-    components.table.field-renderer
---}}
+{{-- components.table.field-renderer --}}
 @if ($field->type === 'component')
     @php $props = $field->resolve($row); @endphp
     <x-dynamic-component :component="$field->componentName"
@@ -23,6 +21,11 @@
 @elseif($field->type === 'badge')
     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
         {{ ucfirst($field->resolve($row)) }}
+    </span>
+@elseif($field->type === 'label')
+    <span>
+        <x-input-label for="{{ $field->resolve($row) }}"
+            value="{{ ucfirst($field->resolve($row)) }}"/>
     </span>
 @elseif($field->type === 'actions')
     <div class="flex items-center gap-3 justify-end">

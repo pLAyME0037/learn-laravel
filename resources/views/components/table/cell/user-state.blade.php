@@ -10,7 +10,7 @@
 @endphp
 
 <div class="flex items-center">
-    <div class="ml-4">
+    <div class="ml-0">
         @foreach ($dates as $label => $date)
             <div class="text-sm text-gray-500 dark:text-gray-400">
                 {{ $label }}: {{ $date ? $date->diffForHumans() : 'Never' }}

@@ -106,76 +106,48 @@ class RolePermissionSeeder extends Seeder
     {
         return [
             // --- CORE ---
+            'Admin & Staff'       => [
+                'Administering' => 'View Admin Work',
+            ],
             'User Management'       => [
-                'view.users'   => 'View user accounts',
-                'create.users' => 'Create new user accounts',
-                'edit.users'   => 'Edit user accounts',
-                'delete.users' => 'Delete user accounts',
+                'Manage Users' => 'Create Delete Edit new user accounts',
             ],
             'Role Management'       => [
-                'view.roles'   => 'View roles',
-                'create.roles' => 'Create new roles',
-                'edit.roles'   => 'Edit roles',
-                'delete.roles' => 'Delete roles',
+                'Manage Roles & Permissions'   => 'This User can (Create, Edit, Update, Delete) roles and permissions',
             ],
 
             // --- ACADEMIC STRUCTURE ---
             'Academic Structure'    => [
-                'view.faculties'    => 'View faculties',
-                'manage.structure'  => 'Manage structure (Faculties/Depts/Majors)',
-                'view.departments'  => 'View departments',
-                'view.programs'     => 'View programs',
-                'manage.curriculum' => 'Manage curriculum (Roadmaps)',
+                'Manage Academic Structure'  => 'Manage structure (Faculties/Depts/Majors)',
             ],
             'Course Management'     => [
-                'view.courses'   => 'View course catalog',
-                'create.courses' => 'Create new courses',
-                'edit.courses'   => 'Edit courses',
-                'delete.courses' => 'Delete courses',
+                'Manage Course'   => 'View course catalog',
             ],
-            'Scheduling'            => [
-                'view.schedule'   => 'View class schedules',
-                'manage.schedule' => 'Create/Edit class sessions',
-                'batch.enroll'    => 'Run batch enrollment tool',
+            'Operation Management' => [
+                'Manage Operation'   => 'Manage Class Schdule and Batch Enrollment',
             ],
 
             // --- PEOPLE ---
             'Student Management'    => [
-                'view.students'         => 'View student records',
-                'create.students'       => 'Create student profiles',
-                'edit.students'         => 'Edit student profiles',
-                'delete.students'       => 'Soft delete students',
-                'restore.students'      => 'Restore deleted students',
-                'force-delete.students' => 'Permanently delete students',
+                'Manage Student'         => 'View student records',
             ],
-            'Instructor Management' => [
-                'view.instructors'   => 'View instructor list',
-                'create.instructors' => 'Create instructor profiles',
-                'edit.instructors'   => 'Edit instructor profiles',
-                'delete.instructors' => 'Delete instructors',
+            'Student' => [
+                'Student'         => 'For Student Route',
             ],
 
             // --- INSTRUCTOR TOOLS ---
-            'Grading'               => [
-                'view.gradebook'  => 'Access gradebook',
-                'submit.grades'   => 'Submit final grades',
-                'view.attendance' => 'View attendance records',
-                'take.attendance' => 'Take daily attendance',
+            'Instructor Management' => [
+                'Instructor'   => 'Access to class score attendent',
             ],
 
             // --- FINANCIALS ---
-            'Financials'            => [
-                'view.invoices'   => 'View invoices',
-                'create.invoices' => 'Generate invoices',
-                'record.payments' => 'Record payments manually',
-                'view.payments'   => 'View payment history',
+            'Financials' => [
+                'Manage Payments'   => 'Manage cash flow',
             ],
 
             // --- SYSTEM ---
-            'System'                => [
-                'view.audit-logs'     => 'View audit logs',
-                'view.system-configs' => 'View system settings',
-                'edit.system-configs' => 'Edit system settings',
+            'System' => [
+                'Manage System' => 'View, Edit system settings',
             ],
         ];
     }
@@ -193,66 +165,63 @@ class RolePermissionSeeder extends Seeder
         return [
             'Super Administrator' => [
                 'description' => 'Full system access',
-                'permissions' => $allPermissions,
+                'permissions' => [
+                    'Manage Academic Structure',
+                    'Administering',
+                    'Manage Payments',
+                    'Manage Operation',
+                    'Manage Roles & Permissions',
+                    'Manage System',
+                    'Manage Users',
+                ],
             ],
-            'admin'               => [
+            'admin' => [
                 'description' => 'System administrator',
                 'permissions' => [
-                    'view.users', 'create.users', 'edit.users',
-                    'manage.structure', 'manage.curriculum',
-                    'view.courses', 'create.courses', 'edit.courses',
-                    'view.schedule', 'manage.schedule', 'batch.enroll',
-                    'view.students', 'create.students', 'edit.students', 'delete.students', 'restore.students',
-                    'view.instructors', 'create.instructors', 'edit.instructors',
-                    'view.invoices', 'record.payments', 'view.payments',
+                    'Administering',
+                    'Manage Academic Structure',
+                    'Manage Payments',
+                    'Manage Operation',
+                    'Manage Roles & Permissions',
+                    'Manage System',
+                    'Manage Users',
                 ],
             ],
-            'register'            => [
+            'register' => [
                 'description' => 'Registrar office staff',
                 'permissions' => [
-                    'view.users', 'create.users', 'edit.users',
-                    'manage.structure', 'manage.curriculum',
-                    'view.courses', 'create.courses', 'edit.courses',
-                    'view.schedule', 'manage.schedule', 'batch.enroll',
-                    'view.students', 'create.students', 'edit.students', 'delete.students', 'restore.students',
-                    'view.instructors', 'create.instructors', 'edit.instructors',
-                    'view.invoices', 'record.payments', 'view.payments',
+                    'Administering',
+                    'Manage Payments',
+                    'Manage Users',
                 ],
             ],
-            'hod'                 => [
+            'hod' => [
                 'description' => 'Head of Department',
                 'permissions' => [
-                    'view.users', 'create.users', 'edit.users',
-                    'manage.structure', 'manage.curriculum',
-                    'view.courses', 'create.courses', 'edit.courses',
-                    'view.schedule', 'manage.schedule', 'batch.enroll',
-                    'view.students', 'create.students', 'edit.students', 'delete.students', 'restore.students',
-                    'view.instructors', 'create.instructors', 'edit.instructors',
-                    'view.invoices', 'record.payments', 'view.payments',
+                    'Manage Academic Structure',
+                    'Administering',
+                    'Manage Payments',
+                    'Manage Operation',
+                    'Manage System',
+                    'Manage Users',
                 ],
             ],
-            'professor'           => [
+            'instructor' => [
                 'description' => 'Teaching faculty',
                 'permissions' => [
-                    'view.schedule',
-                    'view.gradebook', 'submit.grades',
-                    'view.attendance', 'take.attendance',
-                    'view.students',
+                    'Instructors',
                 ],
             ],
             'staff'               => [
                 'description' => 'Administrative staff',
                 'permissions' => [
-                    'view.schedule',
-                    'view.gradebook', 'submit.grades',
-                    'view.attendance', 'take.attendance',
-                    'view.students',
+                    'Manage Users',
                 ],
             ],
             'student'             => [
                 'description' => 'Student access',
                 'permissions' => [
-                    'view.students',
+                    'Student',
                 ],
             ],
         ];
