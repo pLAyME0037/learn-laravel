@@ -1,11 +1,16 @@
 # Schul SYS – Functional Workflow & Operational Documentation
 
-This document outlines the operational logic, user journeys, and management workflows for the **Schul SYS** School Management System. It serves as a guide for understanding how different roles interact with the system and the value proposition for each stakeholder.
+This document outlines the operational logic, user journeys, and management
+workflows for the **Schul SYS** School Management System. It serves as a guide
+for understanding how different roles interact with the system and the value
+proposition for each stakeholder.
 
 ---
 
 ## 1. The Ecosystem Overview
-The system acts as the central nervous system for the educational institution. It bridges the gap between **Academic Operations** (learning, grading) and **Administrative Operations** (finance, HR, facilities).
+The system acts as the central nervous system for the educational institution. 
+It bridges the gap between **Academic Operations** (learning, grading) and
+**Administrative Operations** (finance, HR, facilities).
 
 **Core Philosophy:** "Data entered once, accessible everywhere."
 
@@ -16,13 +21,17 @@ The system acts as the central nervous system for the educational institution. I
 The student is the primary consumer of the system. Their workflow moves from **Admission** to **Graduation**.
 
 ### Phase A: Admission & Onboarding
-1.  **Registration:** The student (or Registrar) creates a profile. The system generates a unique `Student ID` and links them to a `User` account for login.
-2.  **Program Assignment:** The student is assigned a **Department** (e.g., Computer Science) and a **Program** (e.g., Bachelor of Software Engineering).
-3.  **Profile Completion:** Student updates emergency contacts, addresses, and uploads a profile picture.
+1.  **Registration:** The student (or Registrar) creates a profile. The system
+    generates a unique `Student ID` and links them to a `User` account for login.
+2.  **Program Assignment:** The student is assigned a **Department** (e.g.,
+    Computer Science) and a **Program** (e.g., Bachelor of Software Engineering).
+3.  **Profile Completion:** Student updates emergency contacts, addresses, and
+    uploads a profile picture.
 
 ### Phase B: Semester Enrollment (The "Start of Term" Loop)
 *This happens every semester.*
-1.  **Check Eligibility:** The system checks if the student has no financial holds and is "Active."
+1.  **Check Eligibility:** The system checks if the student has no financial 
+    holds and is "Active."
 2.  **Course Selection:**
     *   Student views the **Class Schedule**.
     *   Student selects courses.
@@ -30,30 +39,39 @@ The student is the primary consumer of the system. Their workflow moves from **A
         *   Does the student meet **Prerequisites**?
         *   Is there a **Time Conflict** with another class?
         *   Is the **Classroom Capacity** full?
-3.  **Confirmation:** Once approved, an `Enrollment` record is created. The student now appears on the Instructor's attendance sheet.
+3.  **Confirmation:** Once approved, an `Enrollment` record is created. The student 
+    now appears on the Instructor's attendance sheet.
 
 ### Phase C: Daily Academic Life
-1.  **Dashboard:** Student logs in to see their schedule ("What class do I have today?"), announcements, and upcoming exams.
-2.  **Attendance:** They can view their attendance percentage (e.g., "I have 85% attendance in Math").
+1.  **Dashboard:** Student logs in to see their schedule ("What class do I have
+    today?"), announcements, and upcoming exams.
+2.  **Attendance:** They can view their attendance percentage (e.g., "I have 85%
+    attendance in Math").
 3.  **Resources:** Download assignments or lecture notes uploaded by the instructor.
 
 ### Phase D: Financials
 1.  **Billing:** The system generates a tuition invoice based on the number of credits taken.
-2.  **Payment:** Student/Parent views outstanding balance. Payments are recorded (Cash/Online), and the balance updates instantly.
+2.  **Payment:** Student/Parent views outstanding balance. Payments are recorded
+    (Cash/Online), and the balance updates instantly.
 
 ### Phase E: Assessment & Progression
-1.  **Results:** After exams, students view their **Grades** and **GPA/CGPA** (automatically calculated by the system).
-2.  **Transcript:** At any point, they can request/view an unofficial transcript showing their academic history.
+1.  **Results:** After exams, students view their **Grades** and **GPA/CGPA**
+    (automatically calculated by the system).
+2.  **Transcript:** At any point, they can request/view an unofficial transcript
+    showing their academic history.
 
 ---
 
 ## 3. The Instructor Workflow (Faculty Point of View)
 
-The instructor is the service provider. Their goal is efficient classroom management and assessment.
+The instructor is the service provider. Their goal is efficient classroom
+management and assessment.
 
 ### Phase A: Course Assignment
-1.  **Allocation:** The Admin assigns the Instructor to specific **Courses** and **Class Schedules** (e.g., "Intro to AI" on Mondays at 10:00 AM).
-2.  **Roster:** The instructor logs in and sees the list of enrolled students for each class.
+1.  **Allocation:** The Admin assigns the Instructor to specific **Courses** and
+    **Class Schedules** (e.g., "Intro to AI" on Mondays at 10:00 AM).
+2.  **Roster:** The instructor logs in and sees the list of enrolled students for
+    each class.
 
 ### Phase B: Classroom Management
 1.  **Attendance Taking:**
@@ -61,7 +79,8 @@ The instructor is the service provider. Their goal is efficient classroom manage
     *   Selects the specific class session.
     *   Marks students as *Present, Absent, Late,* or *Excused*.
     *   *System Action:* Updates the student's attendance stats immediately.
-2.  **Content Delivery:** Uploading syllabus, assignment guidelines, or resources to the specific Course page.
+2.  **Content Delivery:** Uploading syllabus, assignment guidelines, or resources
+    to the specific Course page.
 
 ### Phase C: Grading & Assessment (Crucial)
 1.  **Input Marks:**
@@ -80,7 +99,8 @@ Admins are the "Architects." They set the rules and maintain the infrastructure.
 ### Phase A: System Configuration (The Setup)
 Before any student can enroll, the Admin must:
 1.  **Academic Years & Semesters:** Define the timeline (e.g., "Fall 2025").
-2.  **Physical Infrastructure:** Create `Buildings` and `Classrooms` (defining capacity to prevent overcrowding).
+2.  **Physical Infrastructure:** Create `Buildings` and `Classrooms` (defining
+    capacity to prevent overcrowding).
 3.  **Academic Structure:**
     *   Create `Faculties` -> `Departments` -> `Programs`.
     *   Create `Courses` (Subject matter) and `Course Prerequisites`.
@@ -136,7 +156,8 @@ This is the most complex Admin task.
 ### 🏢 For the Administration
 *   **Control:** Granular permission settings ensure data security.
 *   **Integrity:** Audit logs prevent fraud (grade changing).
-*   **Insight:** Reports on which programs are popular, which students are at risk (low attendance/GPA), and financial health.
+*   **Insight:** Reports on which programs are popular, which students are at
+    risk (low attendance/GPA), and financial health.
 
 ---
 
@@ -154,15 +175,20 @@ This is the most complex Admin task.
 | **System Config** | Super Admin | - |
 
 ---
+
 ## Step to set up this system:
-1 .``` git clone https://github.com/pLAyME0037/learn-laravel.git ```
-2. cd learn-laravel
-3. composer install
-4. npm install
-5. copy .env.example .env
-6. php artisan key:generate
-7. php artisan migrate
-8. php artisan migrate --database=sqlite_locations --path=database/migrations/locations && php artisan db:seed --class=LocationSeeder --path=database/seeders/locations
-9. php artisan migrate --seed
-10. npm run build
-11. php artisan serve
+
+*1.* Clone this Project
+```console
+git clone https://github.com/pLAyME0037/learn-laravel.git 
+```
+*2.* cd learn-laravel
+*3.* composer install
+*4.* npm install
+*5.* copy .env.example .env
+*6.* php artisan key:generate
+*7.* php artisan migrate
+*8.* php artisan migrate --database=sqlite_locations --path=database/migrations/locations && php artisan db:seed --class=LocationSeeder --path=database/seeders/locations
+*9.* php artisan migrate --seed
+*10.* npm run build
+*11.* php artisan serve

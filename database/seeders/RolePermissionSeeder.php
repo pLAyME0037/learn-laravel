@@ -209,7 +209,7 @@ class RolePermissionSeeder extends Seeder
             'instructor' => [
                 'description' => 'Teaching faculty',
                 'permissions' => [
-                    'Instructors',
+                    'Instructor',
                 ],
             ],
             'staff'               => [

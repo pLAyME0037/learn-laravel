@@ -6,6 +6,7 @@
 .phpactor.json
 .phpunit.result.cache
 .clinerules
+_ide_helper.php
 /.fleet
 /.idea
 /.nova
